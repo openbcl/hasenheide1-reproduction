@@ -1,0 +1,213 @@
+macro,value,recomputed,cls,source,status
+valBinnedDmassEnd,0.74,0.74,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valBinnedDmassPeak,0.46,0.46,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valBinnedEndLargePct,75,75,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valBinnedPeakLargePct,42,42,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valBinnedPeakMidPct,57,57,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valBinnedPeakTime,210,210,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valBinnedTopBinMaxPct,3,3,data,results/simulation/sootdep_binned_rh_bins.csv,OK
+valCoreFuelCoaMchPct,22.9,,literal,supplier certificate of analysis (SM S3),documented
+valCoreFuelCoaNhepPct,35.8,,literal,supplier certificate of analysis (SM S3),documented
+valCoreFuelCyclohexanePct,9.9,9.9,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelDmcpPct,7.4,7.4,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelDmhPct,13.5,13.5,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelFormulaC,7.0,7.0,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelFormulaH,15.0,15.0,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelMchOverCoaPts,6.6,6.6,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelMchPct,29.5,29.5,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelMhPct,3.2,3.2,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelNaphthenicCoaPct,43,43,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelNaphthenicPct,47,47,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelNhepPct,36.5,36.5,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelParaffinicPct,53,53,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelUnreportedPct,3,,literal,"GC-FID peak areas (SM S3), GC records",documented
+valExtPathPointIqrHiPct,0.8,0.8,data,results/validation/extinction_point_vs_path_summary.csv,OK
+valExtPathPointIqrLoPct,-0.9,-0.9,data,results/validation/extinction_point_vs_path_summary.csv,OK
+valExtPathPointMedianPct,-0.06,-0.06,data,results/validation/extinction_point_vs_path_summary.csv,OK
+valExtPathPointPNinetyFivePct,5.4,5.4,data,results/validation/extinction_point_vs_path_summary.csv,OK
+valExtPeakHiPerM,1.1,1.1,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valExtPeakLoPerM,0.5,0.5,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtExclMax,1.06,1.06,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtFOne,1.09,1.09,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtFThree,1.10,1.10,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtFTwo,1.11,1.11,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtHighZ,1.06,1.06,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtLowZ,1.28,1.28,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaExtSerBetweenSD,0.05,0.05,data,results/validation/fds_metrics/guide_series.csv,OK
+valFdsDeltaExtSerOneFifty,1.05,1.05,data,results/validation/fds_metrics/guide_series.csv,OK
+valFdsDeltaExtSerSevenFive,1.15,1.15,data,results/validation/fds_metrics/guide_series.csv,OK
+valFdsDeltaExtSerSpanPp,10,10,data,results/validation/fds_metrics/guide_series.csv,OK
+valFdsDeltaExtSerThreeHundred,1.08,1.08,data,results/validation/fds_metrics/guide_series.csv,OK
+valFdsDeltaExtSerUPp,3,3,data,results/validation/fds_metrics/guide_series.csv,OK
+valFdsDeltaExtinction,1.10,1.10,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsDeltaLayerHeight,0.91,0.91,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsDeltaTempUL,1.19,1.19,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsDeltaTemperature,1.34,1.34,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsDeltaUpperLayerT,1.20,1.20,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsExtBetweenIcc,0.00,0.00,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsExtExclN,0,0,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsExtMaxPairRatio,1.63,1.63,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsExtWithinSeriesPct,13,13,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsNExtinction,14,14,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsNLayerHeight,6,6,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsNTempUL,30,30,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsNTemperature,49,49,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsNUpperLayerT,6,6,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsSigmaEExtinction,0.08,0.08,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaEExtinctionPct,8,8,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaELayerHeight,0.05,0.05,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaELayerHeightPct,5,5,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaETemperature,0.05,0.05,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaETemperaturePct,5,5,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaEUpperLayerT,0.05,0.05,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaEUpperLayerTPct,5,5,constant,"experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)",OK
+valFdsSigmaMExtinction,0.10,0.10,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsSigmaMLayerHeight,0.05,0.05,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsSigmaMTempUL,0.05,0.05,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFdsSigmaMTemperature,0.19,0.19,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsSigmaMUpperLayerT,0.05,0.05,data,results/validation/fds_metrics/guide_pooled.csv,OK
+valFdsTempExclN,2,2,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valFoulingAtPeakMaxPct,2.9,2.9,data,results/measurement/fouling_at_peak.csv,OK
+valFoulingEndMaxPct,11,11,data,results/measurement/fouling_at_peak.csv,OK
+valFoulingExposureAtPeakPct,18,18,data,results/measurement/fouling_at_peak.csv,OK
+valGridExtCoarseMaxDevPct,4,4,data,results/simulation/grid_convergence_summary.csv,OK
+valGridExtCoarseMeanDevPct,3,3,data,results/simulation/grid_convergence_summary.csv,OK
+valGridExtMaxDevPct,12,12,data,results/simulation/grid_convergence_summary.csv,OK
+valGridExtMeanDevPct,7,7,data,results/simulation/grid_convergence_summary.csv,OK
+valGridTempCoarseMaxDevPct,6,6,data,results/simulation/grid_convergence_summary.csv,OK
+valGridTempMaxDevPct,5,5,data,results/simulation/grid_convergence_summary.csv,OK
+valGridTempMeanDevPct,4,4,data,results/simulation/grid_convergence_summary.csv,OK
+valHeptaneMetaCiHi,0.0168,0.0168,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaCiLo,0.0142,0.0142,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaK,10,10,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaMu,0.0155,0.0155,data,results/literature/heptane_meta.csv,OK
+valHrrAvgLarge,46,46,data,results/measurement/hrr/hrr_summary.csv,OK
+valHrrAvgMid,19,19,data,results/measurement/hrr/hrr_summary.csv,OK
+valHrrAvgSmall,16,16,data,results/measurement/hrr/hrr_summary.csv,OK
+valHrrPeakLarge,62,62,data,results/measurement/hrr/hrr_summary.csv,OK
+valHrrPeakMid,26,26,data,results/measurement/hrr/hrr_summary.csv,OK
+valHrrPeakSmall,26,26,data,results/measurement/hrr/hrr_summary.csv,OK
+valLEMBudgetHiPct,4,4,data,tables/device_validation_table.tex,OK
+valLEMBudgetLoPct,2,2,data,tables/device_validation_table.tex,OK
+valLEMExpandedHiPct,8,8,data,tables/device_validation_table.tex,OK
+valLEMExpandedLoPct,3,3,data,tables/device_validation_table.tex,OK
+valLEMFloorPerM,0.007,0.007,data,tables/device_validation_table.tex,OK
+valLEMMaxDevPct,0.35,0.35,data,tables/device_validation_table.tex,OK
+valLEMReproPct,0.20,0.20,data,tables/device_validation_table.tex,OK
+valLEMSlope,1.002,1.002,data,tables/device_validation_table.tex,OK
+valLEMUtauPct,0.28,0.28,data,tables/device_validation_table.tex,OK
+valLeakA,0.036,0.036,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakBemmeNfiftyOver,5.6,5.6,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakBemmeNfiftyUnder,6.8,6.8,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakChimney,85,85,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakFoneNfifty,6.2,6.2,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakFthreeNfifty,8.4,8.4,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakFtwoNfifty,6.8,6.8,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakNExp,0.64,0.64,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakNfiftyMean,9.7,9.7,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakNfiftyOver,9.2,9.2,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakNfiftyUnder,10.2,10.2,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakQfiftyOver,1178,1178,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakQfiftyUnder,1308,1308,data,results/measurement/blowerdoor_summary.csv,OK
+valLeakVolume,128,128,constant,net apartment volume 128 m3 (SM S2),OK
+valLemHousingMaxK,8.6,8.6,data,results/measurement/lem_housing.csv,OK
+valObscPeakHiPct,67,67,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valObscPeakLoPct,39,39,data,results/validation/fds_metrics/*/metrics_report.csv,OK
+valRepeatExtFOneLargePct,2,2,data,results/measurement/repeatability.csv,OK
+valRepeatExtFOneMidPct,5,5,data,results/measurement/repeatability.csv,OK
+valRepeatExtFOneSmallPct,10,10,data,results/measurement/repeatability.csv,OK
+valRepeatPeakQLargePct,4,4,data,results/measurement/repeatability.csv,OK
+valRepeatPeakQMidPct,0,0,data,results/measurement/repeatability.csv,OK
+valRepeatPeakQSmallPct,20,20,data,results/measurement/repeatability.csv,OK
+valRepeatQBandLargePct,4,4,data,results/measurement/repeatability.csv,OK
+valRepeatQBandMidPct,4,4,data,results/measurement/repeatability.csv,OK
+valRepeatQBandSmallPct,8,8,data,results/measurement/repeatability.csv,OK
+valRepeatTempLargePct,5,5,data,results/measurement/repeatability.csv,OK
+valRepeatTempMidPct,4,4,data,results/measurement/repeatability.csv,OK
+valRepeatTempSmallPct,5,5,data,results/measurement/repeatability.csv,OK
+valRstBetweenWithinRatio,8,8,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstChargeMaxDevPct,1.9,,literal,"load-cell check of the fuel charge (SM S4), RST records",documented
+valRstChargeMeanDevPct,-0.3,,literal,"load-cell check of the fuel charge (SM S4), RST records",documented
+valRstChargeN,12,,literal,"load-cell check of the fuel charge (SM S4), RST records",documented
+valRstConfigSpreadHhPct,14.4,14.4,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstDhchHh,41.345,41.345,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstDhchHhN,4,4,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstDhchHhSd,1.00,1.00,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstPeakNm,570,,literal,"peak wavelength of the calorimeter light source (SM S4), RST records",documented
+valRstYsHh,0.0354,0.0354,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstYsHhN,6,6,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstYsHhSd,0.0022,0.0022,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstYsHuge,0.0358,0.0358,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstYsLarge,0.0376,0.0376,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valRstYsPureHeptane,0.0162,,literal,"pure n-heptane calorimeter reference (SM S4), RST records",documented
+valRstYsPureHeptaneN,2,,literal,"pure n-heptane calorimeter reference (SM S4), RST records",documented
+valRstYsPureHeptaneSd,0.0005,,literal,"pure n-heptane calorimeter reference (SM S4), RST records",documented
+valRstYsSmall,0.0328,0.0328,table,results/measurement/rst_apartment_runs.csv (Table S4),OK
+valSICKBudgetHiPct,13,13,data,tables/device_validation_table.tex,OK
+valSICKBudgetLoPct,3,3,data,tables/device_validation_table.tex,OK
+valSICKExpandedHiPct,27,27,data,tables/device_validation_table.tex,OK
+valSICKExpandedLoPct,6,6,data,tables/device_validation_table.tex,OK
+valSICKFloorPerM,0.024,0.024,data,tables/device_validation_table.tex,OK
+valSICKMaxDevPct,1.69,1.69,data,tables/device_validation_table.tex,OK
+valSICKReproPct,0.04,0.04,data,tables/device_validation_table.tex,OK
+valSICKSlope,1.006,1.006,data,tables/device_validation_table.tex,OK
+valSICKUtauPct,0.98,0.98,data,tables/device_validation_table.tex,OK
+valSeedExtFThreePct,3.2,3.2,data,results/simulation/fds_seed_noise.csv,OK
+valSeedExtMeanPct,1.5,1.5,data,results/simulation/fds_seed_noise.csv,OK
+valSeedMeanExtOffsetPct,1.1,1.1,data,results/simulation/fds_seed_noise.csv,OK
+valSeedMeanTempOffsetPct,3.2,3.2,data,results/simulation/fds_seed_noise.csv,OK
+valSeedN,3,3,data,results/simulation/fds_seed_noise.csv,OK
+valSeedNrmseExtPct,3.6,3.6,data,results/simulation/fds_seed_noise.csv,OK
+valSeedNrmseTempFTwoPct,1.4,1.4,data,results/simulation/fds_seed_noise.csv,OK
+valSeedNrmseTempPct,0.9,0.9,data,results/simulation/fds_seed_noise.csv,OK
+valSeedTempCeilPct,6.4,6.4,data,results/simulation/fds_seed_noise.csv,OK
+valSeedTempFOnePct,3.9,3.9,data,results/simulation/fds_seed_noise.csv,OK
+valSeedTempFTwoPct,5.1,5.1,data,results/simulation/fds_seed_noise.csv,OK
+valSensDepCtrlExtPct,-0.1,-0.1,data,results/simulation/fds_sensitivity.csv,OK
+valSensDepCtrlExtRoomMaxPct,3.8,3.8,data,results/simulation/fds_sensitivity.csv,OK
+valSensDepPhysMaxPct,2.4,2.4,data,results/simulation/fds_sensitivity.csv,OK
+valSensDepTenFThreePct,-38,-38,data,results/simulation/fds_sensitivity.csv,OK
+valSensDepTenPct,-19,-19,data,results/simulation/fds_sensitivity.csv,OK
+valSensDhcCeilPct,-3.4,-3.4,data,results/simulation/fds_sensitivity.csv,OK
+valSensDhcExtPct,+0.6,+0.6,data,results/simulation/fds_sensitivity.csv,OK
+valSensDhcExtRoomMaxPct,0.9,0.9,data,results/simulation/fds_sensitivity.csv,OK
+valSensDhcHrrPct,-3.2,-3.2,constant,"n-heptane 44.56 MJ/kg over its stoichiometric O2 demand vs 13.1 MJ/kg O2 (SM S4, S13)",OK
+valSensDhcTempFTwoPct,+0.3,+0.3,data,results/simulation/fds_sensitivity.csv,OK
+valSensDhcTempPct,-2.5,-2.5,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaCeilInterpPct,-2.1,-2.1,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaCeilPct,-5.5,-5.5,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaExtPct,+0.5,+0.5,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaExtRoomMaxInterpPct,0.9,0.9,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaExtRoomMaxPct,2.4,2.4,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaInterpFrac,0.38,0.38,constant,pan areas 150 / 160 / 175 mm (SM S13),OK
+valSensFireAreaTempFTwoInterpPct,+1.6,+1.6,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaTempFTwoPct,+4.1,+4.1,data,results/simulation/fds_sensitivity.csv,OK
+valSensFireAreaTempPct,-0.3,-0.3,data,results/simulation/fds_sensitivity.csv,OK
+valSensFuelExtPct,-54,-54,data,results/simulation/fds_sensitivity.csv,OK
+valSensGridExtMaxRoomName,F3,F3,data,results/simulation/fds_sensitivity.csv,OK
+valSensGridExtMaxRoomPct,12,12,data,results/simulation/fds_sensitivity.csv,OK
+valSensGridUniMaxRoomName,F3,F3,data,results/simulation/fds_sensitivity.csv,OK
+valSensGridUniMaxRoomPct,10,10,data,results/simulation/fds_sensitivity.csv,OK
+valSensRadfracTHiPct,+10,+10,data,results/simulation/fds_sensitivity.csv,OK
+valSensRadfracTLoPct,-8,-8,data,results/simulation/fds_sensitivity.csv,OK
+valSensTempFTwoSealedPct,+13,+13,data,results/simulation/fds_sensitivity.csv,OK
+valSensTempFTwoTransportMaxPct,13,13,data,results/simulation/fds_sensitivity.csv,OK
+valSensYsExtHiPct,+51,+51,data,results/simulation/fds_sensitivity.csv,OK
+valSensYsExtLoPct,-7,-7,data,results/simulation/fds_sensitivity.csv,OK
+valSfpeYsCoreFuelCoa,0.048,0.048,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelCorr,0.047,0.047,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelHi,0.049,0.049,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelLo,0.048,0.048,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsNhep,0.042,0.042,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsNhepCorr,0.037,,literal,"Tewarson's predicted n-heptane yield, 0.037 g/g (SM S3, Table S2 note a)",documented
+valSickLemMeanBiasPct,-2,-2,data,results/measurement/crosscheck_lem_sick.csv,OK
+valSickLemMedDevHiPct,7,7,data,results/measurement/crosscheck_lem_sick.csv,OK
+valSickLemMedDevLoPct,3,3,data,results/measurement/crosscheck_lem_sick.csv,OK
+valSickLemNRuns,9,9,data,results/measurement/crosscheck_lem_sick.csv,OK
+valWallBcExtMaxPct,9,9,data,results/simulation/wallbc_span_summary.csv,OK
+valWallBcTempAdiabMaxPct,169,169,data,results/simulation/wallbc_span_summary.csv,OK
+valWallBcTempColdMaxPct,9,9,data,results/simulation/wallbc_span_summary.csv,OK
+valWidmannExpSick,1.04,1.04,data,results/measurement/widmann_exponent.csv,OK
+valWidmannExpSickHi,1.08,1.08,data,results/measurement/widmann_exponent.csv,OK
+valWidmannExpSickLo,1.02,1.02,data,results/measurement/widmann_exponent.csv,OK
+valWidmannFactorDevPct,1,1,data,results/measurement/widmann_exponent.csv,OK

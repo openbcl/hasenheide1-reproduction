@@ -1,0 +1,7 @@
+quantity,group,baseline,inert,adiabatic,inert_dev_pct,adiab_dev_pct
+k_F1,extinction,0.5209,0.5271,0.4759,1.2,-8.63
+k_F2,extinction,0.311,0.31,0.3193,-0.32,2.68
+k_F3,extinction,0.18,0.1667,0.1914,-7.35,6.37
+Tu_F1,temperature,30.681,27.9579,56.7033,-8.88,84.82
+Tu_F2,temperature,12.9986,12.223,34.9865,-5.97,169.16
+Tceil_F1,temperature,59.6779,59.9395,71.9428,0.44,20.55

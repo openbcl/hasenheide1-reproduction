@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite both the article and this record."
+title: "Hasenheide light-extinction study — reproduction package (code, condensed data, FDS input files)"
+type: software
+authors:
+  - given-names: Manuel
+    family-names: Osburg
+    orcid: "https://orcid.org/0009-0002-8466-9897"
+    affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
+  - given-names: Jonathan
+    family-names: Schelhorn
+    affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
+  - given-names: Anna
+    family-names: Troff
+    affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
+  - given-names: Wojciech
+    family-names: Węgrzyński
+    orcid: "https://orcid.org/0000-0002-7465-0212"
+    affiliation: "Fire Research Department, Building Research Institute (ITB), Warsaw, Poland"
+  - given-names: Alexander
+    family-names: Belt
+    orcid: "https://orcid.org/0000-0002-6091-9321"
+    affiliation: "Institute for Advanced Simulation, Forschungszentrum Jülich, Jülich, Germany"
+  - given-names: Lukas
+    family-names: Arnold
+    orcid: "https://orcid.org/0000-0002-5939-8995"
+    affiliation: "Institute for Advanced Simulation, Forschungszentrum Jülich, Jülich, Germany; Chair of Computational Civil Engineering, University of Wuppertal, Wuppertal, Germany"
+license: CC-BY-4.0
+repository-code: "https://github.com/openbcl/hasenheide1-reproduction"
+version: v0.2.0
+date-released: "2026-10-15"
+doi: 10.5281/zenodo.23097800
+#
+# Once the article is published, add a preferred-citation block so the paper is
+# the primary citation and this record the software/data companion:
+# preferred-citation:
+#   type: article
+#   title: "Measuring and Modelling Smoke Light Extinction in Well-Ventilated, Multi-Room Compartment Fires: Co-located Transmissometry and A-priori FDS Validation"
+#   doi: "10.XXXX/XXXXX"
+#   authors: [ ... same list ... ]

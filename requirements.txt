@@ -1,0 +1,27 @@
+# Python environment for regenerating the paper figures and numbers.
+# Pinned to the versions verified to reproduce the committed outputs
+# (Python 3.12). Install with:  pip install -r requirements.txt
+#
+# A LaTeX installation (e.g. MiKTeX/TeX Live) with siunitx is required because
+# the plot style uses text.usetex=True; pdfcrop is required for the geometry
+# figures (ships with most TeX distributions).
+
+# --- core: figure stage + data reduction ---
+numpy==2.4.6
+pandas==3.0.3
+# matplotlib held at 3.10.8 (not 3.11): 3.11's fonttools-based font embedding
+# uses a random subset tag + timestamped font streams, so figure PDFs are no
+# longer byte-deterministic even with SOURCE_DATE_EPOCH/PYTHONHASHSEED. 3.10.8 is
+# the last byte-reproducible release and works with numpy 2 / pandas 3.
+matplotlib==3.10.8
+scipy==1.17.1
+
+# --- data stage: FDS field extraction (slice / flow-field views) ---
+# 1.11.7 is load-bearing: the 3D cell-centered slice ghost-cell monkeypatch used
+# for the flow-field reduction targets this exact release.
+fdsreader==1.11.7
+
+# --- data stage: blower-door PDF report parsing ---
+# text extraction of the n50 / leakage-area table; not byte-critical (produces a
+# CSV from the supplied report PDF), any recent release works.
+pypdf==6.14.2

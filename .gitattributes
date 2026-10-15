@@ -1,0 +1,8 @@
+# Normalise line endings so a fresh clone is byte-consistent on every platform.
+* text=auto eol=lf
+
+# Binary assets: never touch these bytes.
+*.pdf binary
+*.png binary
+*.npz binary
+*.ASC binary
