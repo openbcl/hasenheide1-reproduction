@@ -1,8 +1,10 @@
 """Reducer for the 3x3 extinction matrices (measured, Fig. 4; with FDS, Fig. 6)
 and the temperature-profile matrices (Supplementary Material).
 
-Reads the measurement ensembles from the raw-data root (``MEAS_ROOT``) and
-writes the committed reduced curves the plotter (``plot_extinction_matrices.py``)
+Reads the measurement ensembles from the raw-data root (``MEAS_ROOT``; without
+it, from the committed per-test time series, results/measurement/timeseries/) and
+the FDS baselines from the FDS output tree (without it, from the committed baseline
+time series, results/simulation/timeseries/), and writes the committed reduced curves the plotter (``plot_extinction_matrices.py``)
 needs, so both matrix figures regenerate without the raw data:
 
   results/validation/matrices/ext_lem.csv    series, room, t_s, mean, std   (LEM ensemble)
@@ -19,15 +21,17 @@ asserts bit-for-bit recovery (NaN-aware). Run: python reduce_matrices.py
 from __future__ import annotations
 
 import glob
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 import fds_io
-from measurement_io import get_processed_file, load_runs, ensemble_stats
+from measurement_io import get_processed_file, load_runs, ensemble_stats, read_processed
 import paths as P
 
 REDUCED_DIR = P.RESULTS_DIR / "validation" / "matrices"
+FDS_TIMESERIES = P.SIM_RESULTS / "timeseries"
 BASE_PATH = P.MEAS_ROOT
 SUB_PROCESSED = P.SUB_PROCESSED
 
@@ -123,7 +127,7 @@ def load_data_for_profiles(selection_list):
         if not file_path:
             continue
         try:
-            df = pd.read_csv(file_path, comment="#")
+            df = read_processed(file_path)
             idx0 = (df["Time (s)"] - 0).abs().idxmin()
             temp_cols = [c for c in df.columns if "Temp" in c]
             df[temp_cols] = df[temp_cols] - df.loc[idx0, temp_cols]
@@ -210,6 +214,17 @@ def reduce_temperature():
 
 
 # -------- FDS baseline overlay --------
+def _read_devc(path, cols: set) -> pd.DataFrame:
+    """Time plus ``cols`` of an FDS device file, from the output tree or from the
+    committed baseline time series (export_fds_timeseries.py; same values, written
+    as round-trip floats, time column ``t_s``)."""
+    path = Path(path)
+    if path.parent.resolve() == FDS_TIMESERIES.resolve():
+        d = pd.read_csv(path, usecols=lambda c: c == "t_s" or c in cols, float_precision="round_trip")
+        return d.rename(columns={"t_s": "Time"})
+    return fds_io.read_fds_devc(path, usecols=lambda c: c == "Time" or c in cols)
+
+
 def reduce_fds():
     """FDS baseline curves for the matrix overlays: extinction at z=2.3 m, the
     F1/F2 thermocouple profiles at the experiment heights, and the F1 ceiling
@@ -229,19 +244,24 @@ def reduce_fds():
         cand = [p for p in glob.glob(
             str(P.FDS_OUTPUT_ROOT / f"{name.lower()}_ysmatched" / "*_devc.csv"))
             if "ctrl_log" not in p]
-        if not cand:
+        committed = FDS_TIMESERIES / f"{name.lower()}_ysmatched_devc.csv"
+        if cand:
+            path = cand[0]
+            print(f"\nloading (FDS baseline): {name}")
+        elif committed.exists():
+            path = committed
+            print(f"\nloading (FDS baseline, committed time series): {name}")
+        else:
             print(f"  no FDS baseline devc for {name} (skipped)")
             continue
-        path = cand[0]
-        print(f"\nloading (FDS baseline): {name}")
-        de = fds_io.read_fds_devc(path, usecols=lambda c: c == "Time" or c in ext_set)
+        de = _read_devc(path, ext_set)
         de = fds_io.add_los_extinction(de)   # -> '<beam>_k' columns used by EXT_FDS_COL
         t = de["Time"].to_numpy(float)
         for room, col in EXT_FDS_COL.items():
             if col in de.columns:
                 ext_rows.append(pd.DataFrame({"series": name, "room": room,
                                               "t_s": t, "k": de[col].to_numpy(float)}))
-        dt = fds_io.read_fds_devc(path, usecols=lambda c: c == "Time" or c in temp_set)
+        dt = _read_devc(path, temp_set)
         tt = dt["Time"].to_numpy(float)
         a1, a2 = dt[f1_cols].to_numpy(float), dt[f2_cols].to_numpy(float)
         pl = dt[plume_col].to_numpy(float)
@@ -296,9 +316,14 @@ def main() -> None:
         "temp_fds_full.csv": (temp_fds_full, ["t_s", "z", "dT"]),
         "temp_fds_plume.csv": (plume_fds, ["plume"]),
     }
+    if ext_fds.empty:
+        # no FDS output tree: keep the committed FDS overlay files as they are
+        for fname in ("ext_fds.csv", "temp_fds.csv", "temp_fds_full.csv", "temp_fds_plume.csv"):
+            del paths[fname]
+            print(f"kept committed {REDUCED_DIR / fname} (no FDS output tree)")
     for fname, (df, fcols) in paths.items():
         p = REDUCED_DIR / fname
-        df.to_csv(p, index=False)
+        df.to_csv(p, index=False, lineterminator="\n")
         _assert_roundtrip(p, df, fcols)
         print(f"wrote {p} ({len(df)} rows)")
     print("round-trip OK")

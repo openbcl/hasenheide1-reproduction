@@ -10,7 +10,8 @@ Detector -> room mapping (confirmed; see the paper's instrumentation section):
 The corridor alarm (FC) has no co-located LEM, so only F2 and F3 are cross-checked.
 
 This is a data-stage step: it reads the processed experiment CSVs under
-``MEAS_ROOT`` (set HASENHEIDE_MEAS_ROOT to your copy of the measurement tree).
+``MEAS_ROOT`` (set HASENHEIDE_MEAS_ROOT to your copy of the measurement tree);
+without that tree it reads the committed per-test time series instead.
 """
 import re
 import numpy as np
@@ -18,6 +19,7 @@ import pandas as pd
 from pathlib import Path
 
 import paths as P  # data roots (env-overridable; default to in-repo placeholders)
+import measurement_io as mio
 
 BASE = P.MEAS_ROOT
 
@@ -55,14 +57,14 @@ def collect() -> pd.DataFrame:
     """Per-run activation times (tF2/tFC/tF3) and co-located LEM extinction at
     activation (kF2/kF3), with the series label. Reused by the FDS comparison."""
     rows = []
-    for p in sorted(BASE.iterdir()):
-        s = series_of(p.name) if p.is_dir() else None
+    for name in mio.list_runs(BASE):
+        s = series_of(name)
         if not s:
             continue
-        pf = list((p / "1_Processed_data").glob("*_processed.csv"))
+        pf = mio.get_processed_file(BASE, name)
         if not pf:
             continue
-        df = pd.read_csv(pf[0], comment="#")
+        df = mio.read_processed(pf)
         t = df["Time (s)"].to_numpy(float)
         dets = sorted([c for c in df.columns if re.match(r"Smoke Detector \d", c)],
                       key=lambda c: int(re.search(r"\d", c).group()))
@@ -70,7 +72,7 @@ def collect() -> pd.DataFrame:
         cF2, cF3 = ext_col(df, "F2"), ext_col(df, "F3")
         kF2 = value_at(t, df[cF2], acts[0]) if cF2 else None
         kF3 = value_at(t, df[cF3], acts[2]) if cF3 else None
-        rows.append(dict(run=p.name, series=s, tF2=acts[0], tFC=acts[1], tF3=acts[2],
+        rows.append(dict(run=name, series=s, tF2=acts[0], tFC=acts[1], tF3=acts[2],
                          kF2=kF2, kF3=kF3))
     return pd.DataFrame(rows)
 
@@ -126,7 +128,7 @@ def main():
         rows.append(row)
     P.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out = P.RESULTS_DIR / "measurement" / "smoke_alarm_table.csv"
-    pd.DataFrame(rows).to_csv(out, index=False)
+    pd.DataFrame(rows).to_csv(out, index=False, lineterminator="\n")
     print(f"\n-> {out}")
 
 

@@ -8,19 +8,25 @@ valBinnedPeakTime,210,210,data,results/simulation/sootdep_binned_rh_bins.csv,OK
 valBinnedTopBinMaxPct,3,3,data,results/simulation/sootdep_binned_rh_bins.csv,OK
 valCoreFuelCoaMchPct,22.9,,literal,supplier certificate of analysis (SM S3),documented
 valCoreFuelCoaNhepPct,35.8,,literal,supplier certificate of analysis (SM S3),documented
-valCoreFuelCyclohexanePct,9.9,9.9,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelDmcpPct,7.4,7.4,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelDmhPct,13.5,13.5,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelFormulaC,7.0,7.0,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelFormulaH,15.0,15.0,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelMchOverCoaPts,6.6,6.6,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelMchPct,29.5,29.5,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelMhPct,3.2,3.2,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelNaphthenicCoaPct,43,43,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelNaphthenicPct,47,47,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelNhepPct,36.5,36.5,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelParaffinicPct,53,53,table,tables/core_fuel_composition.tex (Table S2),OK
-valCoreFuelUnreportedPct,3,,literal,"GC-FID peak areas (SM S3), GC records",documented
+valCoreFuelSevenDmcpPct,7,7,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenFormulaHHi,15.3,15.3,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenFormulaHLo,14.8,14.8,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenHcHi,2.19,2.19,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenHcLo,2.12,2.12,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenIsoPct,7,7,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenMchOverCoaPts,5,5,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenMchPct,28,28,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenNaphHiPct,59,59,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenNaphLoPct,35,35,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenNhepPct,34,34,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreFuelSevenOpenPct,24,24,table,tables/core_fuel_composition.tex (Table S2),OK
+valCoreHeatScaleFactor,1.081,,literal,"heat-release scale factor between the two calorimeter series, matched n-heptane burns (Section 2.4, SM S4), RST records",documented
+valCoreHeatScaleFactorErr,0.030,,literal,"heat-release scale factor between the two calorimeter series, matched n-heptane burns (Section 2.4, SM S4), RST records",documented
+valCoreHeatScaleFactorPct,8.1,8.1,data,results/simulation/fds_sensitivity.csv with the documented series factor k,OK
+valCoreHeatScaleTspPct,0.6,,literal,"TSP difference of the same matched n-heptane burns (SM S4), RST records",documented
+valCoreHeatSysHiAbsPct,5,5,data,results/simulation/fds_sensitivity.csv with the documented series factor k,OK
+valCoreHeatSysHiPct,+5,+5,data,results/simulation/fds_sensitivity.csv with the documented series factor k,OK
+valCoreHeatSysLoPct,-3,-3,constant,"n-heptane 44.56 MJ/kg over its stoichiometric O2 demand vs 13.1 MJ/kg O2 (Section 2.4, SM S4)",OK
 valExtPathPointIqrHiPct,0.8,0.8,data,results/validation/extinction_point_vs_path_summary.csv,OK
 valExtPathPointIqrLoPct,-0.9,-0.9,data,results/validation/extinction_point_vs_path_summary.csv,OK
 valExtPathPointMedianPct,-0.06,-0.06,data,results/validation/extinction_point_vs_path_summary.csv,OK
@@ -77,10 +83,10 @@ valGridExtMeanDevPct,7,7,data,results/simulation/grid_convergence_summary.csv,OK
 valGridTempCoarseMaxDevPct,6,6,data,results/simulation/grid_convergence_summary.csv,OK
 valGridTempMaxDevPct,5,5,data,results/simulation/grid_convergence_summary.csv,OK
 valGridTempMeanDevPct,4,4,data,results/simulation/grid_convergence_summary.csv,OK
-valHeptaneMetaCiHi,0.0168,0.0168,data,results/literature/heptane_meta.csv,OK
-valHeptaneMetaCiLo,0.0142,0.0142,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaCiHi,0.0169,0.0169,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaCiLo,0.0144,0.0144,data,results/literature/heptane_meta.csv,OK
 valHeptaneMetaK,10,10,data,results/literature/heptane_meta.csv,OK
-valHeptaneMetaMu,0.0155,0.0155,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaMu,0.0156,0.0156,data,results/literature/heptane_meta.csv,OK
 valHrrAvgLarge,46,46,data,results/measurement/hrr/hrr_summary.csv,OK
 valHrrAvgMid,19,19,data,results/measurement/hrr/hrr_summary.csv,OK
 valHrrAvgSmall,16,16,data,results/measurement/hrr/hrr_summary.csv,OK
@@ -174,6 +180,8 @@ valSensDhcExtRoomMaxPct,0.9,0.9,data,results/simulation/fds_sensitivity.csv,OK
 valSensDhcHrrPct,-3.2,-3.2,constant,"n-heptane 44.56 MJ/kg over its stoichiometric O2 demand vs 13.1 MJ/kg O2 (SM S4, S13)",OK
 valSensDhcTempFTwoPct,+0.3,+0.3,data,results/simulation/fds_sensitivity.csv,OK
 valSensDhcTempPct,-2.5,-2.5,data,results/simulation/fds_sensitivity.csv,OK
+valSensDhcUpExtRoomMaxPct,1.3,1.3,data,results/simulation/fds_sensitivity.csv with the documented series factor k,OK
+valSensDhcUpTempPct,+3.7,+3.7,data,results/simulation/fds_sensitivity.csv with the documented series factor k,OK
 valSensFireAreaCeilInterpPct,-2.1,-2.1,data,results/simulation/fds_sensitivity.csv,OK
 valSensFireAreaCeilPct,-5.5,-5.5,data,results/simulation/fds_sensitivity.csv,OK
 valSensFireAreaExtPct,+0.5,+0.5,data,results/simulation/fds_sensitivity.csv,OK
@@ -183,6 +191,7 @@ valSensFireAreaInterpFrac,0.38,0.38,constant,pan areas 150 / 160 / 175 mm (SM S1
 valSensFireAreaTempFTwoInterpPct,+1.6,+1.6,data,results/simulation/fds_sensitivity.csv,OK
 valSensFireAreaTempFTwoPct,+4.1,+4.1,data,results/simulation/fds_sensitivity.csv,OK
 valSensFireAreaTempPct,-0.3,-0.3,data,results/simulation/fds_sensitivity.csv,OK
+valSensFuelAtMuPct,-52,-52,data,results/simulation/fds_sensitivity.csv,OK
 valSensFuelExtPct,-54,-54,data,results/simulation/fds_sensitivity.csv,OK
 valSensGridExtMaxRoomName,F3,F3,data,results/simulation/fds_sensitivity.csv,OK
 valSensGridExtMaxRoomPct,12,12,data,results/simulation/fds_sensitivity.csv,OK
@@ -194,10 +203,12 @@ valSensTempFTwoSealedPct,+13,+13,data,results/simulation/fds_sensitivity.csv,OK
 valSensTempFTwoTransportMaxPct,13,13,data,results/simulation/fds_sensitivity.csv,OK
 valSensYsExtHiPct,+51,+51,data,results/simulation/fds_sensitivity.csv,OK
 valSensYsExtLoPct,-7,-7,data,results/simulation/fds_sensitivity.csv,OK
-valSfpeYsCoreFuelCoa,0.048,0.048,table,tables/core_fuel_composition.tex (Table S2),OK
-valSfpeYsCoreFuelCorr,0.047,0.047,table,tables/core_fuel_composition.tex (Table S2),OK
-valSfpeYsCoreFuelHi,0.049,0.049,table,tables/core_fuel_composition.tex (Table S2),OK
-valSfpeYsCoreFuelLo,0.048,0.048,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelSevenCorrHi,0.052,0.052,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelSevenCorrLo,0.044,0.044,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelSevenHi,0.054,0.054,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelSevenLo,0.045,0.045,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelSevenRepHi,0.050,0.050,table,tables/core_fuel_composition.tex (Table S2),OK
+valSfpeYsCoreFuelSevenRepLo,0.047,0.047,table,tables/core_fuel_composition.tex (Table S2),OK
 valSfpeYsNhep,0.042,0.042,table,tables/core_fuel_composition.tex (Table S2),OK
 valSfpeYsNhepCorr,0.037,,literal,"Tewarson's predicted n-heptane yield, 0.037 g/g (SM S3, Table S2 note a)",documented
 valSickLemMeanBiasPct,-2,-2,data,results/measurement/crosscheck_lem_sick.csv,OK

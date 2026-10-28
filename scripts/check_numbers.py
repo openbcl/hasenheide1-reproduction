@@ -220,6 +220,7 @@ def fds_sensitivity_numbers() -> dict:
     p = d.loc["pan175"]
     p_room = float(p[rooms].abs().max())
     p_ceil = float(p["dTc"] / d.loc["ysmatched", "dTc"] * 100 - 100)
+    mu = float(pd.read_csv(P.RESULTS_DIR / "literature" / "heptane_meta.csv").iloc[0]["mu"])
     return {
         "valSensGridUniMaxRoomPct": (float(gu.max()), ".0f"),
         "valSensGridUniMaxRoomName": (room_of[gu.idxmax()], "s"),
@@ -240,6 +241,9 @@ def fds_sensitivity_numbers() -> dict:
         "valSensYsExtHiPct": (float(d.loc["ys049", "dk_mean_pct"]), "+.0f"),
         "valSensYsExtLoPct": (float(d.loc["ys030", "dk_mean_pct"]), "+.0f"),
         "valSensFuelExtPct": (float(d.loc["ys015", "dk_mean_pct"]), "+.0f"),
+        # the 0.015 g/g case rounds the pooled literature mean down; the extinction at the
+        # mean itself, scaled linearly in Y_s from that case (SM S13)
+        "valSensFuelAtMuPct": (100.0 * ((1 + float(d.loc["ys015", "dk_mean_pct"]) / 100.0) * mu / 0.015 - 1), ".0f"),
         "valSensRadfracTLoPct": (float(d.loc["chir050", "dTu_pct"]), "+.0f"),
         "valSensRadfracTHiPct": (float(d.loc["chir035", "dTu_pct"]), "+.0f"),
         "valSensDepPhysMaxPct": (float(dep_phys), ".1f"),
@@ -518,68 +522,102 @@ def rst_apartment_numbers() -> dict:
     }
 
 
+S2_ROWS = {"n-heptane": "nhep", "methylcyclohexane": "mch", "cis-1,3-dimethylcyclopentane": "dmcp",
+           "branched C$_7$ paraffins": "iso", "C$_7$, class not assigned": "open"}
+
+
 def _table_s2() -> pd.DataFrame:
-    """Parse the constituent rows of tables/core_fuel_composition.tex (Table S2)."""
+    """Parse the five C7 rows of tables/core_fuel_composition.tex (Table S2). The row of
+    unassigned class has the formula C7H14/16 and a yield range (paraffin / naphthene)."""
     tex = (P.REPO_ROOT / "tables" / "core_fuel_composition.tex").read_text(encoding="utf-8")
     rows = []
     for line in tex.splitlines():
-        m = re.match(r"\s*(.+?) & \$\\mathrm\{C_\{(\d+)\}H_\{(\d+)\}\}\$ & (.+?) & ([\d.]+) & (.+?) & ([\d.]+)(?:--([\d.]+))? \\\\", line)
+        m = re.match(r"\s*(.+?) & \$\\mathrm\{C_\{(\d+)\}H_\{(\d+)(?:/(\d+))?\}\}\$ & (.+?) & ([\d.]+) & (.+?) & ([\d.]+)(?:--([\d.]+))? \\\\", line)
         if m:
-            name = m.group(1).replace(r"\textit{n}", "n")
-            typ = m.group(4).replace(r"\textit{n}", "n")
-            rows.append(dict(constituent=name, c=int(m.group(2)), h=int(m.group(3)), type=typ,
-                             wt=float(m.group(5)), ys_lo=float(m.group(7)),
-                             ys_hi=float(m.group(8) or m.group(7))))
-    return pd.DataFrame(rows).set_index("constituent")
+            name = re.sub(r"\\tnote\{\w\}", "", m.group(1).replace(r"\textit{n}", "n"))
+            typ = m.group(5).replace(r"\textit{n}", "n")
+            rows.append(dict(row=S2_ROWS[name], c=int(m.group(2)), h_lo=int(m.group(3)),
+                             h_hi=int(m.group(4) or m.group(3)), type=typ, wt=float(m.group(6)),
+                             ys_lo=float(m.group(8)), ys_hi=float(m.group(9) or m.group(8))))
+    g = pd.DataFrame(rows).set_index("row")
+    if sorted(g.index) != sorted(S2_ROWS.values()):
+        raise SystemExit("Table S2: unexpected constituent rows")
+    return g
 
 
 def fuel_composition_numbers(lit: dict) -> dict:
-    """Table S2: GC shares, mean molecular formula (mole-weighted), and the SFPE Handbook
-    (6th ed., Table C.13) smoke yields mass-weighted over the composition. Lo/Hi take the
-    two stand-ins for cis-1,3-dimethylcyclopentane (0.066 / 0.070); the Corr and CoA
-    variants take their midpoint (either end gives the same rounded value). Corr uses
-    Tewarson's predicted n-heptane yield, CoA the certified methylcyclohexane share (both
-    documented literals)."""
+    """Table S2: C7 composition of the batch (GC-FID, SM S3), the molar H/C range, and the
+    SFPE Handbook (6th ed., Table C.13) smoke yields mass-weighted over it. The row of
+    unassigned class enters once as paraffin (Lo: H16 and 0.037 g/g, Methylhexane) and once
+    as naphthene (Hi: H14 and 0.070 g/g, Methylcyclopentane); the cis-1,3-
+    dimethylcyclopentane bracket (0.066 / 0.070) moves with it. Corr uses Tewarson's
+    predicted n-heptane yield (documented literal), Rep the class representatives
+    n-heptane / methylcyclohexane for the open class. The printed shares are rounded to
+    0.1 %, so they sum to 100 within 0.25."""
     g = _table_s2()
-    if abs(g["wt"].sum() - 100.0) > 0.05:
+    if abs(g["wt"].sum() - 100.0) > 0.25:
         raise SystemExit("Table S2 shares do not sum to 100 %")
-    mol = g["wt"] / (12.011 * g["c"] + 1.008 * g["h"])
-    molf = mol / mol.sum()
-    w = g["wt"] / 100.0
-    proxy = "cis-1,3-dimethylcyclopentane"
-    y_lo, y_hi = g.loc[proxy, "ys_lo"], g.loc[proxy, "ys_hi"]
-    ys = g["ys_lo"].copy()
+    wt, y = g["wt"], g["ys_lo"]
 
-    def mean(y_hep, y_proxy, weights):
-        y = ys.copy()
-        y["n-heptane"], y[proxy] = y_hep, y_proxy
-        return float((weights * y).sum())
+    def formula_h(h):
+        mol = wt / (12.011 * g["c"] + 1.008 * h)
+        return float((mol * h).sum() / mol.sum())
 
-    coa_mch = float(lit["valCoreFuelCoaMchPct"])
-    mch = float(g.loc["methylcyclohexane", "wt"])
-    w_coa = g["wt"].copy()
-    w_coa["methylcyclohexane"] = coa_mch
-    w_coa = w_coa / w_coa.sum()
-    naph = float(g.loc[g["type"] == "cyclo", "wt"].sum())
+    def mean(y_hep, y_dmcp, y_open):
+        yy = y.copy()
+        yy["nhep"], yy["dmcp"], yy["open"] = y_hep, y_dmcp, y_open
+        return float((wt * yy).sum() / 100.0)
+
+    h_lo, h_hi = formula_h(g["h_lo"]), formula_h(g["h_hi"])     # open class as naphthene / paraffin
+    dm_lo, dm_hi = g.loc["dmcp", "ys_lo"], g.loc["dmcp", "ys_hi"]
+    op_lo, op_hi = g.loc["open", "ys_lo"], g.loc["open", "ys_hi"]
+    y_nhep, y_mch = y["nhep"], y["mch"]
+    naph = float(wt["mch"] + wt["dmcp"])
     nhep_corr = float(lit["valSfpeYsNhepCorr"])
     return {
-        "valCoreFuelParaffinicPct": (float(g.loc[g["type"].isin(["n", "iso"]), "wt"].sum()), ".0f"),
-        "valCoreFuelNaphthenicPct": (naph, ".0f"),
-        "valCoreFuelNhepPct": (float(g.loc["n-heptane", "wt"]), ".1f"),
-        "valCoreFuelMchPct": (mch, ".1f"),
-        "valCoreFuelCyclohexanePct": (float(g.loc["cyclohexane", "wt"]), ".1f"),
-        "valCoreFuelDmhPct": (float(g.loc["2,3-dimethylhexane", "wt"]), ".1f"),
-        "valCoreFuelDmcpPct": (float(g.loc[proxy, "wt"]), ".1f"),
-        "valCoreFuelMhPct": (float(g.loc["3-methylhexane", "wt"]), ".1f"),
-        "valCoreFuelFormulaC": (float((molf * g["c"]).sum()), ".1f"),
-        "valCoreFuelFormulaH": (float((molf * g["h"]).sum()), ".1f"),
-        "valCoreFuelMchOverCoaPts": (mch - coa_mch, ".1f"),
-        "valCoreFuelNaphthenicCoaPct": (100.0 * (naph - (mch - coa_mch)) / (100.0 - (mch - coa_mch)), ".0f"),
-        "valSfpeYsNhep": (float(g.loc["n-heptane", "ys_lo"]), ".3f"),
-        "valSfpeYsCoreFuelLo": (mean(g.loc["n-heptane", "ys_lo"], y_lo, w), ".3f"),
-        "valSfpeYsCoreFuelHi": (mean(g.loc["n-heptane", "ys_lo"], y_hi, w), ".3f"),
-        "valSfpeYsCoreFuelCorr": (mean(nhep_corr, 0.5 * (y_lo + y_hi), w), ".3f"),
-        "valSfpeYsCoreFuelCoa": (mean(g.loc["n-heptane", "ys_lo"], 0.5 * (y_lo + y_hi), w_coa), ".3f"),
+        "valCoreFuelSevenNhepPct": (float(wt["nhep"]), ".0f"),
+        "valCoreFuelSevenMchPct": (float(wt["mch"]), ".0f"),
+        "valCoreFuelSevenDmcpPct": (float(wt["dmcp"]), ".0f"),
+        "valCoreFuelSevenIsoPct": (float(wt["iso"]), ".0f"),
+        "valCoreFuelSevenOpenPct": (float(wt["open"]), ".0f"),
+        "valCoreFuelSevenNaphLoPct": (naph, ".0f"),
+        "valCoreFuelSevenNaphHiPct": (naph + float(wt["open"]), ".0f"),
+        "valCoreFuelSevenFormulaHLo": (h_lo, ".1f"),
+        "valCoreFuelSevenFormulaHHi": (h_hi, ".1f"),
+        "valCoreFuelSevenHcLo": (h_lo / 7.0, ".2f"),
+        "valCoreFuelSevenHcHi": (h_hi / 7.0, ".2f"),
+        "valCoreFuelSevenMchOverCoaPts": (float(wt["mch"]) - float(lit["valCoreFuelCoaMchPct"]), ".0f"),
+        "valSfpeYsNhep": (float(y_nhep), ".3f"),
+        "valSfpeYsCoreFuelSevenLo": (mean(y_nhep, dm_lo, op_lo), ".3f"),
+        "valSfpeYsCoreFuelSevenHi": (mean(y_nhep, dm_hi, op_hi), ".3f"),
+        "valSfpeYsCoreFuelSevenCorrLo": (mean(nhep_corr, dm_lo, op_lo), ".3f"),
+        "valSfpeYsCoreFuelSevenCorrHi": (mean(nhep_corr, dm_hi, op_hi), ".3f"),
+        "valSfpeYsCoreFuelSevenRepLo": (mean(y_nhep, dm_lo, y_nhep), ".3f"),
+        "valSfpeYsCoreFuelSevenRepHi": (mean(y_nhep, dm_hi, y_mch), ".3f"),
+    }
+
+
+def heat_scale_numbers(lit: dict) -> dict:
+    """Two-sided systematic on the prescribed Delta H_ch (Section 2.4, SM S4, S13): between
+    the oxygen-consumption-constant correction alone (n-heptane 44.56 MJ/kg over its
+    stoichiometric O2 demand vs 13.1 MJ/kg O2; first calorimeter series right) and that
+    correction times the factor k between the heat-release scales of the two series
+    (documented literal; second series right). The dhc_e127 case of Table S13 is scaled
+    linearly from the lower to the upper end."""
+    k = float(lit["valCoreHeatScaleFactor"])
+    e_fuel = 44.56 / (11 * 31.998 / 100.205)
+    lo = e_fuel / 13.1 - 1
+    hi = k * (1 + lo) - 1
+    q = pd.read_csv(P.SIM_RESULTS / "fds_sensitivity.csv").set_index("run").loc["dhc_e127"]
+    scale = hi / lo                      # negative: the case is a decrease
+    return {
+        "valCoreHeatScaleFactorPct": (100.0 * (k - 1), ".1f"),
+        "valCoreHeatSysLoPct": (100.0 * lo, ".0f"),
+        "valCoreHeatSysHiPct": (100.0 * hi, "+.0f"),
+        "valCoreHeatSysHiAbsPct": (100.0 * hi, ".0f"),
+        "valSensDhcUpTempPct": (float(q["dTu_F1_pct"]) * scale, "+.1f"),
+        "valSensDhcUpExtRoomMaxPct": (
+            float(q[["dk_F1_pct", "dk_F2_pct", "dk_F3_pct"]].abs().max()) * abs(scale), ".1f"),
     }
 
 
@@ -596,8 +634,12 @@ LITERALS = {
     "valRstPeakNm": "peak wavelength of the calorimeter light source (SM S4), RST records",
     "valCoreFuelCoaNhepPct": "supplier certificate of analysis (SM S3)",
     "valCoreFuelCoaMchPct": "supplier certificate of analysis (SM S3)",
-    "valCoreFuelUnreportedPct": "GC-FID peak areas (SM S3), GC records",
     "valSfpeYsNhepCorr": "Tewarson's predicted n-heptane yield, 0.037 g/g (SM S3, Table S2 note a)",
+    "valCoreHeatScaleFactor": "heat-release scale factor between the two calorimeter series, "
+                              "matched n-heptane burns (Section 2.4, SM S4), RST records",
+    "valCoreHeatScaleFactorErr": "heat-release scale factor between the two calorimeter series, "
+                                 "matched n-heptane burns (Section 2.4, SM S4), RST records",
+    "valCoreHeatScaleTspPct": "TSP difference of the same matched n-heptane burns (SM S4), RST records",
 }
 
 
@@ -605,6 +647,7 @@ LITERALS = {
 CONSTANTS = {
     "valLeakVolume": "net apartment volume 128 m3 (SM S2)",
     "valSensDhcHrrPct": "n-heptane 44.56 MJ/kg over its stoichiometric O2 demand vs 13.1 MJ/kg O2 (SM S4, S13)",
+    "valCoreHeatSysLoPct": "n-heptane 44.56 MJ/kg over its stoichiometric O2 demand vs 13.1 MJ/kg O2 (Section 2.4, SM S4)",
     "valSensFireAreaInterpFrac": "pan areas 150 / 160 / 175 mm (SM S13)",
     **{f"valFdsSigmaE{g}{s}": "experimental uncertainty sigma_E (scripts/guide_stats.py, Table S6)"
        for g in ("Temperature", "UpperLayerT", "LayerHeight", "Extinction") for s in ("", "Pct")},
@@ -633,6 +676,8 @@ def main() -> int:
     record(rst_apartment_numbers(), "table", "results/measurement/rst_apartment_runs.csv (Table S4)")
     lit = {k: tex[k] for k in LITERALS}
     record(fuel_composition_numbers(lit), "table", "tables/core_fuel_composition.tex (Table S2)")
+    record(heat_scale_numbers(lit), "data",
+           "results/simulation/fds_sensitivity.csv with the documented series factor k")
     for k, src in LITERALS.items():
         rows.append(dict(macro=k, value=tex[k], recomputed="", cls="literal", source=src,
                          status="documented"))

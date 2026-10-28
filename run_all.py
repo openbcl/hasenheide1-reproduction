@@ -41,6 +41,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 import paths as P  # noqa: E402
 
 REPO = P.REPO_ROOT
+# committed per-test time series; the measurement reductions read them when the
+# measurement archive is not present
+TIMESERIES = P.MEAS_RESULTS / "timeseries" / "runs.csv"
 
 
 @dataclass
@@ -68,7 +71,24 @@ TARGETS: list[Target] = [
         "data/reprocessed/*/1_Processed_data/*_processed.csv",
         cmd=_scripts(str(REPO / "scripts" / "reprocess_unclipped.py")),
         cwd=REPO / "scripts", requires=[P.MEAS_ROOT],
-        note="feeds the optics-fouling reduction",
+        note="feeds the per-test time series export",
+    ),
+    Target(
+        "export_timeseries", "data",
+        "Export the per-test measured time series -> results/measurement/timeseries/",
+        "results/measurement/timeseries/{Hep_*.csv, runs.csv, events.csv, channels.csv}",
+        cmd=_scripts(str(REPO / "scripts" / "export_timeseries.py")),
+        cwd=REPO / "scripts", requires=[P.REPROCESSED_DIR, P.MEAS_ROOT],
+        note="needs the `reprocess` step first; the measurement reductions below read "
+             "these files when the measurement archive is absent",
+    ),
+    Target(
+        "export_fds_timeseries", "data",
+        "Export the FDS baseline time series at the instrument positions -> results/simulation/timeseries/",
+        "results/simulation/timeseries/{hep_*_ysmatched_devc.csv, hep_*_ysmatched_hrr.csv, fds_channels.csv}",
+        cmd=_scripts(str(REPO / "scripts" / "export_fds_timeseries.py")),
+        cwd=REPO / "scripts", requires=[P.FDS_OUTPUT_ROOT],
+        note="the devices of the three baseline runs at the instrument positions",
     ),
     Target(
         "reduce_hrr", "data",
@@ -86,8 +106,10 @@ TARGETS: list[Target] = [
         "results/validation/matrices/ext_lem.csv, ext_sick.csv, ext_meta.csv, temp_prof.csv, "
         "temp_ceil.csv, ext_fds.csv, temp_fds.csv, temp_fds_plume.csv",
         cmd=_scripts(str(REPO / "scripts" / "reduce_matrices.py")),
-        cwd=REPO / "scripts", requires=[P.MEAS_ROOT, P.FDS_OUTPUT_ROOT],
-        note="feeds the committed matrices figures; round-trip-exact CSVs",
+        cwd=REPO / "scripts", requires=[TIMESERIES], committed=True,
+        note="feeds the committed matrices figures; round-trip-exact CSVs. Measured "
+             "and FDS curves from the archives or, without them, from the committed "
+             "measured and FDS baseline time series",
     ),
     Target(
         "fds_sensitivity", "data",
@@ -161,24 +183,27 @@ TARGETS: list[Target] = [
         "Reduce optics-fouling residuals + figure curves -> results/measurement/fouling/",
         "results/measurement/fouling_residuals.csv, results/measurement/fouling/fig_*.csv",
         cmd=_scripts(str(REPO / "scripts" / "explore_fouling.py")),
-        cwd=REPO / "scripts", requires=[P.REPROCESSED_DIR],
-        note="needs the `reprocess` step first; feeds the committed fouling figure",
+        cwd=REPO / "scripts", requires=[TIMESERIES], committed=True,
+        note="reads data/reprocessed or the committed time series; feeds the committed "
+             "fouling figure",
     ),
     Target(
         "reduce_ambient", "data",
         "Reduce experiment metadata -> results/measurement/ambient.csv, experiments_overview.csv",
         "results/measurement/ambient.csv, results/measurement/experiments_overview.csv",
         cmd=_scripts(str(REPO / "scripts" / "reduce_ambient.py")),
-        cwd=REPO / "scripts", requires=[P.MEAS_ROOT],
-        note="feeds the committed ambient + experiments-overview tables",
+        cwd=REPO / "scripts", requires=[TIMESERIES], committed=True,
+        note="reads the archive's metadata or the committed runs.csv; feeds the committed "
+             "ambient + experiments-overview tables",
     ),
     Target(
         "reduce_smoke_alarm", "data",
         "Reduce smoke-alarm activation table -> results/measurement/smoke_alarm_table.csv",
         "results/measurement/smoke_alarm_table.csv",
         cmd=_scripts(str(REPO / "scripts" / "analyze_smoke_alarms.py")),
-        cwd=REPO / "scripts", requires=[P.MEAS_ROOT],
-        note="feeds the committed smoke-alarm table",
+        cwd=REPO / "scripts", requires=[TIMESERIES], committed=True,
+        note="reads the archive or the committed time series; feeds the committed "
+             "smoke-alarm table",
     ),
     Target(
         "reduce_repeatability", "data",
@@ -202,9 +227,11 @@ TARGETS: list[Target] = [
         "results/measurement/fouling_at_peak.csv",
         cmd=_scripts(str(REPO / "scripts" / "reduce_fouling_at_peak.py")),
         cwd=REPO / "scripts",
-        requires=[REPO / "data" / "reprocessed", P.RESULTS_DIR / "measurement" / "fouling_residuals.csv"],
+        requires=[TIMESERIES, P.RESULTS_DIR / "measurement" / "fouling_residuals.csv"],
+        committed=True,
         note="scales the measured end-of-run residual by the soot-exposure fraction "
-             "reached at the peak (needs the reprocess + reduce_fouling targets first)",
+             "reached at the peak (after reduce_fouling; reads data/reprocessed or the "
+             "committed time series)",
     ),
 
     # ---------------- figures stage: committed-data subset (no external archive) ----------------

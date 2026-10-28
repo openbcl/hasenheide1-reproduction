@@ -12,7 +12,7 @@ in-repo placeholder under ``data/``, so no absolute path is committed and the
 committed figure stage runs with none of them set. Point the variables at your own
 copies of the raw data to re-run the data stage.
 
-    HASENHEIDE_MEAS_ROOT     -> measurement tree (processed run CSVs, smoke alarms)
+    HASENHEIDE_MEAS_ROOT     -> measurement tree (raw and processed run records, event logs, metadata)
     HASENHEIDE_ANALYSIS_ROOT -> analysis tree (parent of HRR/)
     HASENHEIDE_HRR_ROOT      -> per-series HRR ensemble CSVs
     HASENHEIDE_PREP_ROOT     -> preparation tree (blower-door reports)

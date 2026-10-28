@@ -31,7 +31,8 @@ Integration runs to ventilation onset (the residual is read after that, but no
 further deposition happens once the smoke is cleared).
 
 Writes results/measurement/fouling_at_peak.csv. Reads the locally re-processed records in
-data/reprocessed (scripts/reprocess_unclipped.py), not the raw records directly.
+data/reprocessed (scripts/reprocess_unclipped.py), not the raw records directly; without
+them, the committed per-test time series (results/measurement/timeseries/).
 Run: python reduce_fouling_at_peak.py
 """
 from __future__ import annotations
@@ -67,8 +68,8 @@ def main() -> int:
         return 1
     resid = pd.read_csv(resid_f).set_index(["run", "device"]).fouling_resid_1pm
 
-    if not BASE.exists():
-        print(f"re-processed records not present ({BASE}) -- skipping")
+    if not BASE.exists() and not (mio.TIMESERIES_DIR / "runs.csv").exists():
+        print(f"neither re-processed records ({BASE}) nor committed time series -- skipping")
         return 0
 
     print("Loading full records ...")
@@ -123,7 +124,7 @@ def main() -> int:
     d = pd.DataFrame(rows)
     P.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     f = P.RESULTS_DIR / "measurement" / "fouling_at_peak.csv"
-    d.to_csv(f, index=False)
+    d.to_csv(f, index=False, lineterminator="\n")
     print(f"\n{len(d)} device-runs -> {f}\n")
 
     print("relative fouling at the validation peak [% of peak k]")

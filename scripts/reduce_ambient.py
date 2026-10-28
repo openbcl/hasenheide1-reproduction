@@ -10,7 +10,8 @@ can be generated without the raw data:
 
 Per-series statistics are the mean and Bessel-corrected SD over the replicate
 heptane runs of each series. Pre-test ambient columns: pre_T (degC), pre_BP (hPa),
-pre_H (rel. humidity %). Run: python reduce_ambient.py
+pre_H (rel. humidity %). Without the archive the per-run values are read from the
+committed results/measurement/timeseries/runs.csv. Run: python reduce_ambient.py
 """
 from __future__ import annotations
 
@@ -32,7 +33,14 @@ PAN_MM = {"Hep_160_075": 160, "Hep_160_150": 160, "Hep_220_300": 220}
 
 def _rows():
     f = P.MEAS_ROOT / "experiment_metadata.txt"
-    return list(csv.DictReader(open(f, encoding="utf-8"), delimiter=";"))
+    if f.exists():
+        return list(csv.DictReader(open(f, encoding="utf-8"), delimiter=";"))
+    # without the archive: the same per-run values from the committed time series
+    r = pd.read_csv(P.MEAS_RESULTS / "timeseries" / "runs.csv", float_precision="round_trip")
+    return [{"ID": x.run, "pre_T": repr(x.ambient_T_C), "pre_BP": repr(x.ambient_p_hPa),
+             "pre_H": repr(x.ambient_RH_pct), "Burning_Duration": repr(x.burning_duration_s),
+             "Start_ventilation": str(int(x.ventilation_start_s)), "Fuel_mass": str(int(x.fuel_mass_g))}
+            for x in r.itertuples()]
 
 
 def main() -> None:
@@ -60,8 +68,10 @@ def main() -> None:
                         vent_s=int(next(iter(vents)))))
 
     P.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(amb).to_csv(P.RESULTS_DIR / "measurement" / "ambient.csv", index=False)
-    pd.DataFrame(ovr).to_csv(P.RESULTS_DIR / "measurement" / "experiments_overview.csv", index=False)
+    pd.DataFrame(amb).to_csv(P.RESULTS_DIR / "measurement" / "ambient.csv", index=False,
+                             lineterminator="\n")
+    pd.DataFrame(ovr).to_csv(P.RESULTS_DIR / "measurement" / "experiments_overview.csv", index=False,
+                             lineterminator="\n")
     print(f"wrote {P.RESULTS_DIR / 'measurement' / 'ambient.csv'} and {P.RESULTS_DIR / 'measurement' / 'experiments_overview.csv'}")
 
 

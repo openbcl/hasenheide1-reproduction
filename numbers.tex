@@ -3,8 +3,8 @@
 % data (results/) and table fragments (tables/) and compares; a documented minority
 % are literals whose source records are not shipped in this package (the
 % pure-n-heptane calorimeter reference, the charge check, the calorimeter light
-% source, the supplier certificate and the unreported GC share of SM S3/S4, and
-% Tewarson's predicted n-heptane yield) -- see the "Provenance of the reported
+% source, the supplier certificate of SM S3/S4, Tewarson's predicted n-heptane
+% yield, and the heat-release scale factor between the two calorimeter series) -- see the "Provenance of the reported
 % values" section of README.md and results/numbers_check.csv.
 
 \newcommand{\valBinnedDmassEnd}{0.74}
@@ -16,19 +16,25 @@
 \newcommand{\valBinnedTopBinMaxPct}{3}
 \newcommand{\valCoreFuelCoaMchPct}{22.9}
 \newcommand{\valCoreFuelCoaNhepPct}{35.8}
-\newcommand{\valCoreFuelCyclohexanePct}{9.9}
-\newcommand{\valCoreFuelDmcpPct}{7.4}
-\newcommand{\valCoreFuelDmhPct}{13.5}
-\newcommand{\valCoreFuelFormulaC}{7.0}
-\newcommand{\valCoreFuelFormulaH}{15.0}
-\newcommand{\valCoreFuelMchOverCoaPts}{6.6}
-\newcommand{\valCoreFuelMchPct}{29.5}
-\newcommand{\valCoreFuelMhPct}{3.2}
-\newcommand{\valCoreFuelNaphthenicCoaPct}{43}
-\newcommand{\valCoreFuelNaphthenicPct}{47}
-\newcommand{\valCoreFuelNhepPct}{36.5}
-\newcommand{\valCoreFuelParaffinicPct}{53}
-\newcommand{\valCoreFuelUnreportedPct}{3}
+\newcommand{\valCoreFuelSevenDmcpPct}{7}
+\newcommand{\valCoreFuelSevenFormulaHHi}{15.3}
+\newcommand{\valCoreFuelSevenFormulaHLo}{14.8}
+\newcommand{\valCoreFuelSevenHcHi}{2.19}
+\newcommand{\valCoreFuelSevenHcLo}{2.12}
+\newcommand{\valCoreFuelSevenIsoPct}{7}
+\newcommand{\valCoreFuelSevenMchOverCoaPts}{5}
+\newcommand{\valCoreFuelSevenMchPct}{28}
+\newcommand{\valCoreFuelSevenNaphHiPct}{59}
+\newcommand{\valCoreFuelSevenNaphLoPct}{35}
+\newcommand{\valCoreFuelSevenNhepPct}{34}
+\newcommand{\valCoreFuelSevenOpenPct}{24}
+\newcommand{\valCoreHeatScaleFactor}{1.081}
+\newcommand{\valCoreHeatScaleFactorErr}{0.030}
+\newcommand{\valCoreHeatScaleFactorPct}{8.1}
+\newcommand{\valCoreHeatScaleTspPct}{0.6}
+\newcommand{\valCoreHeatSysHiAbsPct}{5}
+\newcommand{\valCoreHeatSysHiPct}{+5}
+\newcommand{\valCoreHeatSysLoPct}{-3}
 \newcommand{\valExtPathPointIqrHiPct}{0.8}
 \newcommand{\valExtPathPointIqrLoPct}{-0.9}
 \newcommand{\valExtPathPointMedianPct}{-0.06}
@@ -85,10 +91,10 @@
 \newcommand{\valGridTempCoarseMaxDevPct}{6}
 \newcommand{\valGridTempMaxDevPct}{5}
 \newcommand{\valGridTempMeanDevPct}{4}
-\newcommand{\valHeptaneMetaCiHi}{0.0168}
-\newcommand{\valHeptaneMetaCiLo}{0.0142}
+\newcommand{\valHeptaneMetaCiHi}{0.0169}
+\newcommand{\valHeptaneMetaCiLo}{0.0144}
 \newcommand{\valHeptaneMetaK}{10}
-\newcommand{\valHeptaneMetaMu}{0.0155}
+\newcommand{\valHeptaneMetaMu}{0.0156}
 \newcommand{\valHrrAvgLarge}{46}
 \newcommand{\valHrrAvgMid}{19}
 \newcommand{\valHrrAvgSmall}{16}
@@ -182,6 +188,8 @@
 \newcommand{\valSensDhcHrrPct}{-3.2}
 \newcommand{\valSensDhcTempFTwoPct}{+0.3}
 \newcommand{\valSensDhcTempPct}{-2.5}
+\newcommand{\valSensDhcUpExtRoomMaxPct}{1.3}
+\newcommand{\valSensDhcUpTempPct}{+3.7}
 \newcommand{\valSensFireAreaCeilInterpPct}{-2.1}
 \newcommand{\valSensFireAreaCeilPct}{-5.5}
 \newcommand{\valSensFireAreaExtPct}{+0.5}
@@ -191,6 +199,7 @@
 \newcommand{\valSensFireAreaTempFTwoInterpPct}{+1.6}
 \newcommand{\valSensFireAreaTempFTwoPct}{+4.1}
 \newcommand{\valSensFireAreaTempPct}{-0.3}
+\newcommand{\valSensFuelAtMuPct}{-52}
 \newcommand{\valSensFuelExtPct}{-54}
 \newcommand{\valSensGridExtMaxRoomName}{F3}
 \newcommand{\valSensGridExtMaxRoomPct}{12}
@@ -202,10 +211,12 @@
 \newcommand{\valSensTempFTwoTransportMaxPct}{13}
 \newcommand{\valSensYsExtHiPct}{+51}
 \newcommand{\valSensYsExtLoPct}{-7}
-\newcommand{\valSfpeYsCoreFuelCoa}{0.048}
-\newcommand{\valSfpeYsCoreFuelCorr}{0.047}
-\newcommand{\valSfpeYsCoreFuelHi}{0.049}
-\newcommand{\valSfpeYsCoreFuelLo}{0.048}
+\newcommand{\valSfpeYsCoreFuelSevenCorrHi}{0.052}
+\newcommand{\valSfpeYsCoreFuelSevenCorrLo}{0.044}
+\newcommand{\valSfpeYsCoreFuelSevenHi}{0.054}
+\newcommand{\valSfpeYsCoreFuelSevenLo}{0.045}
+\newcommand{\valSfpeYsCoreFuelSevenRepHi}{0.050}
+\newcommand{\valSfpeYsCoreFuelSevenRepLo}{0.047}
 \newcommand{\valSfpeYsNhep}{0.042}
 \newcommand{\valSfpeYsNhepCorr}{0.037}
 \newcommand{\valSickLemMeanBiasPct}{-2}
