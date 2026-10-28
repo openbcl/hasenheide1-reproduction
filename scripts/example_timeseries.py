@@ -22,7 +22,7 @@ from timeseries import load_fds, load_test  # noqa: E402
 
 
 def main(run: str = "Hep_160_S4_R1") -> int:
-    t = load_test(run)
+    t = load_test(run, until_test_end=True)
     m = load_fds(t.run["series"])
     ch = t.channels[t.channels.status == "ok"]
     lem = ch[ch.instrument.str.startswith("LEM") & (ch.quantity == "light-extinction coefficient")]

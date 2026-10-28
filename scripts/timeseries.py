@@ -5,6 +5,7 @@
 
     from timeseries import load_test, load_fds
     t = load_test("Hep_160_S2_R1")      # t.data, t.channels, t.events, t.run (runs.csv row)
+    t = load_test("Hep_160_S2_R1", until_test_end=True)   # without the switch-off artefacts
     m = load_fds(t.run["series"])       # m.data, m.channels, m.hrr
 
 Values are read with float_precision="round_trip", so they are the exact doubles the
@@ -31,15 +32,25 @@ def _read(path: Path, **kw) -> pd.DataFrame:
     return pd.read_csv(path, float_precision="round_trip", **kw)
 
 
-def load_test(run: str) -> SimpleNamespace:
-    """One measured test: its time series, dictionary rows, events and runs.csv row."""
+def load_test(run: str, until_test_end: bool = False) -> SimpleNamespace:
+    """One measured test: its time series, dictionary rows, events and runs.csv row.
+
+    until_test_end: keep only t_s < test_end - 1 s. After the logged test_end the
+    instruments are switched off (and in two tests cleaned), which produces
+    extinction artefacts up to the 14.21 1/m ceiling; one test switches off 0.3 s
+    before its logged test_end, hence the 1 s margin."""
     runs = _read(MEAS_TS / "runs.csv").set_index("run")
     if run not in runs.index:
         raise KeyError(f"{run!r} is not one of {sorted(runs.index)}")
     ch = _read(MEAS_TS / "channels.csv")
     ev = _read(MEAS_TS / "events.csv")
-    return SimpleNamespace(data=_read(MEAS_TS / f"{run}.csv"), channels=ch[ch.run == run].reset_index(drop=True),
-                           events=ev[ev.run == run].reset_index(drop=True), run=runs.loc[run])
+    ev = ev[ev.run == run].reset_index(drop=True)
+    data = _read(MEAS_TS / f"{run}.csv")
+    if until_test_end:
+        t_end = float(ev.loc[ev.event == "test_end", "t_s"].iloc[0])
+        data = data[data.t_s < t_end - 1].reset_index(drop=True)
+    return SimpleNamespace(data=data, channels=ch[ch.run == run].reset_index(drop=True),
+                           events=ev, run=runs.loc[run])
 
 
 def load_fds(series: str) -> SimpleNamespace:

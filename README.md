@@ -133,10 +133,14 @@ test; the second LEM in F2 (LEM 1) was moved between the setups (1.5 m in S1/S2,
 F3 (S4). Extinction follows from the logged transmission as `k = −ln(τ)/L`
 (L = 0.81 m for the LEMs, 1.6 m for the double-pass SICK); a transmission below
 0.001 %, including the negative readings when an instrument is switched off, is held
-at `τ = 10⁻⁵`, i.e. `k = 14.21 1/m` for a LEM. That ceiling appears in the last
-seconds of every record and in isolated samples late in Hep_160_S1_R3 (2444–2687 s)
-and Hep_220_S1_R2 (2013–2369 s; an instrument cleaning is logged at 1833 s); mask it
-before plotting full records, as the fouling reduction does. Thermocouple tree 2 is
+at `τ = 10⁻⁵`, i.e. `k = 14.21 1/m` for a LEM. **Use the records up to the logged
+`test_end`** (`events.csv`; `load_test(run, until_test_end=True)` cuts each record
+1 s before it). After that the instruments are switched off and, in Hep_160_S1_R3
+and Hep_220_S1_R2, cleaned: the extinction then alternates between the ceiling of
+14.21 1/m and intermediate values (e.g. 6.2, 5.2, 4.1, 1.4 1/m) that would pass for
+smoke, so masking the ceiling alone is not enough. The switch-off starts between
+0.3 s before (Hep_160_S3_R1) and several minutes after the logged `test_end`; up to
+1 s before it, every extinction value is at most 1.15 1/m. Thermocouple tree 2 is
 logged at 2.0–2.5 m with the other channels; its lower heights (0.6–1.8 m) come
 from a separate logger (0.1 °C resolution), are missing in Hep_160_S1_R3 and
 Hep_160_S2_R1, and end before the record in Hep_160_S4_R2 and Hep_220_S1_R3
@@ -173,7 +177,7 @@ a test and its model counterpart in one call:
 
 ```python
 from timeseries import load_test, load_fds      # run from scripts/
-t = load_test("Hep_160_S2_R1")    # t.data, t.channels, t.events, t.run (its runs.csv row)
+t = load_test("Hep_160_S2_R1", until_test_end=True)   # t.data, t.channels, t.events, t.run
 m = load_fds(t.run["series"])     # m.data, m.channels, m.hrr
 ```
 
