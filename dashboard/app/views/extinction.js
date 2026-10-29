@@ -3,7 +3,7 @@
 // files of Fig. 4 (ext_lem.csv, ext_sick.csv), the FDS beam of Fig. 6 (ext_fds.csv, or
 // the FDS device file for the lower F2 heights), the single tests from the time series.
 // Measured values are zeroed at t = 0 as in the paper; nothing else is computed.
-import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart } from "../util.js";
+import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, testName } from "../util.js";
 import { REF } from "../paper_refs.js";
 
 const ROOMS = [{ value: "F1", label: "F1 · fire room" }, { value: "F2", label: "F2" }, { value: "F3", label: "F3" }];
@@ -90,9 +90,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
       data.forEach((d, i) => {
         const y = d.columns[runs[i].column], y0 = y[d.zero_index];
         out.push({ x: d.t, y: y.map(v => v === null ? null : v - y0), type: "scatter", mode: "lines",
-                   name: runs[i].run, legendgroup: "tests", showlegend: i === 0,
+                   name: testName(meta, runs[i].run), legendgroup: "tests", showlegend: i === 0,
                    line: { color: rgba(c.lem, 0.45), width: 0.9 },
-                   hovertemplate: `${runs[i].run}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
+                   hovertemplate: `${testName(meta, runs[i].run)}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
         sources.add(d.source);
       });
       out[out.length - runs.length].name = `LEM single tests (n = ${runs.length})`;
@@ -112,9 +112,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
     if (show("sick")) {
       const runs = Object.entries(mx.ext_sick[s]?.[r] || {});
       runs.forEach(([run, d], i) => out.push({
-        x: d.t, y: d.k, type: "scatter", mode: "lines", name: i === 0 ? `SICK, scaled to 638 nm (n = ${runs.length})` : run,
+        x: d.t, y: d.k, type: "scatter", mode: "lines", name: i === 0 ? `SICK, scaled to 638 nm (n = ${runs.length})` : testName(meta, run),
         legendgroup: "sick", showlegend: i === 0, line: { color: rgba(c.sick, 0.7), width: 0.9 },
-        hovertemplate: `SICK ${run}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` }));
+        hovertemplate: `SICK ${testName(meta, run)}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` }));
       if (runs.length) sources.add("results/validation/matrices/ext_sick.csv");
     }
     if (show("fds")) {

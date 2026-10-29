@@ -57,7 +57,8 @@ export async function render(root, { meta, views, load }) {
     h("h3", {}, "Names used here"),
     h("dl", { class: "naming" },
       h("dt", {}, "Hep_160_075"), h("dd", {}, "a series: fuel, square pan of side 160 mm, fuel mass 75 g"),
-      h("dt", {}, "Hep_160_S2_R1"), h("dd", {}, "a test: pan 160 mm, instrument setup S2, repetition 1 (setups S1–S4 differ in the LEM and SICK positions)"),
+      h("dt", {}, "Hep_160_075_R4"), h("dd", {}, "a test: the fourth test of that series, in the order run (the package files keep the ids " +
+        "of the test log, such as Hep_160_S3_R1; ", h("a", { href: "#/data" }, "Data and numbers"), " lists both)"),
       h("dt", {}, "Hep"), h("dd", {}, "the commercial ‘heptane’, a C7 hydrocarbon mixture"),
       h("dt", {}, "F1, F2, FC, F3"), h("dd", {}, "fire room F1, room F2, corridor FC, room F3"),
       h("dt", {}, "LEM"), h("dd", {}, "custom-built laser extinction meter, 638 nm, optical path 0.81 m"),

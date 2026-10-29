@@ -216,6 +216,31 @@ def tex_table(rel: str) -> dict:
 
 
 # ----------------------------------------------------------------------------- meta + time series
+def test_names(runs: pd.DataFrame, ch: pd.DataFrame) -> pd.DataFrame:
+    """Display name and instrument setup of each test. The package ids (Hep_160_S2_R1) count the
+    repetitions within an instrument setup S1-S4, which the paper does not name; the dashboard shows
+    <series>_R<n> instead, n counting the tests of a series in the order they were run, and states
+    the setup by what it changed: the height of the tripod LEM in F2 and the room of the SICK."""
+    start = pd.to_datetime(runs.date + " " + runs.t0_local)
+    n = runs.loc[start.sort_values(kind="stable").index].groupby("series").cumcount() + 1
+    runs = runs.assign(name=runs.series + "_R" + n.reindex(runs.index).astype(str))
+    tab = tex_table("tables/experiments_overview.tex")   # Table 1: number of runs per series
+    i = tab["header"].index("Runs")
+    assert {r[0]: int(r[i]) for r in tab["rows"]} == runs.series.value_counts().to_dict(), "runs per series != Table 1"
+    assert runs.name.is_unique and not set(runs.name) & set(runs.run)
+
+    def setup(run: str) -> str:
+        c = ch[ch.run == run]
+        lem = c.loc[(c.instrument == "LEM1") & (c.room == "F2"), "z_m"].dropna().unique()
+        sick = c.loc[c.instrument == "SICK", "room"].dropna().unique()
+        assert len(lem) == 1 and len(sick) == 1, f"{run}: setup not unique"
+        return f"tripod LEM in F2 at {lem[0]:g} m, SICK in {sick[0]}"
+
+    runs = runs.assign(setup_text=runs.run.map(setup))
+    assert runs.groupby("setup").setup_text.nunique().eq(1).all(), "one description per setup"
+    return runs
+
+
 def build_timeseries(files: dict) -> dict:
     runs = read_csv(f"{TS_DIR}/runs.csv")
     events = read_csv(f"{TS_DIR}/events.csv")
@@ -248,7 +273,7 @@ def build_timeseries(files: dict) -> dict:
     ch_keep = ["run", "column", "quantity", "unit", "instrument", "room", "z_m", "wavelength_nm",
                "path_length_m", "processing", "status", "note"]
     meta = {
-        "runs": records(runs),
+        "runs": records(test_names(runs, ch)),
         "events": records(events),
         "channels": records(ch[ch.column.isin(["t_s", "time_local"]) == False][ch_keep]),  # noqa: E712
     }

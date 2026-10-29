@@ -1,6 +1,6 @@
 // Data and numbers: every number macro of the paper with its source, then citation,
 // reproduction, downloads and checksums.
-import { h, about, table, fmtBytes, repoLink, viewHeader, segmented } from "../util.js";
+import { h, about, table, fmtBytes, repoLink, viewHeader, segmented, REPO_REF } from "../util.js";
 import { PAPER, REF } from "../paper_refs.js";
 
 const CLASSES = {
@@ -44,6 +44,19 @@ export async function render(root, { params, meta, load, setParams, views }) {
       "python scripts/build_dashboard_data.py # this dashboard's data (--check: compare only)",
       "cd dashboard && python -m http.server   # view locally at http://localhost:8000",
     ].join("\n"))),
+
+    h("h2", {}, "Test names"),
+    h("p", { class: "note" }, "The dashboard names each test after its series, numbered in the order the tests were run. " +
+      "The package files keep the ids of the test log, which count the repetitions within an instrument setup " +
+      "(S1–S4: where the tripod LEM in F2 and the SICK stood)."),
+    table({
+      caption: "Tests, package files and instrument setup (results/measurement/timeseries/runs.csv, channels.csv)",
+      header: ["Test", "Package file", "Date", "Time zero (local)", "Instrument setup"],
+      rows: meta.series.flatMap(s => s.runs).map(id => meta.runs.find(r => r.run === id)).map(r => [r.name,
+        h("a", { href: `${c.repository}/blob/${REPO_REF}/results/measurement/timeseries/${r.run}.csv`, rel: "noopener" },
+          h("code", {}, `${r.run}.csv`)),
+        r.date, r.t0_local.slice(0, 5), r.setup_text]),
+    }),
 
     h("h2", {}, "Files of this dashboard"),
     h("p", { class: "note" }, "Sizes and checksums of every file below, and of every source file, are listed in ",

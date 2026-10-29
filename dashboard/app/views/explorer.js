@@ -2,7 +2,7 @@
 // grouped by quantity, with the logged events and, where fds_channels.csv maps one, the
 // FDS device at the same position. Values as committed; optionally zeroed at t = 0 (as
 // the paper's comparisons). Records end 1 s before the logged test_end.
-import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis, EXTRA_THEME_PAIRS } from "../util.js";
+import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis, EXTRA_THEME_PAIRS, testName, testId } from "../util.js";
 import { REF } from "../paper_refs.js";
 
 const GROUPS = [
@@ -38,8 +38,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const view = views.find(v => v.id === "explorer");
   const Plotly = await loadPlotly();
   const repo = meta.citation.repository;
-  const runs = meta.runs.map(r => r.run);
-  const st = { run: runs.includes(params.run) ? params.run : runs[0],
+  const st = { run: testId(meta, params.run) || meta.runs[0].run,
                group: GROUPS.some(g => g.value === params.g) ? params.g : "ext",
                fds: params.fds !== "0", zero: params.zero !== "0", ch: params.ch || "" };
 
@@ -57,10 +56,11 @@ export async function render(root, { params, meta, load, setParams, views }) {
 
   const select = h("select", { "aria-label": "Test", onchange: e => { st.run = e.target.value; update(); } },
     meta.series.map(s => h("optgroup", { label: `${s.key} (${s.label})` },
-      s.runs.map(r => h("option", { value: r, selected: r === st.run }, r)))));
+      s.runs.map(r => h("option", { value: r, selected: r === st.run }, testName(meta, r))))));
 
   const update = latest(async stale => {
-    setParams({ run: st.run, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null });
+    const name = testName(meta, st.run);
+    setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null });
     const g = GROUPS.find(x => x.value === st.group);
     const canFds = !["mass", "alarm", "tau"].includes(g.value);
     rebuild(controls, () => [
@@ -126,14 +126,14 @@ export async function render(root, { params, meta, load, setParams, views }) {
       margin: { l: 60, r: 10, t: 10, b: 50 + legendH },
       xaxis: { title: { text: "t / s (from the ignition reference)" } },
       yaxis: { title: { text: (st.zero && g.value !== "alarm" ? "Δ" : "") + g.axis } } }),
-      `${st.run}_${g.value}`, `${st.run}, ${g.label} (${g.unit}), ${st.zero ? "zeroed at t = 0" : "as recorded"}; package data`);
+      `${name}_${g.value}`, `${name}, ${g.label} (${g.unit}), ${st.zero ? "zeroed at t = 0" : "as recorded"}; package data`);
 
     const odd = chans.filter(x => x.status !== "ok");
     note.replaceChildren(
       ...(pick ? [h("p", {}, h("b", {}, "Selected in the plan: "), shown.length ? shown.map(label).join(", ") : "not recorded in this test",
         " · ", h("button", { type: "button", class: "linklike", onclick: () => { st.ch = ""; update(); } }, "show all channels"))] : []),
-      h("p", {}, `${st.run}: series ${run.series}, setup ${run.setup}, ${run.fuel_mass_g} g in the ${run.pan_mm} mm pan, ${run.date}; ` +
-        `burning ${run.burning_duration_s} s, ventilation from ${run.ventilation_start_s} s; record to ${d.cut_s} s ` +
+      h("p", {}, `${name}: series ${run.series}, ${run.fuel_mass_g} g in the ${run.pan_mm} mm pan, ${run.date} at ${run.t0_local.slice(0, 5)}; ` +
+        `${run.setup_text}; package file ${st.run}.csv. Burning ${run.burning_duration_s} s, ventilation from ${run.ventilation_start_s} s; record to ${d.cut_s} s ` +
         "(1 s before the logged end). The time axis starts at the full minute of ignition; the logged ignition follows " +
         `${(evs.find(e => e.event === "ignition") || { t_s: "?" }).t_s} s later.`),
       ...odd.map(x => h("p", {}, `${x.column}: ${x.status}${x.note ? ` (${x.note})` : ""}.`)));

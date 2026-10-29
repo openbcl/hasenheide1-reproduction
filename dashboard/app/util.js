@@ -18,6 +18,11 @@ export function h(tag, attrs, ...children) {
   return el;
 }
 
+// Tests are shown as <series>_R<n> (meta.runs[].name, numbered in the order run); the package
+// files keep their ids (Hep_160_S2_R1). Links may carry either.
+export const testName = (meta, id) => (meta.runs.find(r => r.run === id) || {}).name || id;
+export const testId = (meta, p) => (meta.runs.find(r => r.name === p || r.run === p) || {}).run;
+
 export function fmtBytes(n) {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} kB`;

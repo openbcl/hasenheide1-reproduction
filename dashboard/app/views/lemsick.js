@@ -2,7 +2,7 @@
 // 638 nm, the SICK at 880 nm as measured and the SICK scaled to 638 nm (Widmann), zeroed at
 // t = 0 as in the paper; the cross-check table and the exponent test as committed. The
 // key numbers are the numbers.tex macros checked at build time.
-import { h, about, refChips, sourceLine, segmented, table, loadPlotly, themeColors, baseLayout, latest, rebuild, drawChart } from "../util.js";
+import { h, about, refChips, sourceLine, segmented, table, loadPlotly, themeColors, baseLayout, latest, rebuild, drawChart, testName, testId } from "../util.js";
 import { REF } from "../paper_refs.js";
 
 export async function render(root, { params, meta, load, setParams, views }) {
@@ -11,7 +11,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const repo = meta.citation.repository;
   const k = ls.keys;
   const runs = ls.crosscheck.map(r => r.run);
-  const st = { run: runs.includes(params.run) ? params.run : runs[0] };
+  const asked = testId(meta, params.run);
+  const st = { run: runs.includes(asked) ? asked : runs[0] };
 
   const controls = h("div", { class: "controls" });
   const chart = h("div", { class: "chart", role: "img", "aria-label": "LEM and SICK extinction over time" });
@@ -34,14 +35,15 @@ export async function render(root, { params, meta, load, setParams, views }) {
     h("h2", {}, "Cross-check per run"),
     table({ caption: "SICK (scaled to 638 nm) against the co-located LEM, per run (as committed)",
             header: ["Run", "Room", "Samples (1 Hz)", "Bias (%)", "Median |deviation| (%)", "RMS deviation (%)"], numeric: [2, 3, 4, 5],
-            rows: ls.crosscheck.map(r => [r.run, r.room, String(r.n), fmt(r.bias_pct, 1), fmt(r.median_abs_pct, 1), fmt(r.rms_pct, 1)]) }),
+            rows: ls.crosscheck.map(r => [testName(meta, r.run), r.room, String(r.n), fmt(r.bias_pct, 1), fmt(r.median_abs_pct, 1), fmt(r.rms_pct, 1)]) }),
     w ? h("p", { class: "note" }, `Exponent test over ${w.n} runs: median ${fmt(w.n_median, 3)}, interquartile range ` +
       `${fmt(w.lo, 3)}–${fmt(w.hi, 3)}, range ${fmt(w.n_min, 3)}–${fmt(w.n_max, 3)}.`) : null,
     sourceLine(repo, ls.source));
 
   const update = latest(async stale => {
-    setParams({ run: st.run === runs[0] ? null : st.run });
-    rebuild(controls, segmented("Run", ls.crosscheck.map(r => ({ value: r.run, label: `${r.run} · ${r.room}` })), st.run,
+    const name = testName(meta, st.run);
+    setParams({ run: st.run === runs[0] ? null : name });
+    rebuild(controls, segmented("Run", ls.crosscheck.map(r => ({ value: r.run, label: `${testName(meta, r.run)} · ${r.room}` })), st.run,
       v => { st.run = v; update(); }));
     const c = themeColors();
     const row = ls.crosscheck.find(r => r.run === st.run);
@@ -58,8 +60,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
     ];
     await drawChart(chart, traces, baseLayout(c, {
       xaxis: { title: { text: "t / s" } }, yaxis: { title: { text: "k / m⁻¹" }, rangemode: "tozero" } }),
-      `lem_sick_${st.run}`, `${st.run}, room ${row.room}, LEM and SICK extinction in 1/m, zeroed at t = 0`);
-    note.textContent = `${st.run}, room ${row.room}, z = 2.3 m, zeroed at t = 0; records up to 1 s before the logged end of the test.`;
+      `lem_sick_${name}`, `${name}, room ${row.room}, LEM and SICK extinction in 1/m, zeroed at t = 0`);
+    note.textContent = `${name}, room ${row.room}, z = 2.3 m, zeroed at t = 0; records up to 1 s before the logged end of the test.`;
     src.replaceChildren(sourceLine(repo, [d.source]));
   }, err => { note.textContent = `Could not draw the chart: ${err.message}`; });
 
