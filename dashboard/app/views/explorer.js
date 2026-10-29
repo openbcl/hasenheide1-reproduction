@@ -2,15 +2,17 @@
 // grouped by quantity, with the logged events and, where fds_channels.csv maps one, the
 // FDS device at the same position. Values as committed; optionally zeroed at t = 0 (as
 // the paper's comparisons). Records end 1 s before the logged test_end.
-import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis, EXTRA_THEME_PAIRS, testName, testId } from "../util.js";
+import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis, EXTRA_THEME_PAIRS, testName, testId, LEGEND } from "../util.js";
 import { REF } from "../paper_refs.js";
 
 const GROUPS = [
-  { value: "ext", label: "Extinction", quantities: ["light-extinction coefficient"], unit: "1/m", axis: "k / m⁻¹" },
-  { value: "tau", label: "Transmission", quantities: ["transmission"], unit: "%", axis: "transmission / %" },
-  { value: "temp", label: "Temperature", quantities: ["gas temperature", "ceiling temperature above the fire"], unit: "°C", axis: "T / °C" },
-  { value: "mass", label: "Fuel mass", quantities: ["fuel mass on the platform scale (pan tared)"], unit: "kg", axis: "mass / kg" },
-  { value: "alarm", label: "Smoke alarms", quantities: ["smoke alarm state (0/1)"], unit: "", axis: "alarm state (0/1)" },
+  { value: "ext", label: "Extinction", quantities: ["light-extinction coefficient"], unit: "1/m", axis: "k / m⁻¹",
+    key: "Instrument · room · height" },
+  { value: "tau", label: "Transmission", quantities: ["transmission"], unit: "%", axis: "transmission / %", key: "Instrument · room · height" },
+  { value: "temp", label: "Temperature", quantities: ["gas temperature", "ceiling temperature above the fire"], unit: "°C", axis: "T / °C",
+    key: "Thermocouple · height" },
+  { value: "mass", label: "Fuel mass", quantities: ["fuel mass on the platform scale (pan tared)"], unit: "kg", axis: "mass / kg", key: "" },
+  { value: "alarm", label: "Smoke alarms", quantities: ["smoke alarm state (0/1)"], unit: "", axis: "alarm state (0/1)", key: "Smoke alarm · room" },
 ];
 const ROOM_C = { F1: "#1f77b4", F2: "#ff7f0e", F3: "#2ca02c", FC: "#9467bd" };
 // viridis for the 8 tree heights, each section at least 3:1 against its background (WCAG 1.4.11):
@@ -28,6 +30,18 @@ function label(c) {
   if (c.quantity === "gas temperature") return `TC tree ${c.room}${z}`;
   if (c.quantity.startsWith("ceiling")) return "ceiling TC above the fire, F1";
   if (c.quantity.startsWith("smoke")) return `${c.instrument}, ${c.room}`;
+  return "fuel mass (pan tared)";
+}
+
+// the shorter legend entry: the legend title names the parts
+function keyLabel(c) {
+  const z = c.z_m !== null && c.z_m !== undefined ? ` · ${c.z_m} m` : "";
+  if (c.quantity === "light-extinction coefficient")
+    return `${c.instrument} · ${c.room}${z}` + (c.instrument === "SICK" ? (c.wavelength_nm === 880 ? ", 880 nm as measured" : ", scaled to 638 nm") : "");
+  if (c.quantity === "transmission") return `${c.instrument} · ${c.room}${z} · ${c.wavelength_nm} nm`;
+  if (c.quantity === "gas temperature") return `${c.room} tree${z}`;
+  if (c.quantity.startsWith("ceiling")) return "ceiling, above the fire · F1";
+  if (c.quantity.startsWith("smoke")) return `${c.instrument} · ${c.room}`;
   return "fuel mass (pan tared)";
 }
 
@@ -92,19 +106,27 @@ export async function render(root, { params, meta, load, setParams, views }) {
       : x.instrument === "LEM1" ? "dashdot" : (g.value === "temp" && x.room === "F2" ? "dash" : "solid");
     const zero = (y, i0) => { const y0 = y[i0]; return st.zero && y0 !== null ? y.map(v => v === null ? null : v - y0) : y; };
 
+    // one legend entry per sensor; its FDS device shares the entry (legendgroup), so both hide
+    // together, and a second key above the plot tells the measured from the FDS lines
     const traces = [];
     for (const x of shown) {
-      traces.push({ x: d.t, y: zero(d.columns[x.column], d.zero_index), type: "scatter", mode: "lines", name: label(x),
-        line: { color: color(x), dash: dash(x), width: 1.3 },
+      traces.push({ x: d.t, y: zero(d.columns[x.column], d.zero_index), type: "scatter", mode: "lines", name: keyLabel(x),
+        legendgroup: x.column, line: { color: color(x), dash: dash(x), width: 1.3 },
         hovertemplate: `${label(x)}<br>t = %{x} s<br>%{y:.4g} ${g.unit}<extra>${x.column}</extra>` });
       const fc = fdsBy[x.column];
       if (fds && fc) {
         const i0 = fds.t.findIndex(t => t >= 0);
-        traces.push({ x: fds.t, y: zero(fds.columns[fc], i0), type: "scatter", mode: "lines", name: `FDS · ${label(x)}`,
+        traces.push({ x: fds.t, y: zero(fds.columns[fc], i0), type: "scatter", mode: "lines", name: `FDS · ${keyLabel(x)}`,
+          legendgroup: x.column, showlegend: false,
           line: { color: color(x), width: 2.6, dash: "longdash" },  // full colour (>= 3:1); long dashes are used by no measured line
           hovertemplate: `FDS ${fc}<br>t = %{x:.0f} s<br>%{y:.4g} ${g.unit}<extra></extra>` });
       }
     }
+    const withFds = traces.some(t => t.showlegend === false);
+    // dashes also tell measured channels apart (F2 tree, SICK), so the key names the line weight
+    if (withFds) for (const [name, line] of [["measured (thin)", { color: c.fg, width: 1.3 }],
+                                             ["FDS baseline at the same position (thick)", { color: c.fg, width: 2.6, dash: "longdash" }]])
+      traces.push({ x: [null], y: [null], type: "scatter", mode: "lines", name, line, legend: "legend2", hoverinfo: "skip" });
     const evs = meta.events.filter(e => e.run === st.run && EVENT[e.event]);
     const shapes = evs.map(e => ({ type: "line", xref: "x", yref: "paper", x0: e.t_s, x1: e.t_s, y0: 0, y1: 1,
                                    line: { color: c.muted, width: 1, dash: "dot" } }));
@@ -118,12 +140,16 @@ export async function render(root, { params, meta, load, setParams, views }) {
     // legend at the side on wide screens, below the chart on narrow ones
     const narrow = chart.clientWidth < 700;
     // the plot area stays 280 px high: the extra height is all legend room below the axis title
-    const legendH = narrow ? 18 * traces.length + 20 : 0;
-    chart.style.height = narrow ? `${340 + legendH}px` : "";
+    const keyTop = withFds ? 28 : 10;
+    const legendH = narrow ? 19 * shown.length + 40 : 0;
+    chart.style.height = narrow ? `${340 + keyTop + legendH}px` : "";
+    const title = { text: g.key, font: { size: 12, color: c.muted } };
     await drawChart(chart, traces, baseLayout(c, { shapes, annotations, hovermode: "closest",
-      legend: narrow ? { orientation: "h", x: 0, y: -65 / 280, xanchor: "left", yanchor: "top", font: { size: 11 } }
-                     : { orientation: "v", x: 1.01, y: 1, xanchor: "left", yanchor: "top", font: { size: 11 } },
-      margin: { l: 60, r: 10, t: 10, b: 50 + legendH },
+      // one entry per sensor, so no gap between the (one-trace) groups
+      legend: narrow ? { ...LEGEND, orientation: "v", x: 0, y: -65 / 280, yanchor: "top", tracegroupgap: 0, title }
+                     : { ...LEGEND, orientation: "v", x: 1.02, y: 1, yanchor: "top", tracegroupgap: 0, title },
+      legend2: { ...LEGEND, x: 0, y: 1, yanchor: "bottom", itemclick: false, itemdoubleclick: false, font: { size: 12, color: c.muted } },
+      margin: { l: 60, r: 10, t: keyTop, b: 50 + legendH },
       xaxis: { title: { text: "t / s (from the ignition reference)" } },
       yaxis: { title: { text: (st.zero && g.value !== "alarm" ? "Δ" : "") + g.axis } } }),
       `${name}_${g.value}`, `${name}, ${g.label} (${g.unit}), ${st.zero ? "zeroed at t = 0" : "as recorded"}; package data`);

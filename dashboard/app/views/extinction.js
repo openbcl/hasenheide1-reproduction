@@ -90,7 +90,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
       data.forEach((d, i) => {
         const y = d.columns[runs[i].column], y0 = y[d.zero_index];
         out.push({ x: d.t, y: y.map(v => v === null ? null : v - y0), type: "scatter", mode: "lines",
-                   name: testName(meta, runs[i].run), legendgroup: "tests", showlegend: i === 0,
+                   name: testName(meta, runs[i].run), legendgroup: "tests", showlegend: i === 0, legendrank: 2,
                    line: { color: rgba(c.lem, 0.45), width: 0.9 },
                    hovertemplate: `${testName(meta, runs[i].run)}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
         sources.add(d.source);
@@ -104,7 +104,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
       out.push({ x: m.t, y: lo, type: "scatter", mode: "lines", line: { width: 0 }, hoverinfo: "skip", showlegend: false, legendgroup: "mean" });
       out.push({ x: m.t, y: hi, type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: rgba(c.lem, 0.22),
                  hoverinfo: "skip", showlegend: false, legendgroup: "mean" });
-      out.push({ x: m.t, y: m.mean, type: "scatter", mode: "lines", name: `LEM mean ± SD (n = ${metaRow.n_lem})`, legendgroup: "mean",
+      out.push({ x: m.t, y: m.mean, type: "scatter", mode: "lines", name: `LEM mean ± SD (n = ${metaRow.n_lem})`, legendgroup: "mean", legendrank: 1,
                  line: { color: c.lem, width: 1.6 }, customdata: m.std, meta: "sd",
                  hovertemplate: "LEM mean<br>t = %{x} s<br>k = %{y:.3f} ± %{customdata:.3f} 1/m<extra></extra>" });
       sources.add("results/validation/matrices/ext_lem.csv");
@@ -113,7 +113,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
       const runs = Object.entries(mx.ext_sick[s]?.[r] || {});
       runs.forEach(([run, d], i) => out.push({
         x: d.t, y: d.k, type: "scatter", mode: "lines", name: i === 0 ? `SICK, scaled to 638 nm (n = ${runs.length})` : testName(meta, run),
-        legendgroup: "sick", showlegend: i === 0, line: { color: rgba(c.sick, 0.7), width: 0.9 },
+        legendgroup: "sick", showlegend: i === 0, legendrank: 3, line: { color: rgba(c.sick, 0.7), width: 0.9 },
         hovertemplate: `SICK ${testName(meta, run)}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` }));
       if (runs.length) sources.add("results/validation/matrices/ext_sick.csv");
     }
@@ -125,7 +125,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
         x = f.t; y = f.columns[`LEM_LOS_${r}_${String(st.z).replace(".", "_")}_k`];
         sources.add(f.source[0]);
       }
-      out.push({ x, y, type: "scatter", mode: "lines", name: "FDS beam", line: { color: c.fds, width: 2 },
+      out.push({ x, y, type: "scatter", mode: "lines", name: "FDS beam", legendrank: 4, line: { color: c.fds, width: 2 },
                  hovertemplate: "FDS<br>t = %{x:.0f} s<br>k = %{y:.3f} 1/m<extra></extra>" });
     }
     return { out, sources, metaRow, c };

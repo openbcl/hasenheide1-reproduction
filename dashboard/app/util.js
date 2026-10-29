@@ -116,6 +116,14 @@ export function rgba(hex, a) {
   return m ? `rgba(${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)},${a})` : hex;
 }
 
+// Legends: above the plot by default, with line samples long enough to tell dashes from
+// dots. Views pass their own position as { ...LEGEND, x, y, ... }.
+export const LEGEND = { orientation: "h", x: 0, xanchor: "left", y: 1.02, yanchor: "bottom", font: { size: 12 },
+                        itemwidth: 40, tracegroupgap: 4, bgcolor: "rgba(0,0,0,0)" };
+// a legend set inside the plot area, on a panel that hides the grid behind it
+export const insideLegend = (c, pos) => ({ ...LEGEND, orientation: "v", bgcolor: rgba(c.panel, 0.88), bordercolor: c.border,
+                                            borderwidth: 1, ...pos });
+
 export function baseLayout(c, extra = {}) {
   const axis = { gridcolor: c.border, zerolinecolor: c.border, linecolor: c.muted, tickcolor: c.muted, ticks: "outside", automargin: true };
   return {
@@ -123,7 +131,7 @@ export function baseLayout(c, extra = {}) {
     font: { family: getComputedStyle(document.body).fontFamily, color: c.fg, size: 13 },
     margin: { l: 60, r: 16, t: 10, b: 50 }, hovermode: "closest",
     hoverlabel: { bgcolor: c.panel, bordercolor: c.border, font: { color: c.fg } },
-    legend: { orientation: "h", x: 0, y: 1.02, yanchor: "bottom", font: { size: 12 } },
+    legend: LEGEND,
     ...extra,
     xaxis: { ...axis, ...(extra.xaxis || {}) }, yaxis: { ...axis, ...(extra.yaxis || {}) },
   };

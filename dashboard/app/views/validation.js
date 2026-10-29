@@ -2,7 +2,7 @@
 // Points, the pooled statistics and the per-series bias come from validation.json; the
 // printed values (delta, sigma_M, sigma_E) are the numbers.tex macros checked at build
 // time. Lines as in the paper: 1:1, delta, +-2 sigma_E about 1:1, +-2 sigma_M about delta.
-import { h, about, refChips, sourceLine, segmented, checks, table, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis } from "../util.js";
+import { h, about, refChips, sourceLine, segmented, checks, table, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis, insideLegend, LEGEND } from "../util.js";
 import { REF } from "../paper_refs.js";
 import { TOKENS } from "../style_tokens.js";
 
@@ -67,27 +67,32 @@ export async function render(root, { params, meta, load, setParams, views }) {
     }
     const xs = g.log ? Array.from({ length: 50 }, (_, i) => lo * Math.pow(hi / lo, i / 49)) : [lo, hi];
     const d = stat.delta.value, sm = stat.sigma_M.value, se = stat.sigma_E.value;
+    // two keys: the points inside the plot, top left, where a parity plot has no data; the
+    // reference lines in one row above the plot (bottom right is crossed by the lower band
+    // where the bias factor is below 1)
     const line = (f, name, color, dash, width, show = false) => ({
       x: xs, y: xs.map(f), type: "scatter", mode: "lines", name, showlegend: show, hoverinfo: "skip",
-      line: { color, dash, width } });
+      line: { color, dash, width }, legend: "legend2", legendgroup: name || undefined });
     const traces = [
-      line(x => x, "1:1", c.fg, "solid", 1),
-      line(x => x * Math.exp(2 * se), "±2σE about 1:1", c.fg, "dash", 0.8, true),
+      line(x => x, "1:1", c.fg, "solid", 1, true),
+      line(x => x * Math.exp(2 * se), "±2σ<sub>E</sub> about 1:1", c.fg, "dash", 0.8, true),
       line(x => x * Math.exp(-2 * se), "", c.fg, "dash", 0.8),
-      line(x => d * x, `δ = ${stat.delta.text}`, c.sick, "solid", 1.2, true),
-      line(x => d * x * Math.exp(2 * sm), "±2σM about δ", c.sick, "dot", 1.3, true),
+      line(x => d * x, `δ<sub>${g.sym}</sub> = ${stat.delta.text}`, c.sick, "solid", 1.2, true),
+      line(x => d * x * Math.exp(2 * sm), `±2σ<sub>M</sub> about δ<sub>${g.sym}</sub>`, c.sick, "dot", 1.3, true),
       line(x => d * x * Math.exp(-2 * sm), "", c.sick, "dot", 1.3),
     ];
+    // the unnamed lower bands toggle with their upper partners
+    traces[2].legendgroup = traces[1].name; traces[5].legendgroup = traces[4].name;
     if (st.group === "Upper-layer T") {
       // the paper shows all thermocouples faintly behind the upper-layer statistic
       const all = val.points.filter(p => p.group === "Temperature" && p.in_stat);
       const dT = val.pooled.find(p => p.group === "Temperature").delta.text;
       traces.push({ x: all.map(p => p.exp), y: all.map(p => p.sim), type: "scatter", mode: "markers",
-        name: `all thermocouples (δT = ${dT})`, marker: { size: 5, color: rgba(c.muted, 0.35), line: { width: 0 } },
+        name: `all thermocouples (δ<sub>T</sub> = ${dT})`, legendrank: 1010, marker: { size: 5, color: rgba(c.muted, 0.35), line: { width: 0 } },
         text: all.map(p => `${sensorName(p.sensor)}<br>${p.series}`), hovertemplate: "%{text}<br>measured %{x:.1f}, FDS %{y:.1f} °C<extra></extra>" });
     }
     if (st.excluded && outS.length) {
-      traces.push({ x: outS.map(p => p.exp), y: outS.map(p => p.sim), type: "scatter", mode: "markers", name: "excluded pairs",
+      traces.push({ x: outS.map(p => p.exp), y: outS.map(p => p.sim), type: "scatter", mode: "markers", name: "excluded pairs", legendrank: 1020,
         marker: { symbol: "x-thin-open", size: 8, color: c.muted, line: { width: 1.3, color: c.muted } },
         text: outS.map(p => `${sensorName(p.sensor)}<br>${p.series} · ${p.instrument === "SICK" ? "co-located SICK" : "below the signal floor"}`),   // temperature: 1 K (Section 3.3)
         hovertemplate: `%{text}<br>measured %{x:.${g.fmt}f}, FDS %{y:.${g.fmt}f} ${g.unit}<extra></extra>` });
@@ -108,19 +113,28 @@ export async function render(root, { params, meta, load, setParams, views }) {
     }
     const ax = { title: { text: "measured " + g.axis }, type: g.log ? "log" : "linear",
                  range: g.log ? [Math.log10(lo), Math.log10(hi)] : [lo, hi], ...(g.ticks ? { tickvals: g.ticks } : {}) };
+    const font = { size: chart.clientWidth < 500 ? 11 : 12 };
     const layout = baseLayout(c, {
       annotations, margin: { l: 70, r: 16, t: 10, b: 60 },
+      legend: insideLegend(c, { x: 0.02, xanchor: "left", y: 0.98, yanchor: "top", font }),
+      legend2: { ...LEGEND, font },
       xaxis: { ...ax, constrain: "domain" },
       yaxis: { ...ax, title: { text: "predicted " + g.axis }, scaleanchor: "x", scaleratio: 1, constrain: "domain" },
     });
     if (stale()) return;
     await drawChart(chart, traces, layout, `validation_${g.label.toLowerCase().replace(/[^a-z]+/g, "_")}`,
                     `measured (x) vs FDS (y) peaks, ${g.label} (${g.unit})`);
+    // the square axes are centred in the plot area, legends are placed on it: move both keys
+    // onto the axes actually drawn
+    const xd = chart._fullLayout.xaxis.domain, yd = chart._fullLayout.yaxis.domain;
+    if (xd[0] > 0.001 || yd[1] < 0.999)
+      await Plotly.relayout(chart, { "legend.x": xd[0] + 0.02 * (xd[1] - xd[0]), "legend.y": yd[1] - 0.02 * (yd[1] - yd[0]),
+                                     "legend2.x": xd[0], "legend2.y": yd[1] + 0.02 });
 
     title.replaceChildren(h("b", {}, "δ", h("sub", {}, g.sym), ` = ${stat.delta.text}`),
       ", σ", h("sub", {}, "M"), ` = ${stat.sigma_M.text}, σ`, h("sub", {}, "E"), ` = ${stat.sigma_E.text} (n = ${stat.n})`,
       stat.floored ? " · σM at its floor (= σE): not resolved from the data" : "");
-    note.textContent = "Text colour: 1:1 and ±2σE (dashed); red: δ and ±2σM (dotted). Hover a point for its sensor and series." +
+    note.textContent = "Hover a point for its sensor and series; select a legend entry to hide or show it." +
       (st.group === "Extinction" ? " Excluded: the co-located SICK beams (no extinction pair falls below the package's floor of " +
         `${val.signal_min.Extinction} 1/m).` : ` Excluded: measured rises below the signal floor of 1 K (${REF.secCfdResults}).`);
 
@@ -143,8 +157,14 @@ export async function render(root, { params, meta, load, setParams, views }) {
   return async () => {
     await update();
     const onTheme = () => update();
+    // the keys follow the axes: redraw once the width has settled
+    let timer = 0, width = chart.clientWidth;
+    const onResize = () => { clearTimeout(timer); timer = setTimeout(() => {
+      if (chart.clientWidth !== width) { width = chart.clientWidth; update(); } }, 250); };
     window.addEventListener("themechange", onTheme);
-    new MutationObserver((_, obs) => { if (!chart.isConnected) { window.removeEventListener("themechange", onTheme); obs.disconnect(); } })
+    window.addEventListener("resize", onResize);
+    new MutationObserver((_, obs) => { if (!chart.isConnected) {
+      window.removeEventListener("themechange", onTheme); window.removeEventListener("resize", onResize); obs.disconnect(); } })
       .observe(document.getElementById("main"), { childList: true });
   };
 }

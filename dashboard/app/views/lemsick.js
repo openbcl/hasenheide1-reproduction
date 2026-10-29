@@ -51,12 +51,13 @@ export async function render(root, { params, meta, load, setParams, views }) {
     if (stale()) return;
     const lemCol = Object.keys(d.columns).find(n => new RegExp(`^k_LEM\\d_${row.room}_z2\\.3_638nm`).test(n));
     const zeroed = name => { const y = d.columns[name], y0 = y[d.zero_index]; return y.map(v => v === null ? null : v - y0); };
-    const tr = (name, label, color, dash, width) => ({ x: d.t, y: zeroed(name), type: "scatter", mode: "lines", name: label,
-      line: { color, dash, width }, hovertemplate: `${label}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
+    const tr = (name, label, color, dash, width, rank) => ({ x: d.t, y: zeroed(name), type: "scatter", mode: "lines", name: label,
+      legendrank: rank, line: { color, dash, width }, hovertemplate: `${label}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
+    // drawn with the LEM on top, listed with the reference first
     const traces = [
-      tr(`k_SICK_${row.room}_z2.3_880nm_per_m`, "SICK at 880 nm (as measured)", c.sick, "dot", 1.2),
-      tr(`k_SICK_${row.room}_z2.3_638nm_per_m`, "SICK scaled to 638 nm", c.sick, "solid", 1.5),
-      tr(lemCol, "LEM at 638 nm", c.lem, "solid", 1.5),
+      tr(`k_SICK_${row.room}_z2.3_880nm_per_m`, "SICK at 880 nm (as measured)", c.sick, "dot", 1.2, 3),
+      tr(`k_SICK_${row.room}_z2.3_638nm_per_m`, "SICK scaled to 638 nm", c.sick, "solid", 1.5, 2),
+      tr(lemCol, "LEM at 638 nm", c.lem, "solid", 1.5, 1),
     ];
     await drawChart(chart, traces, baseLayout(c, {
       xaxis: { title: { text: "t / s" } }, yaxis: { title: { text: "k / m⁻¹" }, rangemode: "tozero" } }),
