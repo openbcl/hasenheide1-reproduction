@@ -311,6 +311,38 @@ literals rather than recomputed here, so a reproducer is not misled:
   batch (0.7179 kg/l at 15 °C, supplier's certificate of analysis), which reproduce the
   `h/D` ranges of Table 1.
 
+## Dashboard
+
+`dashboard/` is a static, interactive companion to the paper: the key result with its
+numbers, the apartment plan with the instruments, the extinction per room and height
+measured against FDS (Figures 4 and 6), the validation statistics (Figure 5), the LEM–SICK
+cross-check, the model inputs and the sensitivity study (Figure 3, Table 4, Figure 7), a
+test explorer for the per-test time series, and every number macro with its source. It
+shows what the paper and this package contain and derives nothing new.
+
+```bash
+python scripts/build_dashboard_data.py           # dashboard/data/*.json from the committed files
+python scripts/build_dashboard_data.py --check   # compare with the committed JSON, exit 1 on drift
+cd dashboard && python -m http.server            # then open http://localhost:8000
+```
+
+The builder (run_all target `dashboard_data`) reads only committed files and writes
+deterministic JSON; it stops if a number shown differs from its macro in `numbers.tex`, if a
+Table 4 value differs from the FDS input files, or if a curve differs from the file the
+paper figure is drawn from. The site needs no build step and makes no request to other
+servers (Plotly is vendored in `dashboard/vendor/`, MIT licence); it does not work from
+`file://`, since the browser then refuses to load the JSON files. Its Content-Security-Policy is a meta tag
+(GitHub Pages sets no custom headers), so it cannot forbid framing; the site changes nothing on a click, so this is
+accepted. The vendored library is loaded with a subresource-integrity hash (`dashboard/vendor/README.md`).
+
+Publishing: `.github/workflows/pages.yml` (on a push to the preview branch `dashboard`, or started by hand)
+checks the committed data with `--check`, stages `dashboard/` with `scripts/stage_dashboard.py` and publishes only
+that copy on GitHub Pages. Staging adds the commit as a version to every module, stylesheet and data reference, so
+browsers do not mix cached files of two releases, and points the repository links at that commit; a site built
+from any branch but `main` says on every page that it is a preview, not a release, and is not indexed. Pages has to be enabled once
+under Settings -> Pages -> Source: GitHub Actions, and the environment `github-pages` must allow the publishing
+branch.
+
 ## Versions
 
 - **v0.3.0** (unreleased) — follows the paper's next revision. NIST TN 2133 in the

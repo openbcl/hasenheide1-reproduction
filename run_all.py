@@ -376,6 +376,16 @@ TARGETS: list[Target] = [
         note="every macro recomputed from results/ and tables/ or listed as a documented "
              "literal; fails on any mismatch (run after the table targets)",
     ),
+    Target(
+        "dashboard_data", "figures",
+        "Data of the interactive dashboard (JSON + colour tokens) from the committed files",
+        "dashboard/data/**/*.json, dashboard/app/style_tokens.js",
+        cmd=_scripts(str(REPO / "scripts" / "build_dashboard_data.py")),
+        cwd=REPO / "scripts", committed=True,
+        requires=[P.REPO_ROOT / "numbers.tex", TIMESERIES],
+        note="deterministic; aborts if a key number differs from numbers.tex or a shipped curve "
+             "from the figure files (run after numbers_check); --check compares without writing",
+    ),
 ]
 
 BY_KEY = {t.key: t for t in TARGETS}

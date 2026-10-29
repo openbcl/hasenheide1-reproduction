@@ -1,0 +1,62 @@
+# Publishes the interactive dashboard (dashboard/) on GitHub Pages:
+# https://openbcl.github.io/hasenheide1-reproduction/
+#
+# Runs on every push to the preview branch "dashboard", or when started by hand (Actions ->
+# "Dashboard on GitHub Pages" -> Run workflow; GitHub offers that only once this file is on
+# main). Pages must be enabled once (Settings -> Pages -> Source: GitHub Actions), and the
+# environment github-pages must allow the publishing branch (Settings -> Environments ->
+# github-pages -> Deployment branches). Only the staged copy of dashboard/ is published,
+# never the rest of the repository. A site built from any branch but main says on every
+# page that it is a preview, not a release.
+name: Dashboard on GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dashboard]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read        # configure-pages reads the Pages settings
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install the pinned environment
+        run: pip install -r requirements.txt
+      - name: The committed dashboard data match the committed files
+        run: python scripts/build_dashboard_data.py --check
+      - name: Stage dashboard/ with a version on every file reference
+        run: |
+          preview=()
+          if [ "$GITHUB_REF_NAME" != "main" ]; then preview=(--preview "$GITHUB_REF_NAME"); fi
+          python scripts/stage_dashboard.py --out _site --version "${GITHUB_SHA::12}" --ref "$GITHUB_SHA" "${preview[@]}"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

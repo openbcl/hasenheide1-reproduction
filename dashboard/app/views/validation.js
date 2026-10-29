@@ -1,0 +1,151 @@
+// Validation: measured vs predicted peaks (Fig. 5) in the FDS Validation Guide convention.
+// Points, the pooled statistics and the per-series bias come from validation.json; the
+// printed values (delta, sigma_M, sigma_E) are the numbers.tex macros checked at build
+// time. Lines as in the paper: 1:1, delta, +-2 sigma_E about 1:1, +-2 sigma_M about delta.
+import { h, about, refChips, sourceLine, segmented, checks, table, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis } from "../util.js";
+import { REF } from "../paper_refs.js";
+import { TOKENS } from "../style_tokens.js";
+
+const GROUPS = [
+  { value: "Extinction", label: "Extinction", sym: "k", axis: "peak k at 638 nm / m⁻¹", log: true, range: [0.1, 1.4], unit: "1/m", fmt: 3,
+    ticks: [0.1, 0.2, 0.5, 1] },
+  { value: "Upper-layer T", label: "Upper-layer temperature", sym: "Tu", axis: "peak ΔTu / °C", log: true, range: [1, 100], unit: "°C", fmt: 1,
+    ticks: [1, 2, 5, 10, 20, 50, 100] },
+  { value: "Layer height", label: "Layer height", sym: "z", axis: "minimum zint / m", log: false, unit: "m", fmt: 2 },
+];
+// sensor names of the metric files, shortened for display
+const sensorName = s => s.replace(/^Extinction coefficient /, "").replace(/^Temp\. Tree (\d) \((.*)\)$/, "TC tree $1, $2")
+  .replace(/^Plume Impingement Temperature$/, "ceiling TC, F1").replace(/^(F\d) dT_u$/, "$1 upper layer").replace(/^(F\d) z_min$/, "$1 interface");
+const PLOTLY_SYMBOL = { circle: "circle-open", square: "square-open", "triangle-up": "triangle-up-open", diamond: "diamond-open" };
+
+export async function render(root, { params, meta, load, setParams, views }) {
+  const view = views.find(v => v.id === "validation");
+  const [val, Plotly] = await Promise.all([load("validation.json"), loadPlotly()]);
+  const repo = meta.citation.repository;
+  const label = Object.fromEntries(meta.series.map(s => [s.key, s.label]));
+  const st = { group: GROUPS.some(g => g.value === params.q) ? params.q : "Extinction", excluded: params.excl === "1" };
+
+  const controls = h("div", { class: "controls" });
+  const title = h("p", { class: "stat-line" });
+  const chart = h("div", { class: "chart square", role: "img", "aria-label": "measured versus predicted peak values" });
+  const note = h("p", { class: "chart-note", "aria-live": "polite" });
+  const tables = h("div");
+
+  root.append(
+    h("h1", {}, view.title), refChips(view, REF),
+    about("Peak values predicted by FDS against the measured ones, pooled over the three series: the bias factor δ " +
+      "(FDS / measured, estimated from the log ratios) and the relative model standard deviation σM in the convention " +
+      `of the FDS Validation Guide, with the experimental uncertainty σE (${REF.secCfdResults}, ${REF.figScatter}). The extinction statistic uses the LEM ` +
+      "positions only; the co-located SICK beams would count those positions twice."),
+    controls, title, chart, note, tables,
+    sourceLine(repo, ["results/validation/fds_metrics/"].concat(val.source.filter(s => !s.includes("<series>")))));
+
+  function drawControls() {
+    rebuild(controls,
+      segmented("Quantity", GROUPS, st.group, v => { st.group = v; update(); }),
+      checks("Show", [{ value: "excl", label: "Excluded pairs", checked: st.excluded,
+        title: "pairs outside the pooled statistic: the co-located SICK beams and measured temperature rises below 1 K" }],
+        (_, on) => { st.excluded = on; update(); }));
+  }
+
+  const update = latest(async stale => {
+    setParams({ q: st.group === "Extinction" ? null : st.group, excl: st.excluded ? "1" : null });
+    drawControls();
+    const c = themeColors();
+    const g = GROUPS.find(x => x.value === st.group);
+    const stat = val.pooled.find(p => p.group === st.group);
+    const pts = val.points.filter(p => p.group === st.group);
+    const inS = pts.filter(p => p.in_stat), outS = pts.filter(p => !p.in_stat && p.exp > 0 && p.sim > 0);
+
+    // axis range: as in the paper (fixed for the two log panels; the layer height padded
+    // by 40 % of the data span and snapped to 0.1)
+    let [lo, hi] = g.range || [];
+    if (!g.range) {
+      const v = inS.flatMap(p => [p.exp, p.sim]);
+      const mn = Math.min(...v), mx = Math.max(...v), pad = 0.4 * (mx - mn);
+      lo = Math.round((mn - pad) * 10) / 10; hi = Math.round((mx + pad) * 10) / 10;
+    }
+    const xs = g.log ? Array.from({ length: 50 }, (_, i) => lo * Math.pow(hi / lo, i / 49)) : [lo, hi];
+    const d = stat.delta.value, sm = stat.sigma_M.value, se = stat.sigma_E.value;
+    const line = (f, name, color, dash, width, show = false) => ({
+      x: xs, y: xs.map(f), type: "scatter", mode: "lines", name, showlegend: show, hoverinfo: "skip",
+      line: { color, dash, width } });
+    const traces = [
+      line(x => x, "1:1", c.fg, "solid", 1),
+      line(x => x * Math.exp(2 * se), "±2σE about 1:1", c.fg, "dash", 0.8, true),
+      line(x => x * Math.exp(-2 * se), "", c.fg, "dash", 0.8),
+      line(x => d * x, `δ = ${stat.delta.text}`, c.sick, "solid", 1.2, true),
+      line(x => d * x * Math.exp(2 * sm), "±2σM about δ", c.sick, "dot", 1.3, true),
+      line(x => d * x * Math.exp(-2 * sm), "", c.sick, "dot", 1.3),
+    ];
+    if (st.group === "Upper-layer T") {
+      // the paper shows all thermocouples faintly behind the upper-layer statistic
+      const all = val.points.filter(p => p.group === "Temperature" && p.in_stat);
+      const dT = val.pooled.find(p => p.group === "Temperature").delta.text;
+      traces.push({ x: all.map(p => p.exp), y: all.map(p => p.sim), type: "scatter", mode: "markers",
+        name: `all thermocouples (δT = ${dT})`, marker: { size: 5, color: rgba(c.muted, 0.35), line: { width: 0 } },
+        text: all.map(p => `${sensorName(p.sensor)}<br>${p.series}`), hovertemplate: "%{text}<br>measured %{x:.1f}, FDS %{y:.1f} °C<extra></extra>" });
+    }
+    if (st.excluded && outS.length) {
+      traces.push({ x: outS.map(p => p.exp), y: outS.map(p => p.sim), type: "scatter", mode: "markers", name: "excluded pairs",
+        marker: { symbol: "x-thin-open", size: 8, color: c.muted, line: { width: 1.3, color: c.muted } },
+        text: outS.map(p => `${sensorName(p.sensor)}<br>${p.series} · ${p.instrument === "SICK" ? "co-located SICK" : "below the signal floor"}`),   // temperature: 1 K (Section 3.3)
+        hovertemplate: `%{text}<br>measured %{x:.${g.fmt}f}, FDS %{y:.${g.fmt}f} ${g.unit}<extra></extra>` });
+    }
+    for (const s of meta.series) {
+      const sel = inS.filter(p => p.series === s.key), tok = TOKENS.series[s.style];
+      traces.push({ x: sel.map(p => p.exp), y: sel.map(p => p.sim), type: "scatter", mode: "markers", name: s.label,
+        marker: { symbol: PLOTLY_SYMBOL[tok.symbol], size: 10, color: vis(tok.color), line: { width: 1.6 } },
+        text: sel.map(p => sensorName(p.sensor)), customdata: sel.map(p => p.sim / p.exp),
+        hovertemplate: `%{text}<br>${s.key}<br>measured %{x:.${g.fmt}f}, FDS %{y:.${g.fmt}f} ${g.unit}<br>FDS / measured %{customdata:.2f}<extra></extra>` });
+    }
+    const annotations = [];
+    if (st.group === "Extinction") {
+      // the most discrepant pair, flagged in the paper
+      const j = inS.reduce((b, p, i) => p.sim / p.exp > inS[b].sim / inS[b].exp ? i : b, 0);
+      annotations.push({ x: Math.log10(inS[j].exp), y: Math.log10(inS[j].sim), text: `${inS[j].room}, z = ${inS[j].z} m`,
+        ax: -50, ay: -30, arrowcolor: c.muted, arrowwidth: 1, font: { size: 11, color: c.muted } });
+    }
+    const ax = { title: { text: "measured " + g.axis }, type: g.log ? "log" : "linear",
+                 range: g.log ? [Math.log10(lo), Math.log10(hi)] : [lo, hi], ...(g.ticks ? { tickvals: g.ticks } : {}) };
+    const layout = baseLayout(c, {
+      annotations, margin: { l: 70, r: 16, t: 10, b: 60 },
+      xaxis: { ...ax, constrain: "domain" },
+      yaxis: { ...ax, title: { text: "predicted " + g.axis }, scaleanchor: "x", scaleratio: 1, constrain: "domain" },
+    });
+    if (stale()) return;
+    await drawChart(chart, traces, layout, `validation_${g.label.toLowerCase().replace(/[^a-z]+/g, "_")}`,
+                    `measured (x) vs FDS (y) peaks, ${g.label} (${g.unit})`);
+
+    title.replaceChildren(h("b", {}, "δ", h("sub", {}, g.sym), ` = ${stat.delta.text}`),
+      ", σ", h("sub", {}, "M"), ` = ${stat.sigma_M.text}, σ`, h("sub", {}, "E"), ` = ${stat.sigma_E.text} (n = ${stat.n})`,
+      stat.floored ? " · σM at its floor (= σE): not resolved from the data" : "");
+    note.textContent = "Text colour: 1:1 and ±2σE (dashed); red: δ and ±2σM (dotted). Hover a point for its sensor and series." +
+      (st.group === "Extinction" ? " Excluded: the co-located SICK beams (no extinction pair falls below the package's floor of " +
+        `${val.signal_min.Extinction} 1/m).` : ` Excluded: measured rises below the signal floor of 1 K (${REF.secCfdResults}).`);
+
+    // per-series bias (extinction) and the pairs of this panel
+    const rows = pts.filter(p => p.exp > 0 && p.sim > 0).sort((a, b) => a.series.localeCompare(b.series) || a.sensor.localeCompare(b.sensor))
+      .map(p => [p.series, sensorName(p.sensor), p.exp.toFixed(g.fmt), p.sim.toFixed(g.fmt), (p.sim / p.exp).toFixed(2),
+                 p.in_stat ? "yes" : (p.instrument === "SICK" ? "no (co-located SICK)" : "no (below signal floor)")]);
+    tables.replaceChildren(...[
+      st.group === "Extinction" ? h("div", {},
+        h("h2", {}, "Bias per series"),
+        table({ caption: "Extinction bias factor δk per series (paper values)", header: ["Series", "", "δk", "n"], numeric: [2, 3],
+                rows: val.per_series.map(s => [s.series, label[s.series], s.delta.text, String(s.n)]) })) : null,
+      h("h2", {}, "Pairs"),
+      table({ caption: `Measured and predicted peaks, ${g.label.toLowerCase()} (${g.unit})`,
+              header: ["Series", "Sensor", "Measured", "FDS", "FDS / measured", "In the statistic"], numeric: [2, 3, 4], rows }),
+    ].filter(Boolean));
+  }, err => { note.textContent = `Could not draw the chart: ${err.message}`; });
+
+  drawControls();
+  return async () => {
+    await update();
+    const onTheme = () => update();
+    window.addEventListener("themechange", onTheme);
+    new MutationObserver((_, obs) => { if (!chart.isConnected) { window.removeEventListener("themechange", onTheme); obs.disconnect(); } })
+      .observe(document.getElementById("main"), { childList: true });
+  };
+}
+
