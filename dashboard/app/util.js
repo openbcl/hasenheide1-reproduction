@@ -230,11 +230,12 @@ export function chartCsv(gd, source) {
   for (const t of gd.data) {
     if (!t.name || t.hoverinfo === "skip" && !t.base) continue;
     const ys = t.y || [], xs = t.x || [];
+    const name = t.legendgrouptitle?.text ? `${t.legendgrouptitle.text}: ${t.name}` : t.name;   // grouped legends (explorer)
     for (let i = 0; i < Math.max(xs.length, ys.length); i++) {
       if (t.type === "bar") rows.push([t.name, ys[i], "", t.base[i], t.base[i] + xs[i], (t.customdata || [])[i] || ""]);
       else if (xs[i] !== null && xs[i] !== undefined) {
         const sd = t.meta === "sd" && ys[i] !== null && t.customdata[i] !== null ? t.customdata[i] : null;   // mean ± SD traces
-        rows.push([t.name, xs[i], ys[i] ?? "", sd === null ? "" : ys[i] - sd, sd === null ? "" : ys[i] + sd,
+        rows.push([name, xs[i], ys[i] ?? "", sd === null ? "" : ys[i] - sd, sd === null ? "" : ys[i] + sd,
                    (Array.isArray(t.text) ? t.text[i] : "") || ""]);
       }
     }

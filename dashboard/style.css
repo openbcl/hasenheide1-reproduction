@@ -44,6 +44,19 @@ h2 { font-size: 1.2rem; margin: 2rem 0 0.6rem; }
 h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
 p { margin: 0.5rem 0; }
 
+/* folded sections (overview): the heading is the toggle, a chevron shows the state */
+.folds { margin-top: 2rem; border-bottom: 1px solid var(--border); }
+details.fold { border-top: 1px solid var(--border); }
+details.fold > summary { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; padding: 12px 0; cursor: pointer; list-style: none; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before { content: ""; align-self: center; flex: none; width: 0.5em; height: 0.5em; margin: 0 4px 0 2px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); }
+details.fold[open] > summary::before { transform: rotate(45deg); }
+details.fold > summary h2 { margin: 0; font-size: 1.1rem; }
+details.fold > summary:hover h2 { color: var(--accent); }
+.fold-hint { font-size: 0.85rem; color: var(--muted); }
+details.fold[open] { padding-bottom: 1.2rem; }
+
 .skip { position: absolute; left: -999px; top: 0; background: var(--accent); color: var(--accent-fg); padding: 8px 12px; z-index: 10; }
 .skip:focus { left: 8px; top: 8px; }
 

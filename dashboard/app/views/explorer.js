@@ -54,7 +54,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const repo = meta.citation.repository;
   const st = { run: testId(meta, params.run) || meta.runs[0].run,
                group: GROUPS.some(g => g.value === params.g) ? params.g : "ext",
-               fds: params.fds !== "0", zero: params.zero !== "0", ch: params.ch || "" };
+               fds: params.fds !== "0", zero: params.zero !== "0", ch: params.ch || "",
+               tree: params.tree === "F2" ? "F2" : "F1", sick: params.sick === "1" };
 
   const controls = h("div", { class: "controls" });
   const chart = h("div", { class: "chart", role: "img", "aria-label": "time series of the selected test" });
@@ -62,8 +63,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const src = h("div");
   root.append(
     h("h1", {}, view.title), refChips(view, REF),
-    about("Every channel of one test as recorded, with the events logged during the test and, where one exists, the FDS " +
-      "device at the same position in the baseline run of its series. This view shows the package's time series; it is " +
+    about("Every channel of one test as recorded (the temperatures one thermocouple tree at a time, the SICK on request), " +
+      "with the events logged during the test and, where one exists, the FDS device at the same position in the baseline " +
+      "run of its series. This view shows the package's time series; it is " +
       "not a figure of the paper. Values are zeroed at t = 0 by default, as in the paper's comparisons; the FDS runs end " +
       "before the ventilation."),
     controls, chart, note, src);
@@ -74,26 +76,35 @@ export async function render(root, { params, meta, load, setParams, views }) {
 
   const update = latest(async stale => {
     const name = testName(meta, st.run);
-    setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null });
     const g = GROUPS.find(x => x.value === st.group);
     const canFds = !["mass", "alarm", "tau"].includes(g.value);
+    const optical = ["ext", "tau"].includes(g.value), temp = g.value === "temp";
+    // the plan links to single sensors: ch = exact column names or prefixes, comma-separated;
+    // such a selection overrides the tree and SICK choices
+    const pick = st.ch ? st.ch.split(",") : null;
+    setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null,
+                tree: temp && !pick && st.tree === "F2" ? "F2" : null, sick: optical && !pick && st.sick ? "1" : null });
     rebuild(controls, () => [
       h("fieldset", { class: "seg" }, h("legend", {}, "Test"), select),
       segmented("Channels", GROUPS, st.group, v => { st.group = v; st.ch = ""; update(); }),
+      temp && !pick ? segmented("Thermocouple tree", [{ value: "F1", label: "F1 · fire room, with ceiling TC" }, { value: "F2", label: "F2" }],
+                                st.tree, v => { st.tree = v; update(); }) : null,
       checks("Show", [
         { value: "zero", label: "Zeroed at t = 0", checked: st.zero },
+        ...(optical && !pick ? [{ value: "sick", label: "SICK", checked: st.sick,
+                                  title: "the SICK transmissometer (880 nm as measured and scaled to 638 nm)" }] : []),
         { value: "fds", label: "FDS at the same position", checked: st.fds && canFds, disabled: !canFds,
           title: canFds ? "FDS baseline device mapped in fds_channels.csv" : "no FDS device of the same quantity" },
-      ], (k, on) => { st[k] = on; update(); })]);
+      ], (k, on) => { st[k] = on; update(); })].filter(Boolean));
 
     const c = themeColors();
     const run = meta.runs.find(r => r.run === st.run);
     const d = await load(`ts/${st.run}.json`);
     if (stale()) return;
-    // the plan links to single sensors: ch = exact column names or prefixes, comma-separated
-    const pick = st.ch ? st.ch.split(",") : null;
-    const chans = meta.channels.filter(x => x.run === st.run && g.quantities.includes(x.quantity) &&
-                                            (!pick || pick.some(p => x.column === p || x.column.startsWith(p))));
+    const chosen = x => pick ? pick.some(p => x.column === p || x.column.startsWith(p))
+      : temp ? x.room === st.tree || (st.tree === "F1" && x.quantity.startsWith("ceiling"))
+      : !(optical && x.instrument === "SICK" && !st.sick);
+    const chans = meta.channels.filter(x => x.run === st.run && g.quantities.includes(x.quantity) && chosen(x));
     const shown = chans.filter(x => d.columns[x.column]);
     const fds = st.fds && canFds ? await load(`fds/${run.series}.json`) : null;
     if (stale()) return;
@@ -102,31 +113,26 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const pal = HEIGHT_C[document.documentElement.getAttribute("data-theme") ||
       (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")];
     const color = x => g.value === "temp" && x.z_m !== null ? pal[zs.indexOf(x.z_m) % pal.length] : vis(ROOM_C[x.room] || c.fg);
-    const dash = x => x.instrument === "SICK" ? (x.wavelength_nm === 880 ? "dot" : "dash")
-      : x.instrument === "LEM1" ? "dashdot" : (g.value === "temp" && x.room === "F2" ? "dash" : "solid");
+    const dash = x => x.instrument === "SICK" ? (x.wavelength_nm === 880 ? "dot" : "dash") : x.instrument === "LEM1" ? "dashdot" : "solid";
     const zero = (y, i0) => { const y0 = y[i0]; return st.zero && y0 !== null ? y.map(v => v === null ? null : v - y0) : y; };
 
-    // one legend entry per sensor; its FDS device shares the entry (legendgroup), so both hide
-    // together, and a second key above the plot tells the measured from the FDS lines
-    const traces = [];
+    // the legend in two groups, measured and FDS, each entry hiding or showing its own line
+    const MEAS = { legendgroup: "measured", legendgrouptitle: { text: "Measured" } };
+    const SIM = { legendgroup: "fds", legendgrouptitle: { text: "FDS baseline, same position" } };
+    const traces = [], fdsTraces = [];
     for (const x of shown) {
-      traces.push({ x: d.t, y: zero(d.columns[x.column], d.zero_index), type: "scatter", mode: "lines", name: keyLabel(x),
-        legendgroup: x.column, line: { color: color(x), dash: dash(x), width: 1.3 },
+      traces.push({ x: d.t, y: zero(d.columns[x.column], d.zero_index), type: "scatter", mode: "lines", name: keyLabel(x), ...MEAS,
+        line: { color: color(x), dash: dash(x), width: 1.3 },
         hovertemplate: `${label(x)}<br>t = %{x} s<br>%{y:.4g} ${g.unit}<extra>${x.column}</extra>` });
       const fc = fdsBy[x.column];
       if (fds && fc) {
         const i0 = fds.t.findIndex(t => t >= 0);
-        traces.push({ x: fds.t, y: zero(fds.columns[fc], i0), type: "scatter", mode: "lines", name: `FDS · ${keyLabel(x)}`,
-          legendgroup: x.column, showlegend: false,
+        fdsTraces.push({ x: fds.t, y: zero(fds.columns[fc], i0), type: "scatter", mode: "lines", name: keyLabel(x), ...SIM,
           line: { color: color(x), width: 2.6, dash: "longdash" },  // full colour (>= 3:1); long dashes are used by no measured line
           hovertemplate: `FDS ${fc}<br>t = %{x:.0f} s<br>%{y:.4g} ${g.unit}<extra></extra>` });
       }
     }
-    const withFds = traces.some(t => t.showlegend === false);
-    // dashes also tell measured channels apart (F2 tree, SICK), so the key names the line weight
-    if (withFds) for (const [name, line] of [["measured (thin)", { color: c.fg, width: 1.3 }],
-                                             ["FDS baseline at the same position (thick)", { color: c.fg, width: 2.6, dash: "longdash" }]])
-      traces.push({ x: [null], y: [null], type: "scatter", mode: "lines", name, line, legend: "legend2", hoverinfo: "skip" });
+    traces.push(...fdsTraces);
     const evs = meta.events.filter(e => e.run === st.run && EVENT[e.event]);
     const shapes = evs.map(e => ({ type: "line", xref: "x", yref: "paper", x0: e.t_s, x1: e.t_s, y0: 0, y1: 1,
                                    line: { color: c.muted, width: 1, dash: "dot" } }));
@@ -140,16 +146,18 @@ export async function render(root, { params, meta, load, setParams, views }) {
     // legend at the side on wide screens, below the chart on narrow ones
     const narrow = chart.clientWidth < 700;
     // the plot area stays 280 px high: the extra height is all legend room below the axis title
-    const keyTop = withFds ? 28 : 10;
-    const legendH = narrow ? 19 * shown.length + 40 : 0;
-    chart.style.height = narrow ? `${340 + keyTop + legendH}px` : "";
+    // rows of the legend: entries, group titles and the legend title; on wide screens the chart
+    // grows with a long legend instead of scrolling it
+    const rows = traces.length + (fdsTraces.length ? 3 : 2);
+    const legendH = narrow ? 19 * rows + 30 : 0;
+    chart.style.height = narrow ? `${340 + legendH}px` : "";
+    if (!narrow && 21 * rows + 90 > chart.clientHeight) chart.style.height = `${21 * rows + 90}px`;
     const title = { text: g.key, font: { size: 12, color: c.muted } };
+    const legend = { ...LEGEND, orientation: "v", yanchor: "top", tracegroupgap: 10, groupclick: "toggleitem", traceorder: "grouped", title,
+                     grouptitlefont: { size: 12, color: c.muted } };
     await drawChart(chart, traces, baseLayout(c, { shapes, annotations, hovermode: "closest",
-      // one entry per sensor, so no gap between the (one-trace) groups
-      legend: narrow ? { ...LEGEND, orientation: "v", x: 0, y: -65 / 280, yanchor: "top", tracegroupgap: 0, title }
-                     : { ...LEGEND, orientation: "v", x: 1.02, y: 1, yanchor: "top", tracegroupgap: 0, title },
-      legend2: { ...LEGEND, x: 0, y: 1, yanchor: "bottom", itemclick: false, itemdoubleclick: false, font: { size: 12, color: c.muted } },
-      margin: { l: 60, r: 10, t: keyTop, b: 50 + legendH },
+      legend: narrow ? { ...legend, x: 0, y: -65 / 280 } : { ...legend, x: 1.02, y: 1 },
+      margin: { l: 60, r: 10, t: 10, b: 50 + legendH },
       xaxis: { title: { text: "t / s (from the ignition reference)" } },
       yaxis: { title: { text: (st.zero && g.value !== "alarm" ? "Δ" : "") + g.axis } } }),
       `${name}_${g.value}`, `${name}, ${g.label} (${g.unit}), ${st.zero ? "zeroed at t = 0" : "as recorded"}; package data`);
@@ -157,7 +165,11 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const odd = chans.filter(x => x.status !== "ok");
     note.replaceChildren(
       ...(pick ? [h("p", {}, h("b", {}, "Selected in the plan: "), shown.length ? shown.map(label).join(", ") : "not recorded in this test",
-        " · ", h("button", { type: "button", class: "linklike", onclick: () => { st.ch = ""; update(); } }, "show all channels"))] : []),
+        " · ", h("button", { type: "button", class: "linklike", onclick: () => {
+          // keep the tree and the SICK of the plan's selection
+          if (temp && shown.length && shown.every(x => x.room === "F2")) st.tree = "F2";
+          if (optical && shown.some(x => x.instrument === "SICK")) st.sick = true;
+          st.ch = ""; update(); } }, "show all channels"))] : []),
       h("p", {}, `${name}: series ${run.series}, ${run.fuel_mass_g} g in the ${run.pan_mm} mm pan, ${run.date} at ${run.t0_local.slice(0, 5)}; ` +
         `${run.setup_text}; package file ${st.run}.csv. Burning ${run.burning_duration_s} s, ventilation from ${run.ventilation_start_s} s; record to ${d.cut_s} s ` +
         "(1 s before the logged end). The time axis starts at the full minute of ignition; the logged ignition follows " +
