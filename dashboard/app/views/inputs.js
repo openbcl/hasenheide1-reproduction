@@ -36,7 +36,7 @@ export async function render(root, { params, meta, load, views }) {
       "were measured on the same fuel in a furniture calorimeter, the mass-specific extinction coefficient follows from " +
       "a published correlation, the rest are FDS defaults or tabulated values."),
     table({ caption: `${REF.tabCfdParams}. Baseline fuel, combustion and smoke parameters (FDS keywords on &REAC; K_{m} on &SPEC)`,
-            header: inp.table4.header,
+            header: inp.table4.header, cls: "stack",
             rows: inp.table4.rows.map(r => [h("span", { class: "nowrap" }, sym(r[0])), h("code", {}, r[1]),
                                             h("span", { class: "nowrap" }, sym(r[2])), h("span", { class: "wrap wide" }, sym(r[3]))]) }),
     h("p", { class: "note" }, "Soot yield per series: ",
@@ -131,7 +131,7 @@ export async function render(root, { params, meta, load, views }) {
     // legend entry for the grey noise bands (drawn as shapes)
     traces.push({ type: "bar", orientation: "h", x: [null], y: [null], name: "run-to-run variability",
                   marker: { color: rgba(c.muted, 0.3) }, hoverinfo: "skip" });
-    const ticks = { tickvals: groups.map((_, gi) => ng - 1 - gi), ticktext: groups, range: [-0.6, ng - 0.4] };
+    const ticks = { tickvals: groups.map((_, gi) => ng - 1 - gi), ticktext: groups, range: [-0.6, ng - 0.4], zeroline: false };
     const axis2 = { gridcolor: c.border, linecolor: c.muted, tickcolor: c.muted, ticks: "outside", automargin: true };
     const lay = stacked
       ? { xaxis: { domain: [0, 1], anchor: "y", title: { text: `${QTY[0].short}: deviation / %` }, zeroline: true, zerolinecolor: c.muted },

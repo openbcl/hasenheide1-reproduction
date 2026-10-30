@@ -29,6 +29,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const repo = meta.citation.repository;
   const label = Object.fromEntries(meta.series.map(s => [s.key, s.label]));
   const st = { group: GROUPS.some(g => g.value === params.q) ? params.q : "Extinction", excluded: params.excl === "1" };
+  let notice = params.q && st.group !== params.q ? "Unknown quantity in the link; showing the extinction. " : "";
 
   const controls = h("div", { class: "controls" });
   const title = h("p", { class: "stat-line" });
@@ -143,13 +144,14 @@ export async function render(root, { params, meta, load, setParams, views }) {
     title.replaceChildren(h("b", {}, "δ", h("sub", {}, subNode(g.sub)), ` = ${stat.delta.text}`),
       ", σ", h("sub", {}, "M"), ` = ${stat.sigma_M.text}, σ`, h("sub", {}, "E"), ` = ${stat.sigma_E.text} (n = ${stat.n})`,
       ...(stat.floored ? [" · σ", h("sub", {}, "M"), " at its floor (= σ", h("sub", {}, "E"), "): not resolved from the data"] : []));
-    note.textContent = "Hover a point for its sensor and series; select a legend entry (mouse or touch) to hide or show it. " +
+    note.textContent = notice + "Hover a point for its sensor and series; select a legend entry (mouse or touch) to hide or show it. " +
       (st.group === "Extinction"
         ? "Excluded: the co-located SICK beams (no extinction pair falls below the package's floor of " +
           `${val.signal_min.Extinction} 1/m). Annotated: the most discrepant pair, discussed in ${REF.secDiscHeight}.`
         : outS.length ? `Excluded: ${outS.length} pair(s) below the signal floor (${REF.secCfdResults}).`
         : `No pair of this quantity is excluded (n = ${stat.n}).`);
     status.textContent = `${g.label}: bias factor ${stat.delta.text}, n = ${stat.n}.`;
+    notice = "";
 
     // per-series bias (extinction) and the pairs of this panel
     const rows = pts.filter(p => p.exp > 0 && p.sim > 0).sort((a, b) => a.series.localeCompare(b.series) || a.sensor.localeCompare(b.sensor))

@@ -252,7 +252,7 @@ export const PLAN_CAPTION = `Top view, oriented as in ${REF.figApartment} (corri
   `the paper's floor plan and section: ${REF.figS_floorPlan}), and a ` +
   "longitudinal section seen from the facade, aligned with it; heights to scale. Instruments at the positions of the " +
   "FDS input files; the ceiling thermocouple is drawn centred over the fire and the corridor alarm on the corridor axis " +
-  "(offsets of 1–3 cm), the F2 ceiling alarm, right beside the thermocouple tree, next to it, and the LEM and SICK beams " +
+  "(offsets of 1–3 cm), the F2 ceiling alarm, mounted right beside the thermocouple tree, a little apart from it, and the LEM and SICK beams " +
   `schematically as one pair per room; exact coordinates in ${REF.tabS_positions} and the FDS input files. ` +
   "Select any instrument to see its data: the LEM beams open the extinction, the SICK the LEM–SICK comparison, the " +
   "other sensors the test explorer, the fire the heat release rate.";

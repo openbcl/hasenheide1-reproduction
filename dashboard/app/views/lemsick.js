@@ -55,8 +55,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
     controls, chart, note, status, src,
     h("h2", {}, "Cross-check per test"),
     table({ caption: "SICK (scaled to 638 nm) against the co-located LEM, per test (as committed)",
-            header: ["Test", "Room", "Samples (1 Hz)", "Bias (%)", "Median |deviation| (%)", "RMS deviation (%)"], numeric: [2, 3, 4, 5],
-            rows: rows.map(r => [testName(meta, r.run), r.room, String(r.n), fmt(r.bias_pct, 1), fmt(r.median_abs_pct, 1), fmt(r.rms_pct, 1)]) }),
+            header: ["Test", "Room", "Bias (%)", "Median |deviation| (%)", "RMS deviation (%)", "Samples (1 Hz)"], numeric: [2, 3, 4, 5],
+            rows: rows.map(r => [testName(meta, r.run), r.room, fmt(r.bias_pct, 1), fmt(r.median_abs_pct, 1), fmt(r.rms_pct, 1), String(r.n)]) }),
     w ? h("p", { class: "note" }, `Exponent test over ${w.n} tests: median ${fmt(w.n_median, 3)}, interquartile range ` +
       `${fmt(w.lo, 3)}–${fmt(w.hi, 3)}, range ${fmt(w.n_min, 3)}–${fmt(w.n_max, 3)}.`) : null,
     sourceLine(repo, ls.source));

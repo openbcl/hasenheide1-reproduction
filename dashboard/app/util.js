@@ -88,9 +88,9 @@ const scrollFocus = typeof ResizeObserver === "function" ? new ResizeObserver(en
     if (w.scrollWidth > w.clientWidth + 1) w.setAttribute("tabindex", "0"); else w.removeAttribute("tabindex");
   }
 }) : null;
-export function table({ caption, header, rows, numeric = [] }) {
+export function table({ caption, header, rows, numeric = [], cls = null }) {
   const wrap = h("div", { class: "table-wrap", tabindex: scrollFocus ? null : "0", role: "region", "aria-label": caption || "table" },
-    h("table", {},
+    h("table", { class: cls },
       caption ? h("caption", {}, sym(caption)) : null,
       h("thead", {}, h("tr", {}, header.map((c, i) => h("th", { scope: "col", class: numeric.includes(i) ? "num" : null }, sym(c))))),
       h("tbody", {}, rows.map(r => h("tr", {}, r.map((c, i) => h("td", { class: numeric.includes(i) ? "num" : null }, sym(c))))))));

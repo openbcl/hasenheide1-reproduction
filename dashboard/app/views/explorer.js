@@ -73,10 +73,12 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const known = p => meta.channels.some(x => x.column === p || x.column.startsWith(p));
   const asked = params.ch ? params.ch.split(",").filter(Boolean) : [];
   const picked = asked.filter(known);
-  // default test: the first in the list; for a sensor picked in the plan, the first that recorded it
-  const recorded = id => meta.channels.some(x => x.run === id && x.status !== "excluded" &&
-                                              picked.some(p => x.column === p || x.column.startsWith(p)));
-  const st = { run: testId(meta, params.run) || (picked.length && order.find(recorded)) || order[0],
+  // default test: the first in the list; for sensors picked in the plan, the first test that
+  // recorded the most of them (a tree's heights were not all recorded in every test)
+  const recorded = id => meta.channels.filter(x => x.run === id && x.status !== "excluded" &&
+                                                picked.some(p => x.column === p || x.column.startsWith(p))).length;
+  const most = picked.length ? Math.max(...order.map(recorded)) : 0;
+  const st = { run: testId(meta, params.run) || (most && order.find(id => recorded(id) === most)) || order[0],
                group: GROUPS.some(g => g.value === params.g) ? params.g : "ext",
                fds: params.fds !== "0", zero: params.zero !== "0", ch: picked.join(","),
                tree: params.tree === "F2" ? "F2" : "F1", sick: params.sick === "1" };
@@ -107,6 +109,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const canFds = !["mass", "alarm", "tau"].includes(g.value);
     const optical = ["ext", "tau"].includes(g.value), temp = g.value === "temp", alarm = g.value === "alarm";
     const hasSick = meta.channels.some(x => x.run === st.run && x.instrument === "SICK" && x.status !== "excluded");
+    const run0 = () => meta.runs.find(r => r.run === st.run);
     // a selection from the plan overrides the tree and SICK choices
     const pick = st.ch ? st.ch.split(",") : null;
     setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null,
@@ -121,7 +124,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
         ...(alarm ? [] : [{ value: "zero", label: "Zeroed at t = 0", checked: st.zero }]),
         ...(optical && !pick ? [{ value: "sick", label: "SICK", checked: st.sick && hasSick, disabled: !hasSick,
                                   title: hasSick ? "the SICK transmissometer (880 nm as measured and scaled to 638 nm)"
-                                                 : "no valid SICK record in this test" }] : []),
+                                         : run0().pan_mm === 160 ? "no valid SICK record in this test" : "no SICK in the 220 mm tests" }] : []),
         { value: "fds", label: "FDS at the same position", checked: st.fds && canFds, disabled: !canFds,
           title: canFds ? "FDS baseline device mapped in fds_channels.csv" : "no FDS device of the same quantity" },
       ], (k, on) => { st[k] = on; update(); })].filter(Boolean));
@@ -192,7 +195,18 @@ export async function render(root, { params, meta, load, setParams, views }) {
       `${name}_${g.value}`, `${name}, ${g.label.toLowerCase()}${g.unit ? ` (${g.unit})` : ""}, ` +
       `${st.zero && !alarm ? "zeroed at t = 0" : "as recorded"}; package data`);
 
-    const odd = chans.filter(x => x.status !== "ok");
+    // remarks on channels: excluded ones, and a partial validity only where it cuts the record shown
+    const window = x => (/valid for t_s = (-?[\d.]+) to (-?[\d.]+) s/.exec(x.note || "") || []).slice(1).map(Number);
+    const odd = chans.filter(x => x.status === "excluded" || (x.status === "partial" &&
+      !(window(x).length === 2 && window(x)[0] <= d.t[0] && window(x)[1] >= d.cut_s)));
+    // a thermocouple tree with fewer heights in this test than in others
+    const treeHeights = room => new Set(meta.channels.filter(x => x.quantity === "gas temperature" && x.room === room).map(x => x.z_m)).size;
+    const treeNote = temp && !pick ? (() => {
+      const n = shown.filter(x => x.quantity === "gas temperature").length, all = treeHeights(st.tree);
+      return n < all ? `Tree ${st.tree}: ${n} of ${all} heights recorded in this test.` : "";
+    })() : pick && temp && shown.length && shown.every(x => x.quantity === "gas temperature") &&
+           shown.length < treeHeights(shown[0].room) && pick.every(p => p.endsWith("_"))
+      ? `Tree ${shown[0].room}: ${shown.length} of ${treeHeights(shown[0].room)} heights recorded in this test.` : "";
     const ign = evs.find(e => e.event === "ignition");
     note.replaceChildren(
       ...(notice ? [h("p", {}, notice)] : []),
@@ -206,7 +220,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
         `${run.setup_text}; package file ${st.run}.csv. Flame-out ${run.burning_duration_s} s after ignition (t`, h("sub", {}, "flameout"),
         `, as in ${REF.tabExperiments}), ventilation from ${run.ventilation_start_s} s; record to ${d.cut_s} s (1 s before the logged end). ` +
         (ign ? `The logged ignition follows t = 0 by ${ign.t_s} s.` : "")),
-      ...odd.map(x => h("p", {}, `${x.column}: ${x.status}${x.note ? ` (${x.note})` : ""}.`)));
+      ...(treeNote ? [h("p", {}, treeNote)] : []),
+      ...(odd.length ? [h("p", {}, "Channels: " + odd.map(x => `${keyLabel(x)} ${x.status}${x.note ? ` (${x.note})` : ""}`).join("; ") + ".")] : []));
     status.textContent = `Showing ${name}, ${g.label.toLowerCase()}${temp && !pick ? `, tree ${st.tree}` : ""}: ${shown.length} channel(s).`;
     src.replaceChildren(sourceLine(repo, [d.source, "results/measurement/timeseries/channels.csv", "results/measurement/timeseries/events.csv"]
       .concat(fds ? [fds.source[0], "results/simulation/timeseries/fds_channels.csv"] : [])));

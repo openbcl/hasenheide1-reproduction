@@ -41,8 +41,10 @@ export async function render(root, { params, meta, load, setParams, views }) {
   fixZ();
   // a deep link to a height not measured in that series and room is said, not silently replaced
   // (only a well-formed number is echoed: a link cannot put its own wording on the page)
-  let notice = /^\d+(\.\d+)?$/.test(params.z || "") && Number(params.z) !== st.z
-    ? `z = ${Number(params.z)} m was not measured in this series and room; showing ${st.z} m. ` : "";
+  let notice = (params.series && params.series !== st.series ? "Unknown series in the link; showing the first. " : "") +
+    (params.room && params.room !== st.room ? "Unknown room in the link; showing F1. " : "") +
+    (/^\d+(\.\d+)?$/.test(params.z || "") && Number(params.z) !== st.z
+      ? `z = ${Number(params.z)} m was not measured in this series and room; showing ${st.z} m. ` : "");
 
   const controls = h("div", { class: "controls" });
   const chart = h("div", { class: "chart", role: "img", "aria-label": "extinction coefficient over time" });
@@ -72,7 +74,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
           title: atCeiling ? "LEM series mean ± SD (paper)" : "the paper gives the series mean for the ceiling LEMs only" },
         { value: "tests", label: "Single tests", checked: st.layers.has("tests") || !atCeiling, disabled: !atCeiling },
         { value: "sick", label: "SICK", checked: st.layers.has("sick") && atCeiling && nSick > 0, disabled: !atCeiling || !nSick,
-          title: !atCeiling ? "the SICK was operated at 2.3 m" : nSick ? "SICK records scaled to 638 nm (paper)" : "no valid SICK record in this series and room" },
+          title: !atCeiling ? "the SICK was operated at 2.3 m" : nSick ? "SICK records scaled to 638 nm (paper)" : st.series.startsWith("Hep_160") ? "no valid SICK record in this series and room" : "no SICK in the 220 mm tests" },
         { value: "fds", label: "FDS", checked: st.layers.has("fds") },
       ], (k, on) => { on ? st.layers.add(k) : st.layers.delete(k); update(); }),
       segmented("Scale", [{ value: "lin", label: "linear" }, { value: "log", label: "log" }], st.log ? "log" : "lin",
