@@ -197,7 +197,7 @@ export const isDark = () => (document.documentElement.getAttribute("data-theme")
 // a JSON-able copy of the figure; in the dark theme every dark colour is replaced by its
 // light counterpart in one pass (hex and the rgba() triplets), so replacements never chain.
 // The title names what the figure shows, so a saved image stands on its own.
-function printFigure(gd, title) {
+function printFigure(gd, title, width) {
   let json = JSON.stringify({ data: gd.data, layout: gd.layout });
   if (isDark()) {
     const dark = tokensFor("dark"), light = tokensFor("light"), hex = new Map(), rgb = new Map();
@@ -212,9 +212,11 @@ function printFigure(gd, title) {
   const fig = JSON.parse(json);
   fig.layout.paper_bgcolor = "#ffffff"; fig.layout.plot_bgcolor = "#ffffff";
   if (title) {
-    fig.layout.title = { text: title.replace(/; package data$/, ""), x: 0, xref: "paper", xanchor: "left", y: 1, yref: "container",
+    const lines = wrapTitle(title.replace(/; package data$/, ""), width);
+    fig.layout.title = { text: lines.join("<br>"), x: 0.012, xref: "container", xanchor: "left", y: 1, yref: "container",
                          yanchor: "top", pad: { t: 10 }, font: { size: 13, color: "#1d1f21" } };
-    fig.layout.margin = { ...(fig.layout.margin || {}), t: ((fig.layout.margin || {}).t ?? 10) + 34 };
+    // on top of the margin Plotly actually used (it grows the set margin for a legend above the plot)
+    fig.layout.margin = { ...(fig.layout.margin || {}), t: (gd._fullLayout._size?.t ?? (fig.layout.margin || {}).t ?? 10) + titleSpace(lines) };
   }
   return fig;
 }
@@ -226,9 +228,25 @@ function saveBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+// the export title, broken into lines that fit the figure (about 7 px per character at 13 px;
+// Plotly markup such as <sub> does not count)
+function wrapTitle(text, width) {
+  const per = Math.max(30, Math.floor((width - 24) / 7)), out = [];
+  // "n = 6", "z = 2.3 m" stay on one line (no-break spaces around "=" and before a unit)
+  text = text.replace(/ = /g, "\u00a0=\u00a0").replace(/(\d) (m|s|%)\b/g, "$1\u00a0$2");
+  for (const word of text.split(" ")) {
+    const last = out[out.length - 1], len = s => s.replace(/<[^>]+>/g, "").length;
+    if (last !== undefined && len(last) + 1 + len(word) <= per) out[out.length - 1] = `${last} ${word}`;
+    else out.push(word);
+  }
+  return out;
+}
+const titleSpace = lines => 22 + 18 * lines.length;   // pad and line height, clear of a legend above the plot
+
 export async function exportImage(gd, format, filename, title) {
-  const fig = printFigure(gd, title), full = gd._fullLayout;
-  const url = await window.Plotly.toImage(fig, { format, width: full.width, height: full.height + (title ? 34 : 0),
+  const full = gd._fullLayout, fig = printFigure(gd, title, full.width);
+  const extra = title ? titleSpace(wrapTitle(title.replace(/; package data$/, ""), full.width)) : 0;
+  const url = await window.Plotly.toImage(fig, { format, width: full.width, height: full.height + extra,
                                                  scale: format === "png" ? 2 : 1 });
   saveBlob(dataUrlToBlob(url), `${filename}.${format}`);
 }
@@ -345,6 +363,8 @@ export async function drawChart(el, traces, layout, filename, source) {
   let bar = el.nextElementSibling;
   if (!bar || !bar.classList.contains("chart-downloads")) { bar = h("p", { class: "downloads chart-downloads" }); el.after(bar); }
   const b = (label, title, fn) => h("button", { type: "button", class: "linklike", title, onclick: fn }, label);
+  // nothing to download from an empty chart
+  bar.hidden = !traces.some(t => (t.x || []).some(v => v !== null && v !== undefined));
   bar.replaceChildren("Download: ",
     b("PNG", "image in print colours", () => exportImage(el, "png", filename, source)), " · ",
     b("SVG", "vector image in print colours", () => exportImage(el, "svg", filename, source)), " · ",

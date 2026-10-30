@@ -20,8 +20,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const byRoom = params.room && rows.find(r => r.room === params.room)?.run;
   const st = { run: runs.includes(asked) ? asked : byRoom || runs[0] };
   const notice = params.run && !runs.includes(asked)
-    ? (asked ? `${testName(meta, asked)} has no valid SICK record; showing ${testName(meta, st.run)}.`
-             : `Unknown test “${params.run}”; showing ${testName(meta, st.run)}.`) : "";
+    ? (asked ? `${testName(meta, asked)}: ${meta.runs.find(r => r.run === asked).setup_text.split(", ").slice(1).join(", ")}; ` +
+               `showing ${testName(meta, st.run)}.`
+             : `Unknown test in the link; showing ${testName(meta, st.run)}.`) : "";
 
   const controls = h("div", { class: "controls" });
   const chart = h("div", { class: "chart", role: "img", "aria-label": "LEM and SICK extinction over time" });

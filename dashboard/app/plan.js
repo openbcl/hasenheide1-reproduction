@@ -57,7 +57,7 @@ function instruments(geo) {
   const alarms = [];
   for (const d of dev.filter(d => d.id.startsWith("SD_") && d.measured))
     if (!alarms.some(a => a.column === d.measured)) {
-      // an alarm mounted next to a thermocouple tree (F2) is drawn beside it, not on it
+      // a ceiling alarm right beside a thermocouple tree (F2) is drawn next to it, not on it
       const t = trees[d.room], near = t && Math.hypot(t.x - d.coords[0], t.y - d.coords[1]) < 0.3;
       alarms.push({ room: d.room, x: d.room === "FC" ? fcX(geo.rooms.FC) : d.coords[0], y: near ? t.y - 0.32 : d.coords[1],
                     z: d.coords[2], column: d.measured });
@@ -121,7 +121,7 @@ export function planSvg(geo) {
     svg.append(link(explorer(`g=temp&ch=T_${room}_`), `Thermocouple tree, room ${room} (${t.tcs.length} heights): temperatures in the test explorer`,
                     hitC(t.y, t.x, 0.2), s("circle", { cx: t.y, cy: t.x, r: 0.13, class: "tree" })));
   if (ins.ceil) svg.append(link(explorer("g=temp&ch=T_ceiling_F1_C"), "Ceiling thermocouple above the fire, room F1: temperature in the test explorer",
-                                hitC(ins.ceil.coords[1], ins.ceil.coords[0], 0.12),
+                                null,
                                 s("circle", { cx: ins.ceil.coords[1], cy: ins.ceil.coords[0], r: 0.07, class: "ceiling" })));
   for (const a of ins.alarms)
     svg.append(link(explorer(`g=alarm&ch=${a.column}`), alarmLabel(a), hitC(a.y, a.x, 0.2), triangle(a.y, a.x, 0.15, "alarm")));
@@ -252,7 +252,7 @@ export const PLAN_CAPTION = `Top view, oriented as in ${REF.figApartment} (corri
   `the paper's floor plan and section: ${REF.figS_floorPlan}), and a ` +
   "longitudinal section seen from the facade, aligned with it; heights to scale. Instruments at the positions of the " +
   "FDS input files; the ceiling thermocouple is drawn centred over the fire and the corridor alarm on the corridor axis " +
-  "(offsets of 1–3 cm), the F2 alarm beside the thermocouple tree it is mounted next to, and the LEM and SICK beams " +
+  "(offsets of 1–3 cm), the F2 ceiling alarm, right beside the thermocouple tree, next to it, and the LEM and SICK beams " +
   `schematically as one pair per room; exact coordinates in ${REF.tabS_positions} and the FDS input files. ` +
   "Select any instrument to see its data: the LEM beams open the extinction, the SICK the LEM–SICK comparison, the " +
   "other sensors the test explorer, the fire the heat release rate.";

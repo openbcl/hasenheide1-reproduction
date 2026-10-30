@@ -123,7 +123,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
                  range: g.log ? [Math.log10(lo), Math.log10(hi)] : [lo, hi], ...(g.ticks ? { tickvals: g.ticks } : {}) };
     const font = { size: chart.clientWidth < 500 ? 11 : 12 };
     const layout = baseLayout(c, {
-      annotations, margin: { l: 70, r: 16, t: 10, b: 60 },
+      annotations, margin: { l: 70, r: 16, t: 10, b: 70 },
       legend: insideLegend(c, { x: 0.02, xanchor: "left", y: 0.98, yanchor: "top", font }),
       legend2: { ...LEGEND, font },
       xaxis: { ...ax, constrain: "domain" },
@@ -142,7 +142,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
 
     title.replaceChildren(h("b", {}, "δ", h("sub", {}, subNode(g.sub)), ` = ${stat.delta.text}`),
       ", σ", h("sub", {}, "M"), ` = ${stat.sigma_M.text}, σ`, h("sub", {}, "E"), ` = ${stat.sigma_E.text} (n = ${stat.n})`,
-      stat.floored ? [" · σ", h("sub", {}, "M"), " at its floor (= σ", h("sub", {}, "E"), "): not resolved from the data"] : "");
+      ...(stat.floored ? [" · σ", h("sub", {}, "M"), " at its floor (= σ", h("sub", {}, "E"), "): not resolved from the data"] : []));
     note.textContent = "Hover a point for its sensor and series; select a legend entry (mouse or touch) to hide or show it. " +
       (st.group === "Extinction"
         ? "Excluded: the co-located SICK beams (no extinction pair falls below the package's floor of " +

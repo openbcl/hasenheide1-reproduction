@@ -193,7 +193,7 @@ input.search { width: min(380px, 100%); padding: 6px 10px; }
 .contents { font-size: 0.9rem; color: var(--muted); margin: 10px 0 0; }
 td .wrap { white-space: normal; display: inline-block; min-width: 26ch; max-width: 46ch; overflow-wrap: anywhere; }
 td .wrap.wide { min-width: 34ch; max-width: 70ch; overflow-wrap: normal; }
-@media (max-width: 560px) { td .wrap, td .wrap.wide { min-width: 14ch; } }   /* phones: the next column stays in view */
+@media (max-width: 560px) { td .wrap { min-width: 14ch; } td .wrap.wide { min-width: 26ch; } }   /* phones: the next column stays in view */
 td .nowrap { white-space: nowrap; }
 .chart-note { font-size: 0.85rem; color: var(--muted); margin: 2px 0; }
 
@@ -228,7 +228,7 @@ td .nowrap { white-space: nowrap; }
 .plan a.dev:hover > :not(title):not(.hit), .plan a.dev:focus-visible > :not(title):not(.hit) { stroke: var(--accent); stroke-width: 0.05; }
 .plan a.dev:focus-visible > :not(title):not(.hit):not(.beam) { stroke-width: 0.11; }   /* keyboard focus: a clear halo */
 .plan a.dev:focus-visible .hit { fill: var(--accent); fill-opacity: 0.18; }
-.fig .hit { fill: transparent; stroke: none; pointer-events: all; }   /* larger target around small symbols */
+.fig .hit { fill: transparent; stroke: none; stroke-width: 0; pointer-events: fill; }   /* larger target around small symbols (its fill only) */
 .plan a.dev:hover .beam, .plan a.dev:focus-visible .beam { stroke: var(--accent); stroke-width: 0.17; }
 .plan a.dev:focus { outline: none; }
 .plan a.dev:focus-visible .beam { stroke: var(--accent); }

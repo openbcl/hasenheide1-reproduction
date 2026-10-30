@@ -2,7 +2,7 @@
 // grouped by quantity, with the logged events and, where fds_channels.csv maps one, the
 // FDS device at the same position. Values as committed; optionally zeroed at t = 0 (as
 // the paper's comparisons). Records end 1 s before the logged test_end.
-import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, baseLayout, latest, rebuild, drawChart, vis,
+import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis,
          EXTRA_THEME_PAIRS, testName, testId, LEGEND, isDark, onLeave } from "../util.js";
 import { REF } from "../paper_refs.js";
 
@@ -106,6 +106,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const g = GROUPS.find(x => x.value === st.group);
     const canFds = !["mass", "alarm", "tau"].includes(g.value);
     const optical = ["ext", "tau"].includes(g.value), temp = g.value === "temp", alarm = g.value === "alarm";
+    const hasSick = meta.channels.some(x => x.run === st.run && x.instrument === "SICK" && x.status !== "excluded");
     // a selection from the plan overrides the tree and SICK choices
     const pick = st.ch ? st.ch.split(",") : null;
     setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null,
@@ -118,8 +119,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
       checks("Show", [
         // zeroing means nothing for an on/off alarm state
         ...(alarm ? [] : [{ value: "zero", label: "Zeroed at t = 0", checked: st.zero }]),
-        ...(optical && !pick ? [{ value: "sick", label: "SICK", checked: st.sick,
-                                  title: "the SICK transmissometer (880 nm as measured and scaled to 638 nm)" }] : []),
+        ...(optical && !pick ? [{ value: "sick", label: "SICK", checked: st.sick && hasSick, disabled: !hasSick,
+                                  title: hasSick ? "the SICK transmissometer (880 nm as measured and scaled to 638 nm)"
+                                                 : "no valid SICK record in this test" }] : []),
         { value: "fds", label: "FDS at the same position", checked: st.fds && canFds, disabled: !canFds,
           title: canFds ? "FDS baseline device mapped in fds_channels.csv" : "no FDS device of the same quantity" },
       ], (k, on) => { st[k] = on; update(); })].filter(Boolean));
@@ -166,8 +168,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const evs = meta.events.filter(e => e.run === st.run && EVENT[e.event]);
     const shapes = evs.map(e => ({ type: "line", xref: "x", yref: "paper", x0: e.t_s, x1: e.t_s, y0: 0, y1: 1,
                                    line: { color: c.muted, width: 1, dash: "dot" } }));
+    // on a light panel, so a label stays readable where it crosses the curves
     const annotations = eventLabels(evs).map(l => ({ x: l.t0, y: 1, xref: "x", yref: "paper", text: l.names.join(" · "), textangle: -90,
-      showarrow: false, xanchor: "right", yanchor: "top", font: { size: 10, color: c.muted } }));
+      showarrow: false, xanchor: "right", yanchor: "top", font: { size: 10, color: c.muted }, bgcolor: rgba(c.panel, 0.85), borderpad: 1 }));
     // legend at the side on wide charts, below the chart on narrower ones (a side legend would
     // squeeze the plot); on wide screens the chart grows with a long legend instead of scrolling it
     const narrow = chart.clientWidth < 1000;
@@ -200,7 +203,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
           if (optical && shown.some(x => x.instrument === "SICK")) st.sick = true;
           st.ch = ""; update(); } }, "show all channels"))] : []),
       h("p", {}, `${name}: series ${run.series}, ${run.fuel_mass_g} g in the ${run.pan_mm} mm pan, ${run.date} at ${run.t0_local.slice(0, 5)}; ` +
-        `${run.setup_text}; package file ${st.run}.csv. Flame-out after ${run.burning_duration_s} s (t`, h("sub", {}, "flameout"),
+        `${run.setup_text}; package file ${st.run}.csv. Flame-out ${run.burning_duration_s} s after ignition (t`, h("sub", {}, "flameout"),
         `, as in ${REF.tabExperiments}), ventilation from ${run.ventilation_start_s} s; record to ${d.cut_s} s (1 s before the logged end). ` +
         (ign ? `The logged ignition follows t = 0 by ${ign.t_s} s.` : "")),
       ...odd.map(x => h("p", {}, `${x.column}: ${x.status}${x.note ? ` (${x.note})` : ""}.`)));
@@ -208,8 +211,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
     src.replaceChildren(sourceLine(repo, [d.source, "results/measurement/timeseries/channels.csv", "results/measurement/timeseries/events.csv"]
       .concat(fds ? [fds.source[0], "results/simulation/timeseries/fds_channels.csv"] : [])));
   }, err => {
-    // a failed load must not leave the previous test's chart under the new selection
+    // a failed load must not leave the previous test's chart (or its downloads) under the new selection
     window.Plotly.purge(chart);
+    if (chart.nextElementSibling?.classList.contains("chart-downloads")) chart.nextElementSibling.hidden = true;
     note.replaceChildren(h("p", {}, `Could not draw the chart: ${err.message}`));
   });
 

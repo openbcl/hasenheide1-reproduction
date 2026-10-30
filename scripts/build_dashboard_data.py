@@ -234,9 +234,12 @@ def test_names(runs: pd.DataFrame, ch: pd.DataFrame) -> pd.DataFrame:
         lem = c.loc[(c.instrument == "LEM1") & (c.room == "F2"), "z_m"].dropna().unique()
         sick = c.loc[c.instrument == "SICK", "room"].dropna().unique()
         assert len(lem) == 1 and len(sick) <= 1, f"{run}: setup not unique"
-        # the SICK only where the test has a valid SICK record (the paper: 160 mm tests only)
-        valid = (c.instrument == "SICK") & (c.status != "excluded")
-        return f"tripod LEM in F2 at {lem[0]:g} m, " + (f"SICK in {sick[0]}" if valid.any() else "no valid SICK record")
+        # the paper deploys the SICK in the 160 mm tests only; there, a test may lack a valid record
+        valid = ((c.instrument == "SICK") & (c.status != "excluded")).any()
+        pan = int(runs.loc[runs.run == run, "pan_mm"].iloc[0])
+        sick_text = (f"SICK in {sick[0]}" if valid else f"SICK in {sick[0]}, no valid record") if pan == 160 \
+            else "no SICK (deployed in the 160 mm tests only)"
+        return f"tripod LEM in F2 at {lem[0]:g} m, {sick_text}"
 
     runs = runs.assign(setup_text=runs.run.map(setup))
     return runs

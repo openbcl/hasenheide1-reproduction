@@ -72,7 +72,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
           title: atCeiling ? "LEM series mean ± SD (paper)" : "the paper gives the series mean for the ceiling LEMs only" },
         { value: "tests", label: "Single tests", checked: st.layers.has("tests") || !atCeiling, disabled: !atCeiling },
         { value: "sick", label: "SICK", checked: st.layers.has("sick") && atCeiling && nSick > 0, disabled: !atCeiling || !nSick,
-          title: !atCeiling ? "the SICK was operated at 2.3 m" : nSick ? "SICK tests scaled to 638 nm (paper)" : "no valid SICK record in this series and room" },
+          title: !atCeiling ? "the SICK was operated at 2.3 m" : nSick ? "SICK records scaled to 638 nm (paper)" : "no valid SICK record in this series and room" },
         { value: "fds", label: "FDS", checked: st.layers.has("fds") },
       ], (k, on) => { on ? st.layers.add(k) : st.layers.delete(k); update(); }),
       segmented("Scale", [{ value: "lin", label: "linear" }, { value: "log", label: "log" }], st.log ? "log" : "lin",
@@ -174,7 +174,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
       (mx.cut_s[st.series] < 1500 ? ` The measured curves end at ${mx.cut_s[st.series]} s, 1 s before the earliest logged ` +
         "end of a test, as the time series do." : "");
     status.textContent = `Showing ${ser.label}, room ${st.room}, ${st.z} m.`;
-    srcBox.replaceChildren(sourceLine(repo, [...sources]));
+    srcBox.replaceChildren(...(sources.size ? [sourceLine(repo, [...sources])] : []));
     notice = "";
   }, err => { note.textContent = `Could not draw the chart: ${err.message}`; });
 
