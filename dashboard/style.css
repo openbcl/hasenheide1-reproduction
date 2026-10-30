@@ -46,7 +46,7 @@ p { margin: 0.5rem 0; }
 
 /* folded sections (overview): the heading is the toggle, a chevron shows the state */
 .folds { margin-top: 2rem; border-bottom: 1px solid var(--border); }
-details.fold { border-top: 1px solid var(--border); }
+details.fold { border-top: 1px solid var(--border); scroll-margin-top: calc(var(--topbar) + 8px); }
 details.fold > summary { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; padding: 12px 0; cursor: pointer; list-style: none; }
 details.fold > summary::-webkit-details-marker { display: none; }
 details.fold > summary::before { content: ""; align-self: center; flex: none; width: 0.5em; height: 0.5em; margin: 0 4px 0 2px;
@@ -254,6 +254,7 @@ a.glance-cell:hover { background: var(--code); }
 .glance-parity { display: block; width: 100%; max-width: 380px; height: auto; }
 .glance-plan, .glance-bars { display: block; width: 100%; height: auto; }
 .glance-instr { margin: 4px 0 0; }
+.glance-top > div { min-width: 0; }
 .glance-stat p { margin: 2px 0; }
 .glance-delta { font-size: clamp(2.1rem, 3vw + 1rem, 3.2rem); line-height: 1.05; color: var(--fds); }
 .glance-bars-title { margin: 0 0 4px; }
@@ -264,7 +265,7 @@ a.glance-cell:hover { background: var(--code); }
 .g-frame { fill: none; stroke: var(--muted); stroke-width: 1; }
 .g-tick, .g-note { font: 12px var(--font); fill: var(--muted); }
 .g-axis { font: 13px var(--font); fill: var(--fg); }
-.g-delta-label { font: 600 13px var(--font); fill: var(--fds); }
+.g-delta-label { font: 600 12px var(--font); fill: var(--fds); }
 .g-pt { fill: var(--fds); stroke: var(--bg); stroke-width: 1.2; }
 .g-room { stroke-width: 0.06; fill-opacity: 0.16; }
 .g-room-label { font: 700 0.5px var(--font); }

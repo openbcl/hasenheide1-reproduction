@@ -30,7 +30,7 @@ export function fmtBytes(n) {
 }
 
 export function repoLink(repo, path) {
-  return h("a", { href: `${repo}/blob/${REPO_REF}/${path}`, rel: "noopener" }, h("code", {}, path));
+  return h("a", { href: `${repo}/${path.endsWith("/") ? "tree" : "blob"}/${REPO_REF}/${path}`, rel: "noopener" }, h("code", {}, path));
 }
 
 // "Data: <path>, <path>" line under a view or figure.

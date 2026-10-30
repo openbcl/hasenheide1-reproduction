@@ -85,8 +85,10 @@ async function route() {
     const mounted = await mod.render(frag, { params, meta, load, setParams, views: VIEWS });
     if (token !== renderToken) return;
     main.replaceChildren(frag);
-    if (typeof mounted === "function") await mounted();   // e.g. charts that size to their container
+    // e.g. charts that size to their container; true when the view scrolled to a target
+    const placed = typeof mounted === "function" ? await mounted() : false;
     document.title = view.id === "start" ? "Hasenheide smoke extinction" : `${view.title} · Hasenheide smoke extinction`;
+    return placed === true;
   } catch (err) {
     console.error(err);
     main.replaceChildren(h("h1", {}, "Could not load this view"), h("p", {}, String(err.message || err)));
@@ -143,6 +145,7 @@ initTheme();
 initMenu();
 initSkip();
 window.addEventListener("hashchange", () => {
-  route().then(() => { window.scrollTo(0, 0); document.getElementById("main").focus({ preventScroll: true }); });
+  // a new view starts at the top, unless it scrolled to a target itself (#/start?open=...)
+  route().then(placed => { if (!placed) window.scrollTo(0, 0); document.getElementById("main").focus({ preventScroll: true }); });
 });
 route();

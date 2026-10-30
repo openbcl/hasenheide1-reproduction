@@ -35,9 +35,10 @@ function parity(g, delta) {
                     s("text", { x: P.l - 6, y: Y(t) + 4, class: "g-tick", "text-anchor": "end" }, t)]),
     s("text", { x: P.l + 8, y: P.t + 18, class: "g-note" }, "earlier corridor"),
     s("text", { x: P.l + 8, y: P.t + 33, class: "g-note" }, "validation: ×2–5"),
-    // labels clear of the points: 1:1 below its line near the top, delta_k above its line at the low end
+    // labels clear of the points: 1:1 below its line near the top, delta_k above its line at the
+    // low end, starting clear of the y axis and ending below the highest low pair
     s("text", { x: X(1.15) + 6, y: Y(1.15) + 16, class: "g-note", transform: `rotate(-45 ${X(1.15) + 6} ${Y(1.15) + 16})` }, "1:1"),
-    s("text", { x: X(0.105), y: Y(0.105 * delta) - 22, class: "g-delta-label", transform: `rotate(-45 ${X(0.105)} ${Y(0.105 * delta) - 22})` },
+    s("text", { x: X(0.117), y: Y(0.117 * delta) - 14, class: "g-delta-label", transform: `rotate(-45 ${X(0.117)} ${Y(0.117 * delta) - 14})` },
       "δ", s("tspan", { "baseline-shift": "sub", "font-size": "75%" }, "k"), ` = ${delta}`),
     g.pairs.map(p => s("circle", { cx: X(p.exp), cy: Y(p.sim), r: 4.2, class: "g-pt" },
       s("title", {}, `${p.series}, ${p.sensor.replace(/^Extinction coefficient /, "")}: measured ${p.exp.toFixed(3)}, FDS ${p.sim.toFixed(3)} 1/m`))),
@@ -117,11 +118,13 @@ export function glanceBlock(meta, geo) {
       h("a", { href: "#/validation", class: "glance-cell", title: `Validation (${REF.figScatter})` }, parity(g, delta)),
       h("div", { class: "glance-right" },
         h("div", { class: "glance-top" },
-          h("a", { href: "#/extinction", class: "glance-cell glance-plan-cell", title: "Extinction per room" },
-            miniPlan(geo),
-            h("p", { class: "glance-instr" }, h("b", {}, "638"), " / ", h("b", { class: "g-sick-text" }, "880 nm"),
+          h("div", {},
+            h("a", { href: "#/start?open=study", class: "glance-cell", title: "The apartment and its instruments (plan and section below)",
+                     onclick: toPlan }, miniPlan(geo)),
+            h("a", { href: "#/lemsick", class: "glance-cell glance-instr", title: `LEM vs SICK (${REF.secWavelength})` },
+              h("b", {}, "638"), " / ", h("b", { class: "g-sick-text" }, "880 nm"),
               ` transmissometers: bias ${minus(kn.valSickLemMeanBiasPct)} %`)),
-          h("div", { class: "glance-stat" },
+          h("a", { href: "#/validation", class: "glance-cell glance-stat", title: `Validation (${REF.figScatter})` },
             h("p", { class: "glance-delta" }, "δ", h("sub", {}, "k"), ` = ${delta}`),
             h("p", {}, "bias factor FDS / measured"),
             h("p", {}, "σ", h("sub", {}, "M"), ` = ${kn.valFdsSigmaMExtinction}   (σ`, h("sub", {}, "E"), ` = ${kn.valFdsSigmaEExtinction})`))),
@@ -129,6 +132,18 @@ export function glanceBlock(meta, geo) {
           h("p", { class: "glance-bars-title" }, "Change in predicted peak k – one input at a time, 75 g series"),
           bars(g)))),
     h("p", { class: "caption" }, "Key result at a glance, after the paper's graphical abstract. " +
-      `Select a panel for its view: the peak pairs (${REF.figScatter}), the rooms, the sensitivity (${REF.figTornado}). ` +
-      "Numbers from the dashboard data, checked against the paper when the dashboard is built."));
+      `Select a panel: the peak pairs and the bias factor open the validation (${REF.figScatter}), the plan opens the ` +
+      `apartment's plan and section below, the transmissometer line the LEM–SICK comparison, the bars the sensitivity ` +
+      `(${REF.figTornado}). Numbers from the dashboard data, checked against the paper when the dashboard is built.`));
+}
+
+// The mini plan opens the overview's folded plan and section and scrolls to it; its link
+// (#/start?open=study) does the same when opened directly.
+function toPlan(e) {
+  const d = document.getElementById("fold-study");
+  if (!d) return;
+  e.preventDefault();
+  d.open = true;
+  d.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  d.querySelector("summary").focus({ preventScroll: true });
 }

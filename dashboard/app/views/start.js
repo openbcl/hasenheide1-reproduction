@@ -6,7 +6,7 @@ import { PAPER, REF } from "../paper_refs.js";
 import { planSvg, sectionSvg, planLegend, exportFigure, PLAN_CAPTION } from "../plan.js";
 import { glanceBlock } from "../glance.js";
 
-export async function render(root, { meta, views, load }) {
+export async function render(root, { params, meta, views, load }) {
   const geo = await load("geometry.json");
   const top = planSvg(geo), side = sectionSvg(geo);
   const kn = Object.fromEntries(meta.key_numbers.map(k => [k.macro, k]));
@@ -85,6 +85,13 @@ export async function render(root, { meta, views, load }) {
     h("p", { class: "note" }, "The FDS runs cover the pre-ventilation phase only (900 s for Hep_160_075, 1200 s otherwise).")),
     ),
   );
+
+  // #/start?open=<section> opens that section and scrolls to it once the page is in place
+  const target = params.open && root.querySelector(`#fold-${CSS.escape(params.open)}`);
+  if (target) {
+    target.open = true;
+    return () => { target.scrollIntoView({ block: "start" }); return true; };
+  }
 }
 
 // A folded section: closed by default; whether a reader opened it is remembered for the
@@ -93,7 +100,7 @@ function fold(key, title, hint, ...body) {
   const id = `fold:${key}`;
   let open = false;
   try { open = sessionStorage.getItem(id) === "1"; } catch { /* storage blocked: start closed */ }
-  const d = h("details", { class: "fold", open },
+  const d = h("details", { class: "fold", id: `fold-${key}`, open },
     h("summary", {}, h("h2", {}, title), hint ? h("span", { class: "fold-hint" }, hint) : null), ...body);
   d.addEventListener("toggle", () => { try { sessionStorage.setItem(id, d.open ? "1" : "0"); } catch { /* ignore */ } });
   return d;

@@ -10,6 +10,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const [ls, Plotly] = await Promise.all([load("lemsick.json"), loadPlotly()]);
   const repo = meta.citation.repository;
   const k = ls.keys;
+  // tests in the order used everywhere else: by series (as Table 1), then in the order run
+  const order = meta.series.flatMap(s => s.runs);
+  ls.crosscheck.sort((a, b) => order.indexOf(a.run) - order.indexOf(b.run));
   const runs = ls.crosscheck.map(r => r.run);
   const asked = testId(meta, params.run);
   const st = { run: runs.includes(asked) ? asked : runs[0] };

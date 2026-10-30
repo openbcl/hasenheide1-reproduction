@@ -52,7 +52,11 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const view = views.find(v => v.id === "explorer");
   const Plotly = await loadPlotly();
   const repo = meta.citation.repository;
-  const st = { run: testId(meta, params.run) || meta.runs[0].run,
+  // default test: the first in the list; for a sensor picked in the plan, the first that recorded it
+  const order = meta.series.flatMap(s => s.runs), picked = params.ch ? params.ch.split(",") : null;
+  const recorded = id => meta.channels.some(x => x.run === id && x.status !== "excluded" &&
+                                              picked.some(p => x.column === p || x.column.startsWith(p)));
+  const st = { run: testId(meta, params.run) || (picked && order.find(recorded)) || order[0],
                group: GROUPS.some(g => g.value === params.g) ? params.g : "ext",
                fds: params.fds !== "0", zero: params.zero !== "0", ch: params.ch || "",
                tree: params.tree === "F2" ? "F2" : "F1", sick: params.sick === "1" };
@@ -155,7 +159,9 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const title = { text: g.key, font: { size: 12, color: c.muted } };
     const legend = { ...LEGEND, orientation: "v", yanchor: "top", tracegroupgap: 10, groupclick: "toggleitem", traceorder: "grouped", title,
                      grouptitlefont: { size: 12, color: c.muted } };
-    await drawChart(chart, traces, baseLayout(c, { shapes, annotations, hovermode: "closest",
+    // the height is set here, not measured by Plotly: a legend that grows from one entry to
+    // many would otherwise send its automatic margins round in circles
+    await drawChart(chart, traces, baseLayout(c, { shapes, annotations, hovermode: "closest", height: chart.clientHeight,
       legend: narrow ? { ...legend, x: 0, y: -65 / 280 } : { ...legend, x: 1.02, y: 1 },
       margin: { l: 60, r: 10, t: 10, b: 50 + legendH },
       xaxis: { title: { text: "t / s (from the ignition reference)" } },
