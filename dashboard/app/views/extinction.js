@@ -3,7 +3,7 @@
 // files of Fig. 4 (ext_lem.csv, ext_sick.csv), the FDS beam of Fig. 6 (ext_fds.csv, or
 // the FDS device file for the lower F2 heights), the single tests from the time series.
 // Measured values are zeroed at t = 0 as in the paper; nothing else is computed.
-import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, testName } from "../util.js";
+import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, testName, onLeave } from "../util.js";
 import { REF } from "../paper_refs.js";
 
 const ROOMS = [{ value: "F1", label: "F1 · fire room" }, { value: "F2", label: "F2" }, { value: "F3", label: "F3" }];
@@ -11,7 +11,7 @@ const LAYERS = ["mean", "tests", "sick", "fds"];
 
 export async function render(root, { params, meta, load, setParams, views }) {
   const view = views.find(v => v.id === "extinction");
-  const [mx, Plotly] = await Promise.all([load("matrices.json"), loadPlotly()]);
+  const [mx] = await Promise.all([load("matrices.json"), loadPlotly()]);
   const repo = meta.citation.repository;
   const series = meta.series;
 
@@ -33,7 +33,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
     log: params.y === "log",
   };
 
-  if (!st.layers.size) ["mean", "sick", "fds"].forEach(l => st.layers.add(l));   // default (also for invalid layers)
+  // default (also for invalid layers); layers=none keeps an empty selection across a reload
+  if (!st.layers.size && params.layers !== "none") ["mean", "sick", "fds"].forEach(l => st.layers.add(l));
 
   const heights = () => Object.keys(lemRuns[st.series]?.[st.room] || {}).map(Number).sort((a, b) => a - b);
   const fixZ = () => { const hs = heights(); if (!hs.includes(st.z)) st.z = hs.includes(2.3) ? 2.3 : hs[hs.length - 1]; };
@@ -45,16 +46,17 @@ export async function render(root, { params, meta, load, setParams, views }) {
 
   const controls = h("div", { class: "controls" });
   const chart = h("div", { class: "chart", role: "img", "aria-label": "extinction coefficient over time" });
-  const note = h("p", { class: "chart-note", "aria-live": "polite" });
+  const note = h("p", { class: "chart-note" });
+  const status = h("p", { class: "sr-only", "aria-live": "polite" });
   const srcBox = h("div");
 
   root.append(
     h("h1", {}, view.title), refChips(view, REF),
     about("The light-extinction coefficient k at 638 nm in the three rooms: the series mean ± SD of the LEM near the " +
-      `ceiling with the SICK runs scaled to 638 nm (${REF.figExtMeasured}), and the FDS beam at the same position ` +
+      `ceiling with the SICK records scaled to 638 nm (${REF.figExtMeasured}), and the FDS beam at the same position ` +
       `(${REF.figExtFds}). Measured values are zeroed at t = 0 as in the paper. The single tests and the lower F2 heights ` +
       "come from the per-test time series."),
-    controls, chart, note, srcBox);
+    controls, chart, note, status, srcBox);
 
   function drawControls() {
     const hs = heights();
@@ -70,7 +72,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
           title: atCeiling ? "LEM series mean ± SD (paper)" : "the paper gives the series mean for the ceiling LEMs only" },
         { value: "tests", label: "Single tests", checked: st.layers.has("tests") || !atCeiling, disabled: !atCeiling },
         { value: "sick", label: "SICK", checked: st.layers.has("sick") && atCeiling && nSick > 0, disabled: !atCeiling || !nSick,
-          title: !atCeiling ? "the SICK was operated at 2.3 m" : nSick ? "SICK runs scaled to 638 nm (paper)" : "no valid SICK record in this series and room" },
+          title: !atCeiling ? "the SICK was operated at 2.3 m" : nSick ? "SICK tests scaled to 638 nm (paper)" : "no valid SICK record in this series and room" },
         { value: "fds", label: "FDS", checked: st.layers.has("fds") },
       ], (k, on) => { on ? st.layers.add(k) : st.layers.delete(k); update(); }),
       segmented("Scale", [{ value: "lin", label: "linear" }, { value: "log", label: "log" }], st.log ? "log" : "lin",
@@ -81,21 +83,24 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const c = themeColors();
     const s = st.series, r = st.room, atCeiling = st.z === 2.3;
     const show = k => k === "tests" ? (st.layers.has("tests") || !atCeiling) : st.layers.has(k) && (k === "fds" || atCeiling);
-    const out = [], sources = new Set();
+    const out = [], sources = new Set(), missing = [];
     const metaRow = mx.ext_meta.find(m => m.series === s && m.room === r);
 
+    // each layer is drawn on its own: a file that fails to load leaves the others in place
     if (show("tests")) {
       const runs = lemRuns[s][r][st.z];
-      const data = await Promise.all(runs.map(x => load(`ts/${x.run}.json`)));
-      data.forEach((d, i) => {
-        const y = d.columns[runs[i].column], y0 = y[d.zero_index];
-        out.push({ x: d.t, y: y.map(v => v === null ? null : v - y0), type: "scatter", mode: "lines",
-                   name: testName(meta, runs[i].run), legendgroup: "tests", showlegend: i === 0, legendrank: 2,
-                   line: { color: rgba(c.lem, 0.45), width: 0.9 },
-                   hovertemplate: `${testName(meta, runs[i].run)}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
-        sources.add(d.source);
-      });
-      out[out.length - runs.length].name = `LEM single tests (n = ${runs.length})`;
+      try {
+        const data = await Promise.all(runs.map(x => load(`ts/${x.run}.json`)));
+        data.forEach((d, i) => {
+          const y = d.columns[runs[i].column], y0 = y[d.zero_index], name = testName(meta, runs[i].run);
+          // one legend entry for the group; the CSV names every test
+          out.push({ x: d.t, y: y.map(v => v === null ? null : v - y0), type: "scatter", mode: "lines",
+                     name: i === 0 ? `LEM single tests (n = ${runs.length})` : name, meta: { csv: `LEM ${name}` },
+                     legendgroup: "tests", showlegend: i === 0, legendrank: 2, line: { color: rgba(c.lem, 0.45), width: 0.9 },
+                     hovertemplate: `${name}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
+          sources.add(d.source);
+        });
+      } catch (err) { console.error(err); missing.push("the single tests"); }
     }
     if (show("mean")) {
       const m = mx.ext_lem[s][r];
@@ -113,28 +118,31 @@ export async function render(root, { params, meta, load, setParams, views }) {
       const runs = Object.entries(mx.ext_sick[s]?.[r] || {});
       runs.forEach(([run, d], i) => out.push({
         x: d.t, y: d.k, type: "scatter", mode: "lines", name: i === 0 ? `SICK, scaled to 638 nm (n = ${runs.length})` : testName(meta, run),
+        meta: { csv: `SICK ${testName(meta, run)}` },
         legendgroup: "sick", showlegend: i === 0, legendrank: 3, line: { color: rgba(c.sick, 0.7), width: 0.9 },
         hovertemplate: `SICK ${testName(meta, run)}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` }));
       if (runs.length) sources.add("results/validation/matrices/ext_sick.csv");
     }
     if (show("fds")) {
       let x, y;
-      if (atCeiling) { ({ t: x, k: y } = mx.ext_fds[s][r]); sources.add("results/validation/matrices/ext_fds.csv"); }
-      else {
-        const f = await load(`fds/${s}.json`);
-        x = f.t; y = f.columns[`LEM_LOS_${r}_${String(st.z).replace(".", "_")}_k`];
-        sources.add(f.source[0]);
-      }
-      out.push({ x, y, type: "scatter", mode: "lines", name: "FDS beam", legendrank: 4, line: { color: c.fds, width: 2 },
-                 hovertemplate: "FDS<br>t = %{x:.0f} s<br>k = %{y:.3f} 1/m<extra></extra>" });
+      try {
+        if (atCeiling) { ({ t: x, k: y } = mx.ext_fds[s][r]); sources.add("results/validation/matrices/ext_fds.csv"); }
+        else {
+          const f = await load(`fds/${s}.json`);
+          x = f.t; y = f.columns[`LEM_LOS_${r}_${String(st.z).replace(".", "_")}_k`];
+          sources.add(f.source[0]);
+        }
+        out.push({ x, y, type: "scatter", mode: "lines", name: "FDS beam", legendrank: 4, line: { color: c.fds, width: 2 },
+                   hovertemplate: "FDS<br>t = %{x:.0f} s<br>k = %{y:.3f} 1/m<extra></extra>" });
+      } catch (err) { console.error(err); missing.push("the FDS beam"); }
     }
-    return { out, sources, metaRow, c };
+    return { out, sources, metaRow, c, missing };
   }
 
   const update = latest(async stale => {
-    setParams({ series: st.series, room: st.room, z: st.z, layers: [...st.layers].join(","), y: st.log ? "log" : null });
+    setParams({ series: st.series, room: st.room, z: st.z, layers: [...st.layers].join(",") || "none", y: st.log ? "log" : null });
     drawControls();
-    const { out, sources, metaRow, c } = await traces();
+    const { out, sources, metaRow, c, missing } = await traces();
     if (stale()) return;                            // a newer selection is already being drawn
     const shapes = [], annotations = [];
     if (metaRow) {
@@ -154,15 +162,18 @@ export async function render(root, { params, meta, load, setParams, views }) {
       yaxis: { title: { text: "k at 638 nm / m⁻¹" }, type: st.log ? "log" : "linear", range: st.log ? [-3, 0.5] : [0, 1.3],
                ...(st.log ? { dtick: 1, exponentformat: "power" } : {}) },
     });
-    await drawChart(chart, out, layout, `extinction_${st.series}_${st.room}_z${st.z}m`,
-                    `extinction, ${st.series}, room ${st.room}, z = ${st.z} m, k at 638 nm in 1/m, zeroed at t = 0`);
     const ser = series.find(x => x.key === st.series);
-    note.textContent = notice + `${ser.key} (${ser.label}), room ${st.room}, z = ${st.z} m. ` +
+    await drawChart(chart, out, layout, `extinction_${st.series}_${st.room}_z${st.z}m`,
+                    `Extinction k at 638 nm (1/m), ${ser.key} (${ser.label}), room ${st.room}, z = ${st.z} m, zeroed at t = 0`);
+    note.textContent = notice + (out.length ? "" : "Nothing selected: choose what to show above. ") +
+      (missing.length ? `Could not load ${missing.join(" and ")}; the rest is shown. ` : "") +
+      `${ser.key} (${ser.label}), room ${st.room}, z = ${st.z} m. ` +
       (st.z === 2.3 ? "" : "The paper gives no series mean at this height; the tripod LEM was moved between setups. ") +
       "Shaded: ventilation phase from the mean ventilation start; dashed: mean flame-out (as in the paper). " +
-      `The FDS run ends at ${st.series === "Hep_160_075" ? 900 : 1200} s, before the ventilation.` +
+      `The FDS run covers the pre-ventilation phase only (to ${st.series === "Hep_160_075" ? 900 : 1200} s).` +
       (mx.cut_s[st.series] < 1500 ? ` The measured curves end at ${mx.cut_s[st.series]} s, 1 s before the earliest logged ` +
-        "end of a test, as the time series do (the last sample of the paper's figure file contains the instrument switch-off)." : "");
+        "end of a test, as the time series do." : "");
+    status.textContent = `Showing ${ser.label}, room ${st.room}, ${st.z} m.`;
     srcBox.replaceChildren(sourceLine(repo, [...sources]));
     notice = "";
   }, err => { note.textContent = `Could not draw the chart: ${err.message}`; });
@@ -173,7 +184,6 @@ export async function render(root, { params, meta, load, setParams, views }) {
     await update();
     const onTheme = () => update();
     window.addEventListener("themechange", onTheme);
-    new MutationObserver((_, obs) => { if (!chart.isConnected) { window.removeEventListener("themechange", onTheme); obs.disconnect(); } })
-      .observe(document.getElementById("main"), { childList: true });
+    onLeave(chart, () => window.removeEventListener("themechange", onTheme));
   };
 }

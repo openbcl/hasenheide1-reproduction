@@ -233,11 +233,12 @@ def test_names(runs: pd.DataFrame, ch: pd.DataFrame) -> pd.DataFrame:
         c = ch[ch.run == run]
         lem = c.loc[(c.instrument == "LEM1") & (c.room == "F2"), "z_m"].dropna().unique()
         sick = c.loc[c.instrument == "SICK", "room"].dropna().unique()
-        assert len(lem) == 1 and len(sick) == 1, f"{run}: setup not unique"
-        return f"tripod LEM in F2 at {lem[0]:g} m, SICK in {sick[0]}"
+        assert len(lem) == 1 and len(sick) <= 1, f"{run}: setup not unique"
+        # the SICK only where the test has a valid SICK record (the paper: 160 mm tests only)
+        valid = (c.instrument == "SICK") & (c.status != "excluded")
+        return f"tripod LEM in F2 at {lem[0]:g} m, " + (f"SICK in {sick[0]}" if valid.any() else "no valid SICK record")
 
     runs = runs.assign(setup_text=runs.run.map(setup))
-    assert runs.groupby("setup").setup_text.nunique().eq(1).all(), "one description per setup"
     return runs
 
 
@@ -616,23 +617,26 @@ def build_inputs(files: dict) -> None:
         "valCoreFuelSevenHcLo", "valCoreFuelSevenHcHi", "valCoreFuelSevenNhepPct", "valCoreFuelSevenMchPct",
         "valCoreFuelSevenDmcpPct", "valCoreFuelSevenIsoPct", "valCoreFuelSevenNaphLoPct",
         "valCoreFuelSevenNaphHiPct", "valCoreFuelSevenOpenPct", "valCoreFuelSevenFormulaHLo", "valCoreFuelSevenFormulaHHi",
-        "valSfpeYsCoreFuelSevenLo", "valSfpeYsCoreFuelSevenHi", "valRstConfigSpreadHhPct")}
+        "valSfpeYsCoreFuelSevenLo", "valSfpeYsCoreFuelSevenHi", "valRstConfigSpreadHhPct",
+        "valCoreHeatScaleFactor", "valCoreHeatScaleFactorErr")}
     t = lambda m: pn[m]["text"]  # noqa: E731
     # symbols with subscripts as X_{...} markup (rendered as <sub> by the site); provenance from Sections 2.4, 3.2, SM S3/S4
     table4 = {"header": ["Parameter", "FDS keyword", "Baseline value", "Where it comes from"], "rows": [
         ["Fuel surrogate", "FUEL", "'N-HEPTANE' (C_{7}H_{16})",
          f"FDS predefined single-species surrogate of the C7-UVCB fuel; its H/C ratio of 2.29 lies slightly above the "
-         f"batch's {t('valCoreFuelSevenHcLo')}–{t('valCoreFuelSevenHcHi')} (Section 3.2)"],
+         f"batch's {t('valCoreFuelSevenHcLo')}–{t('valCoreFuelSevenHcHi')} ({{REF:secCfdParams}})"],
         ["Soot yield Y_{s}", "SOOT_YIELD", f"{ys[SERIES[0]]['text']}–{ys[SERIES[1]]['text']} g/g",
          "measured photometrically in the furniture calorimeter on the same fuel batch; per series the mean of the two "
-         "runs with the same pan and charge (configuration-matched, Table S4)"],
+         "runs with the same pan and charge (configuration-matched, {REF:tabS_rst})"],
         ["Mass-specific extinction coefficient K_{m}", "MASS_EXTINCTION_COEFFICIENT", "7.566 m²/g",
          "Widmann correlation K_{m} = 4.8081 λ^{−1.0088} (λ in µm) at the 638 nm reference; the same correlation underlies "
-         "the photometric soot yield, so the absolute K_{m} cancels in the predicted extinction (Sections 3.2, 4.5)"],
+         "the photometric soot yield, so the absolute K_{m} cancels in the predicted extinction ({REF:secCfdParams}, {REF:secDiscKm})"],
         ["Effective heat of combustion ΔH_{ch}", "HEAT_OF_COMBUSTION", f"{dhc['text']} MJ/kg",
          f"furniture calorimeter, same fuel batch: mean of the {t('valRstDhchHhN')} runs of the first calorimeter series "
-         f"(Table S4; the second series' heat-release scale differs by a factor k, so it is not pooled); two-sided systematic of about {t('valCoreHeatSysLoPct').replace('-', '−')} to {t('valCoreHeatSysHiPct')} % from the "
-         "calorimeter's heat-release scale (Section 2.4)"],
+         f"({{REF:tabS_rst}}; the second series differs in its heat-release scale by the factor k = {t('valCoreHeatScaleFactor')} ± "
+         f"{t('valCoreHeatScaleFactorErr')}, so it is not pooled); two-sided systematic of about "
+         f"{t('valCoreHeatSysLoPct').replace('-', '−')} % (generic oxygen-consumption constant) to {t('valCoreHeatSysHiPct')} % "
+         "(scale of the calorimeter series) ({REF:secRst})"],
         ["Radiative fraction χ_{r}", "RADIATIVE_FRACTION", "0.40",
          "FDS default for n-heptane, representative of sooty pool fires at small scale (Beyler); 0.35 and 0.50 in the "
          "sensitivity study"],
@@ -640,7 +644,7 @@ def build_inputs(files: dict) -> None:
          "Tewarson's tabulated reference value; negligible direct effect on the optical field, not varied"]],
         "series": [{"series": s, "ys": ys[s]["text"]} for s in SERIES],
         "pooled": f"{t('valRstYsHh')} ± {t('valRstYsHhSd')} g/g (n = {t('valRstYsHhN')})",
-        "checks": "Y_{s} and ΔH_{ch} recomputed from Table S4 and K_{m} from the Widmann correlation; all values checked "
+        "checks": "Y_{s} and ΔH_{ch} recomputed from {REF:tabS_rst} and K_{m} from the Widmann correlation; all values checked "
                   "against the FDS input files and the paper's numbers"}
     fuel = {"table_s2": tex_table("tables/core_fuel_composition.tex"),
             "table_s4": tex_table("tables/rst_apartment_runs.tex"),
@@ -693,6 +697,10 @@ def build_glance(files: dict) -> dict:
                       "change of the predicted peak k for a pure n-heptane soot yield (%)", S, "start")
     yshi = key_number("valSensYsExtHiPct", float(sens.loc["ys049", "dk_mean_pct"]), "+.0f",
                       "change of the predicted peak k for a handbook-level soot yield (%)", S, "start")
+    # the handbook-level case as the graphical abstract labels it ("≈ 0.05 g/g"), from the case's yield
+    ys_case = float(re.fullmatch(r"\$Y_s=([0-9.]+)\$", sens.loc["ys049", "case"])[1])
+    ys_handbook = format(ys_case, ".2f")
+    assert ys_case == 0.049 and ys_handbook == "0.05", ys_case
     nb = sens[sens.group.isin(CGA_NUMERIC_BC_GROUPS) | sens.index.isin(CGA_DEPOSITION_PHYSICAL)]
     vals = nb[["dk_F1_pct", "dk_F2_pct", "dk_F3_pct"]].to_numpy(float)
     nb_lo, nb_hi = float(vals.min()), float(vals.max())
@@ -705,7 +713,7 @@ def build_glance(files: dict) -> dict:
     assert format(ratio, ".2f") == MACROS["valFdsExtMaxPairRatio"], ratio
     return {"pairs": [{k: p[k] for k in ("series", "sensor", "room", "z", "exp", "sim")} for p in pairs],
             "fuel": fuel["text"], "ys_hi": yshi["text"], "nb_lo": rnd(nb_lo), "nb_hi": rnd(nb_hi), "nb_text": hi["text"],
-            "ys_handbook": "0.05", "source": [S, "results/validation/fds_metrics/"]}
+            "ys_handbook": ys_handbook, "source": [S, "results/validation/fds_metrics/"]}
 
 
 # ----------------------------------------------------------------------------- meta / style

@@ -1,5 +1,5 @@
-// Data and numbers: every number macro of the paper with its source, then citation,
-// reproduction, downloads and checksums.
+// Data and numbers: how to cite and reproduce, every number macro of the package with its
+// source, the test names, the files with their checksums, privacy.
 import { h, about, table, fmtBytes, repoLink, viewHeader, segmented, REPO_REF } from "../util.js";
 import { PAPER, REF } from "../paper_refs.js";
 
@@ -17,14 +17,14 @@ export async function render(root, { params, meta, load, setParams, views }) {
 
   root.append(
     ...viewHeader(views.find(x => x.id === "data"), REF),
-    about("Every number macro of the paper (numbers.tex) with the file it comes from, and how to cite and regenerate " +
-      "everything. The table is the package's check of all macros (scripts/check_numbers.py): each value is recomputed " +
-      "and compared with numbers.tex, or listed as a documented input."),
+    about("How to cite and regenerate everything, and every number macro of the reproduction package (numbers.tex) with " +
+      "the file it comes from. The numbers table is the package's check of all macros (scripts/check_numbers.py): each " +
+      "value is recomputed and compared with numbers.tex, or listed as a documented input."),
 
-    h("h2", {}, "Numbers of the paper"),
-    numbersBlock(nums, params, setParams),
+    contents([["citing", "Citing"], ["reproduce", "Reproduce"], ["numbers", "Numbers"], ["tests", "Test names"],
+              ["files", "Files and checksums"], ["privacy", "Privacy"]]),
 
-    h("h2", {}, "Citing"),
+    h("h2", { id: "citing" }, "Citing"),
     h("p", {}, "Please cite both the paper and the reproduction package."),
     h("ul", {},
       h("li", {}, "Paper: ", h("i", {}, PAPER.title), `, ${PAPER.authors.replace(/\.$/, "")}. `, PAPER.doi
@@ -35,7 +35,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
     h("p", {}, "Licence: ", h("a", { href: "https://creativecommons.org/licenses/by/4.0/", rel: "noopener" }, "CC BY 4.0"),
       ", see ", repoLink(c.repository, "LICENSE"), "."),
 
-    h("h2", {}, "Reproduce"),
+    h("h2", { id: "reproduce" }, "Reproduce"),
     h("p", {}, "Python 3.12 with the pinned requirements; the figures need a LaTeX installation (see README)."),
     h("pre", {}, h("code", {}, [
       "pip install -r requirements.txt",
@@ -45,7 +45,10 @@ export async function render(root, { params, meta, load, setParams, views }) {
       "cd dashboard && python -m http.server   # view locally at http://localhost:8000",
     ].join("\n"))),
 
-    h("h2", {}, "Test names"),
+    h("h2", { id: "numbers" }, "Numbers (numbers.tex)"),
+    numbersBlock(nums, params, setParams),
+
+    h("h2", { id: "tests" }, "Test names"),
     h("p", { class: "note" }, "The dashboard names each test after its series, numbered in the order the tests were run. " +
       "The package files keep the ids of the test log, which count the repetitions within an instrument setup " +
       "(S1–S4: where the tripod LEM in F2 and the SICK stood)."),
@@ -58,7 +61,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
         r.date, r.t0_local.slice(0, 5), r.setup_text]),
     }),
 
-    h("h2", {}, "Files of this dashboard"),
+    h("h2", { id: "files" }, "Files of this dashboard"),
     h("p", { class: "note" }, "Sizes and checksums of every file below, and of every source file, are listed in ",
       h("a", { href: "data/manifest.json", download: "manifest.json" }, h("code", {}, "data/manifest.json")),
       ". The chart library is copied in rather than generated (",
@@ -81,9 +84,10 @@ export async function render(root, { params, meta, load, setParams, views }) {
                                   h("code", { title: s.sha256 }, s.sha256.slice(0, 16) + "…")]),
     }),
 
-    h("h2", {}, "Privacy"),
+    h("h2", { id: "privacy" }, "Privacy"),
     h("p", { class: "note" }, "This site loads nothing from other servers, sets no cookies and uses no analytics. " +
-      "A theme you choose is kept in your browser's local storage and never leaves it. The site is hosted on GitHub Pages; " +
+      "A theme you choose is kept in your browser's local storage, and which folded sections you opened in its session " +
+      "storage (cleared when the tab closes); neither leaves your browser. The site is hosted on GitHub Pages; " +
       "as any web host, GitHub processes the IP address of each visitor to deliver the pages (",
       h("a", { href: "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement", rel: "noopener" },
         "GitHub General Privacy Statement"), ")."),
@@ -100,7 +104,7 @@ function numbersBlock(nums, params, setParams) {
   const count = cls => nums.rows.filter(r => cls === "all" || r.cls === cls).length;
   const holder = h("div");
   const counter = h("p", { class: "chart-note", "aria-live": "polite" });   // one live region, its text changes
-  const input = h("input", { type: "search", value: st.q, placeholder: "Search macro, value or source", "aria-label": "Search the numbers",
+  const input = h("input", { type: "search", value: st.q, placeholder: "macro, value or source", "aria-label": "Search the numbers",
                              class: "search", oninput: e => { st.q = e.target.value; draw(); } });
   const seg = segmented("Class", ["all", ...Object.keys(CLASSES)].map(c => ({ value: c, label: `${c} (${count(c)})`,
                          title: CLASSES[c] || "all macros" })), st.cls, v => { st.cls = v; draw(); });
@@ -116,5 +120,14 @@ function numbersBlock(nums, params, setParams) {
               rows: rows.map(r => [h("code", {}, "\\" + r.macro), r.value, r.cls, h("span", { class: "wrap" }, r.source), r.status]) }));
   }
   draw();
-  return h("div", {}, h("div", { class: "controls" }, h("label", { class: "search-label" }, input), seg), counter, holder);
+  return h("div", {}, h("div", { class: "controls" }, h("label", { class: "search-label" }, h("span", {}, "Search"), input), seg),
+    counter, holder);
+}
+
+// a short list of the page's sections (the long numbers table sits in the middle)
+function contents(items) {
+  const go = id => () => { const t = document.getElementById(id); t.scrollIntoView({ block: "start" });
+                           t.setAttribute("tabindex", "-1"); t.focus({ preventScroll: true }); };
+  return h("nav", { class: "contents", "aria-label": "On this page" }, "On this page: ",
+    items.map(([id, label], i) => [i ? " · " : "", h("button", { type: "button", class: "linklike", onclick: go(id) }, label)]));
 }

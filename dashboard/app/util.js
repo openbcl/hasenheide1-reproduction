@@ -1,4 +1,5 @@
 // Small DOM and formatting helpers shared by the views.
+import { REF } from "./paper_refs.js";
 
 // Repository links for source files (the site itself serves only dashboard/).
 export const REPO_REF = "main";
@@ -61,9 +62,13 @@ export function about(text, ref) {
     h("h2", {}, "What this shows"), h("p", {}, text, ref ? ` (${ref})` : ""));
 }
 
+// Paper references written by the builder as {REF:key} take their numbers from paper_refs.js.
+export const refs = text => typeof text === "string" ? text.replace(/\{REF:(\w+)\}/g, (m, k) => REF[k] || m) : text;
+
 // Symbol markup of the builder: X_{...} -> X<sub>...</sub>, X^{...} -> X<sup>...</sup>
 // (formula symbols such as Y_{s}, ΔH_{ch}, C_{7}H_{16}, λ^{−1.0088}); other values pass through.
 export function sym(text) {
+  text = refs(text);
   if (typeof text !== "string" || !/[_^]\{/.test(text)) return text;
   const out = [], re = /([_^])\{([^}]*)\}/g;
   let last = 0, m;
@@ -76,12 +81,21 @@ export function sym(text) {
   return h("span", {}, out);
 }
 
+// A table scrolls sideways in its own region; that region takes the keyboard focus (so it
+// can be scrolled with the arrow keys) only while it is wider than the page
+const scrollFocus = typeof ResizeObserver === "function" ? new ResizeObserver(entries => {
+  for (const { target: w } of entries) {
+    if (w.scrollWidth > w.clientWidth + 1) w.setAttribute("tabindex", "0"); else w.removeAttribute("tabindex");
+  }
+}) : null;
 export function table({ caption, header, rows, numeric = [] }) {
-  return h("div", { class: "table-wrap", tabindex: "0", role: "region", "aria-label": caption || "table" },
+  const wrap = h("div", { class: "table-wrap", tabindex: scrollFocus ? null : "0", role: "region", "aria-label": caption || "table" },
     h("table", {},
       caption ? h("caption", {}, sym(caption)) : null,
       h("thead", {}, h("tr", {}, header.map((c, i) => h("th", { scope: "col", class: numeric.includes(i) ? "num" : null }, sym(c))))),
       h("tbody", {}, rows.map(r => h("tr", {}, r.map((c, i) => h("td", { class: numeric.includes(i) ? "num" : null }, sym(c))))))));
+  scrollFocus?.observe(wrap);
+  return wrap;
 }
 
 // ---------------------------------------------------------------- charts
@@ -139,7 +153,7 @@ export function baseLayout(c, extra = {}) {
 
 export const PLOT_CONFIG = {
   responsive: true, displaylogo: false,
-  modeBarButtonsToRemove: ["lasso2d", "select2d", "autoScale2d"],
+  modeBarButtonsToRemove: ["lasso2d", "select2d"],
   toImageButtonOptions: { format: "png", scale: 2 },
 };
 
@@ -177,12 +191,13 @@ function tokensFor(theme) {
 }
 const rgbOf = hex => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex); return m ? m.slice(1).map(x => parseInt(x, 16)).join(",") : null; };
 
-const isDark = () => (document.documentElement.getAttribute("data-theme") ||
+export const isDark = () => (document.documentElement.getAttribute("data-theme") ||
   (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
 
 // a JSON-able copy of the figure; in the dark theme every dark colour is replaced by its
-// light counterpart in one pass (hex and the rgba() triplets), so replacements never chain
-function printFigure(gd) {
+// light counterpart in one pass (hex and the rgba() triplets), so replacements never chain.
+// The title names what the figure shows, so a saved image stands on its own.
+function printFigure(gd, title) {
   let json = JSON.stringify({ data: gd.data, layout: gd.layout });
   if (isDark()) {
     const dark = tokensFor("dark"), light = tokensFor("light"), hex = new Map(), rgb = new Map();
@@ -196,6 +211,11 @@ function printFigure(gd) {
   }
   const fig = JSON.parse(json);
   fig.layout.paper_bgcolor = "#ffffff"; fig.layout.plot_bgcolor = "#ffffff";
+  if (title) {
+    fig.layout.title = { text: title.replace(/; package data$/, ""), x: 0, xref: "paper", xanchor: "left", y: 1, yref: "container",
+                         yanchor: "top", pad: { t: 10 }, font: { size: 13, color: "#1d1f21" } };
+    fig.layout.margin = { ...(fig.layout.margin || {}), t: ((fig.layout.margin || {}).t ?? 10) + 34 };
+  }
   return fig;
 }
 
@@ -206,9 +226,10 @@ function saveBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-export async function exportImage(gd, format, filename) {
-  const fig = printFigure(gd), full = gd._fullLayout;
-  const url = await window.Plotly.toImage(fig, { format, width: full.width, height: full.height, scale: format === "png" ? 2 : 1 });
+export async function exportImage(gd, format, filename, title) {
+  const fig = printFigure(gd, title), full = gd._fullLayout;
+  const url = await window.Plotly.toImage(fig, { format, width: full.width, height: full.height + (title ? 34 : 0),
+                                                 scale: format === "png" ? 2 : 1 });
   saveBlob(dataUrlToBlob(url), `${filename}.${format}`);
 }
 
@@ -224,24 +245,26 @@ function dataUrlToBlob(url) {
   return new Blob([decodeURIComponent(body)], { type });
 }
 
-// the plotted data in long format: one row per point of every named trace
+// the plotted data in long format: one row per point of every named trace; a trace may carry
+// its own CSV name in meta.csv (when its legend name stands for a whole group of lines);
+// bars (the tornado) give their two ends as low and high
 export function chartCsv(gd, source) {
-  const rows = [["trace", "x", "y", "y_low", "y_high", "label"]];
+  const rows = [["trace", "x", "y", "low", "high", "label"]];
   for (const t of gd.data) {
     if (!t.name || t.hoverinfo === "skip" && !t.base) continue;
-    const ys = t.y || [], xs = t.x || [];
-    const name = t.legendgrouptitle?.text ? `${t.legendgrouptitle.text}: ${t.name}` : t.name;   // grouped legends (explorer)
+    const ys = t.y || [], xs = t.x || [], m = t.meta && typeof t.meta === "object" ? t.meta : {};
+    const name = m.csv || (t.legendgrouptitle?.text ? `${t.legendgrouptitle.text}: ${t.name}` : t.name);   // grouped legends (explorer)
     for (let i = 0; i < Math.max(xs.length, ys.length); i++) {
-      if (t.type === "bar") rows.push([t.name, ys[i], "", t.base[i], t.base[i] + xs[i], (t.customdata || [])[i] || ""]);
+      if (t.type === "bar") rows.push([name, "", "", t.base[i], t.base[i] + xs[i], (t.customdata || [])[i] || ""]);
       else if (xs[i] !== null && xs[i] !== undefined) {
-        const sd = t.meta === "sd" && ys[i] !== null && t.customdata[i] !== null ? t.customdata[i] : null;   // mean ± SD traces
+        const sd = (t.meta === "sd" || m.sd) && ys[i] !== null && t.customdata[i] !== null ? t.customdata[i] : null;   // mean ± SD traces
         rows.push([name, xs[i], ys[i] ?? "", sd === null ? "" : ys[i] - sd, sd === null ? "" : ys[i] + sd,
                    (Array.isArray(t.text) ? t.text[i] : "") || ""]);
       }
     }
   }
-  const esc = v => { const s = String(v ?? "").replace(/<br>/g, "; "); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  return `# ${source}\n` + rows.map(r => r.map(esc).join(",")).join("\n") + "\n";
+  const esc = v => { const s = String(v ?? "").replace(/<br>/g, "; ").replace(/<[^>]+>/g, ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  return `# ${source.replace(/<[^>]+>/g, "")}\n` + rows.map(r => r.map(esc).join(",")).join("\n") + "\n";
 }
 
 // Plotly config with the download buttons: PNG and SVG (print theme) and the data as CSV
@@ -252,8 +275,8 @@ export function plotConfig(filename, source = "Hasenheide dashboard; data from t
     ...PLOT_CONFIG,
     modeBarButtonsToRemove: [...PLOT_CONFIG.modeBarButtonsToRemove, "toImage"],
     modeBarButtonsToAdd: [
-      btn("png", "Download as PNG (print colours)", P.Icons.camera, gd => exportImage(gd, "png", filename)),
-      btn("svg", "Download as SVG (print colours)", P.Icons.camera_retro || P.Icons.camera, gd => exportImage(gd, "svg", filename)),
+      btn("png", "Download as PNG (print colours)", P.Icons.camera, gd => exportImage(gd, "png", filename, source)),
+      btn("svg", "Download as SVG (print colours)", P.Icons.camera_retro || P.Icons.camera, gd => exportImage(gd, "svg", filename, source)),
       btn("csv", "Download the plotted data (CSV)", P.Icons.disk, gd => saveBlob(new Blob([chartCsv(gd, source)], { type: "text/csv" }), `${filename}.csv`)),
     ],
   };
@@ -311,18 +334,44 @@ export function rebuild(container, ...children) {
 // Colours below 3:1 against the light background are darkened there (WCAG 1.4.11): the
 // orange of plot_style.py (150 g series, room F2). The dark theme keeps the original.
 const LIGHT_DARKER = { "#ff7f0e": "#c25e00" };
+EXTRA_THEME_PAIRS.push(...Object.entries(LIGHT_DARKER));   // exports made in the dark theme use the light version too
 export function vis(hex) { return isDark() ? hex : (LIGHT_DARKER[String(hex).toLowerCase()] || hex); }
 
 // Draw a chart with keyboard-operable downloads below it (the Plotly toolbar is mouse-only)
 // and a text alternative naming its content.
 export async function drawChart(el, traces, layout, filename, source) {
   await window.Plotly.react(el, traces, layout, plotConfig(filename, source));
-  el.setAttribute("aria-label", `Chart: ${source}. The plotted data can be downloaded as CSV below the chart.`);
+  el.setAttribute("aria-label", `Chart: ${source.replace(/<[^>]+>/g, "")}. The plotted data can be downloaded as CSV below the chart.`);
   let bar = el.nextElementSibling;
   if (!bar || !bar.classList.contains("chart-downloads")) { bar = h("p", { class: "downloads chart-downloads" }); el.after(bar); }
   const b = (label, title, fn) => h("button", { type: "button", class: "linklike", title, onclick: fn }, label);
   bar.replaceChildren("Download: ",
-    b("PNG", "image in print colours", () => exportImage(el, "png", filename)), " · ",
-    b("SVG", "vector image in print colours", () => exportImage(el, "svg", filename)), " · ",
+    b("PNG", "image in print colours", () => exportImage(el, "png", filename, source)), " · ",
+    b("SVG", "vector image in print colours", () => exportImage(el, "svg", filename, source)), " · ",
     b("data (CSV)", "the plotted data", () => saveBlob(new Blob([chartCsv(el, source)], { type: "text/csv" }), `${filename}.csv`)));
+}
+
+// "−" for negative numbers in running text (the typographic minus)
+export const minus = s => String(s).replace(/^-/, "−");
+
+// Run `fn` once `el` has left the page (the router replaced the view): the views remove their
+// window listeners and pending timers here
+export function onLeave(el, fn) {
+  new MutationObserver((_, obs) => { if (!el.isConnected) { obs.disconnect(); fn(); } })
+    .observe(document.getElementById("main"), { childList: true });
+}
+
+// A folded section: closed by default; whether a reader opened it is remembered for the
+// session (in this browser only), so coming back to the view keeps it as it was. `level`
+// is the heading level of the title (2 on the overview, 3 inside a view's section).
+export function fold(key, title, hint, ...body) {
+  const level = typeof key === "object" ? key.level : 2;
+  key = typeof key === "object" ? key.key : key;
+  const id = `fold:${key}`;
+  let open = false;
+  try { open = sessionStorage.getItem(id) === "1"; } catch { /* storage blocked: start closed */ }
+  const d = h("details", { class: `fold${level === 3 ? " fold-3" : ""}`, id: `fold-${key}`, open },
+    h("summary", {}, h(`h${level}`, {}, title), hint ? h("span", { class: "fold-hint" }, hint) : null), ...body);
+  d.addEventListener("toggle", () => { try { sessionStorage.setItem(id, d.open ? "1" : "0"); } catch { /* ignore */ } });
+  return d;
 }

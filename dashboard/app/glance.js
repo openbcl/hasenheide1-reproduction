@@ -3,7 +3,7 @@
 // the 14 extinction peak pairs with 1:1, delta_k and the earlier corridor band (x2-5), a
 // schematic plan with the smoke path and the transmissometer pairs, the statistics, and the
 // change of the predicted peak k for three inputs (Fig. 7 cases, numbers checked at build time).
-import { h } from "./util.js";
+import { h, minus } from "./util.js";
 import { REF } from "./paper_refs.js";
 
 const NS = "http://www.w3.org/2000/svg";
@@ -13,7 +13,6 @@ function s(tag, attrs = {}, ...kids) {
   for (const c of kids.flat(Infinity)) if (c !== null && c !== undefined) el.append(c instanceof Node ? c : document.createTextNode(String(c)));
   return el;
 }
-const minus = t => String(t).replace(/^-/, "−");
 
 // parity plot, log-log 0.1-1.5 1/m
 function parity(g, delta) {
@@ -53,7 +52,7 @@ function miniPlan(geo) {
   const room = { F1: "g-f1", F2: "g-f2", FC: "g-fc", F3: "g-f3" };
   const yr = p => [Math.min(...p.map(q => q[1])), Math.max(...p.map(q => q[1]))];
   const len = Math.max(...Object.values(geo.rooms).flat().map(q => q[1]));
-  const svg = s("svg", { viewBox: "-0.3 -1.0 15.1 5.9", class: "glance-plan fig", role: "img",
+  const svg = s("svg", { viewBox: "-0.3 -1.3 15.1 6.2", class: "glance-plan fig", role: "img",
                          "aria-label": "Apartment top view: fire room F1, room F2, corridor FC and room F3, smoke path from F1 to F3" },
     s("defs", {}, s("marker", { id: "g-arrow", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 4, markerHeight: 4, orient: "auto-start-reverse" },
       s("path", { d: "M0,0 L10,5 L0,10 z", class: "g-arrowhead" }))));
@@ -96,7 +95,9 @@ function bars(g) {
   return h("ul", { class: "gbars" }, rows.map(r => {
     const l = pc(Math.min(r.a, r.b)), w = pc(Math.max(r.a, r.b)) - l;
     return h("li", { class: "gbar-row" },
-      h("span", { class: "gbar-label" }, r.label[0], r.label[1] ? h("sub", {}, r.label[1]) : null, r.label[2]),
+      // the value is drawn next to the bar; screen readers get it with the label
+      h("span", { class: "gbar-label" }, r.label[0], r.label[1] ? h("sub", {}, r.label[1]) : null, r.label[2],
+        h("span", { class: "sr-only" }, `: ${r.text}`)),
       h("span", { class: "gbar-track", "aria-hidden": "true" },
         h("span", { class: "gbar-zero", style: `left:${pc(0).toFixed(2)}%` }),
         h("span", { class: `gbar ${r.cls}`, style: `left:${l.toFixed(2)}%;width:${w.toFixed(2)}%` }),
@@ -128,7 +129,7 @@ export function glanceBlock(meta, geo) {
             h("p", { class: "glance-delta" }, "δ", h("sub", {}, "k"), ` = ${delta}`),
             h("p", {}, "bias factor FDS / measured"),
             h("p", {}, "σ", h("sub", {}, "M"), ` = ${kn.valFdsSigmaMExtinction}   (σ`, h("sub", {}, "E"), ` = ${kn.valFdsSigmaEExtinction})`))),
-        h("a", { href: "#/inputs", class: "glance-cell", title: `Sensitivity (${REF.figTornado})` },
+        h("a", { href: "#/inputs?sec=sensitivity", class: "glance-cell", title: `Sensitivity (${REF.figTornado})` },
           h("p", { class: "glance-bars-title" }, "Change in predicted peak k – one input at a time, 75 g series"),
           bars(g)))),
     h("p", { class: "caption" }, "Key result at a glance, after the paper's graphical abstract. " +

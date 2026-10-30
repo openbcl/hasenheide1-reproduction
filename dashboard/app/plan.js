@@ -21,10 +21,13 @@ const PAIR = 0.13;                                  // half spacing of the LEM/S
 const ROOM_LABEL = { F1: "F1 · fire room", F2: "F2", FC: "FC", F3: "F3" };
 const yRange = poly => [Math.min(...poly.map(p => p[1])), Math.max(...poly.map(p => p[1]))];
 
-// a linked instrument marker: <a> with tooltip, keyboard-focusable
-function link(href, label, ...shapes) {
-  return s("a", { href, class: "dev", "aria-label": label }, ...shapes, s("title", {}, label));
+// a linked instrument marker: <a> with tooltip, keyboard-focusable; `hit` is a transparent
+// shape under the symbol that enlarges the target for pointer and touch
+function link(href, label, hit, ...shapes) {
+  return s("a", { href, class: "dev", "aria-label": label }, hit, ...shapes, s("title", {}, label));
 }
+const hitC = (cx, cy, r) => s("circle", { cx, cy, r, class: "hit" });
+const hitR = (x, y, w, hh) => s("rect", { x, y, width: w, height: hh, class: "hit" });
 const explorer = q => `#/explorer?${q}`;
 
 // instruments from the device list of the baseline deck (positions shared by all series)
@@ -36,13 +39,14 @@ function instruments(geo) {
     if (d.id.startsWith("LEM")) b.lem.push(d.z); else b.sick = true;
     b.ys.push(d.coords[2]);
   }
-  for (const b of Object.values(beams)) {           // anchor: the mean of the room's beam positions
-    b.y = b.ys.reduce((a, v) => a + v, 0) / b.ys.length;
-    b.lem.sort((p, q) => p - q);
-  }
   const trees = {};
   for (const d of dev.filter(d => /^TC_F\d_/.test(d.id) && d.measured))
     (trees[d.room] ??= { x: d.coords[0], y: d.coords[1], tcs: [] }).tcs.push({ z: d.z, column: d.measured });
+  for (const [room, b] of Object.entries(beams)) {  // anchor: the mean of the room's beam positions,
+    b.y = b.ys.reduce((a, v) => a + v, 0) / b.ys.length;   // moved clear of a thermocouple tree (section)
+    if (trees[room] && Math.abs(b.y - trees[room].y) < 0.45) b.y = trees[room].y + 0.5;
+    b.lem.sort((p, q) => p - q);
+  }
   // drawn centred where the layout is centred (deck offsets of a grid cell or less): the
   // ceiling thermocouple over the pan (1.25 cm in x and y), the corridor alarm on the
   // corridor axis (2.5 cm); the room alarms stay at their deck positions next to the trees
@@ -52,14 +56,19 @@ function instruments(geo) {
   const fcX = poly => (Math.min(...poly.map(p => p[0])) + Math.max(...poly.map(p => p[0]))) / 2;
   const alarms = [];
   for (const d of dev.filter(d => d.id.startsWith("SD_") && d.measured))
-    if (!alarms.some(a => a.column === d.measured))
-      alarms.push({ room: d.room, x: d.room === "FC" ? fcX(geo.rooms.FC) : d.coords[0], y: d.coords[1], z: d.coords[2], column: d.measured });
+    if (!alarms.some(a => a.column === d.measured)) {
+      // an alarm mounted next to a thermocouple tree (F2) is drawn beside it, not on it
+      const t = trees[d.room], near = t && Math.hypot(t.x - d.coords[0], t.y - d.coords[1]) < 0.3;
+      alarms.push({ room: d.room, x: d.room === "FC" ? fcX(geo.rooms.FC) : d.coords[0], y: near ? t.y - 0.32 : d.coords[1],
+                    z: d.coords[2], column: d.measured });
+    }
   return { beams, trees, ceil, alarms };
 }
 
 const lemHref = (room, z) => `#/extinction?room=${room}&z=${z}`;
-const sickHref = room => `#/extinction?room=${room}&z=2.3&layers=mean,sick,fds`;
+const sickHref = room => `#/lemsick?room=${room}`;   // the SICK's own view: its tests in that room
 const alarmLabel = a => `Smoke alarm, ${a.room === "FC" ? "corridor FC" : "room " + a.room}: activation in the test explorer`;
+const fireLabel = `Pool fire: heat release rate (${REF.figHrr})`;
 
 function triangle(cx, cy, r, cls) {
   return s("polygon", { points: `${cx},${cy - r} ${cx + r},${cy + r * 0.8} ${cx - r},${cy + r * 0.8}`, class: cls });
@@ -71,7 +80,7 @@ function diamond(cx, cy, r, cls) {
 export function planSvg(geo) {
   const W = 0.06;
   const ins = instruments(geo);
-  const svg = s("svg", { viewBox: `${VIEW_X[0]} -0.75 ${VIEW_X[1]} 6.0`, class: "plan fig", role: "img",
+  const svg = s("svg", { viewBox: `${VIEW_X[0]} -0.75 ${VIEW_X[1]} 6.0`, class: "plan fig", role: "group",
                          "aria-label": "Top view of the apartment with rooms F1, F2, corridor FC and F3 and the instruments" });
   for (const poly of Object.values(geo.rooms))
     svg.append(s("polygon", { points: poly.map(([x, y]) => `${y},${x}`).join(" "), class: "room", "stroke-width": W }));
@@ -94,25 +103,28 @@ export function planSvg(geo) {
   }
   // platform scale and fire
   const [lx0, lx1, ly0, ly1] = geo.load_cell_xb, [px0, px1, py0, py1] = geo.pan_xb;
-  svg.append(link(explorer("g=mass"), "Platform scale under the fire: fuel mass in the test explorer",
+  svg.append(link(explorer("g=mass"), "Platform scale under the fire: fuel mass in the test explorer", null,
                   s("rect", { x: ly0, y: lx0, width: ly1 - ly0, height: lx1 - lx0, class: "scale" })));
-  svg.append(link("#/inputs", "Pool fire: heat release rate (Fig. 3)",
+  svg.append(link("#/inputs", fireLabel, null,
                   s("rect", { x: py0, y: px0, width: py1 - py0, height: px1 - px0, class: "fire" })));
   // schematic beam pairs: SICK towards F1, LEM towards F3, the same span in every room
   for (const [room, b] of Object.entries(ins.beams)) {
-    if (b.sick) svg.append(link(sickHref(room), `SICK beam, room ${room}, z = 2.3 m: extinction`,
+    if (b.sick) svg.append(link(sickHref(room), `SICK beam, room ${room}, z = 2.3 m: LEM vs SICK`,
+      hitR(b.y - PAIR - 0.12, BEAM_X[0] - 0.05, 0.24, BEAM_X[1] - BEAM_X[0] + 0.1),
       s("line", { x1: b.y - PAIR, y1: BEAM_X[0], x2: b.y - PAIR, y2: BEAM_X[1], class: "beam sick" })));
     if (b.lem.length) svg.append(link(lemHref(room, b.lem[b.lem.length - 1]),
       `LEM beam${b.lem.length > 1 ? "s" : ""}, room ${room}, z = ${b.lem.join(", ")} m: extinction`,
+      hitR(b.y + PAIR - 0.12, BEAM_X[0] - 0.05, 0.24, BEAM_X[1] - BEAM_X[0] + 0.1),
       s("line", { x1: b.y + PAIR, y1: BEAM_X[0], x2: b.y + PAIR, y2: BEAM_X[1], class: "beam lem" })));
   }
   for (const [room, t] of Object.entries(ins.trees))
     svg.append(link(explorer(`g=temp&ch=T_${room}_`), `Thermocouple tree, room ${room} (${t.tcs.length} heights): temperatures in the test explorer`,
-                    s("circle", { cx: t.y, cy: t.x, r: 0.13, class: "tree" })));
+                    hitC(t.y, t.x, 0.2), s("circle", { cx: t.y, cy: t.x, r: 0.13, class: "tree" })));
   if (ins.ceil) svg.append(link(explorer("g=temp&ch=T_ceiling_F1_C"), "Ceiling thermocouple above the fire, room F1: temperature in the test explorer",
+                                hitC(ins.ceil.coords[1], ins.ceil.coords[0], 0.12),
                                 s("circle", { cx: ins.ceil.coords[1], cy: ins.ceil.coords[0], r: 0.07, class: "ceiling" })));
   for (const a of ins.alarms)
-    svg.append(link(explorer(`g=alarm&ch=${a.column}`), alarmLabel(a), triangle(a.y, a.x, 0.15, "alarm")));
+    svg.append(link(explorer(`g=alarm&ch=${a.column}`), alarmLabel(a), hitC(a.y, a.x, 0.2), triangle(a.y, a.x, 0.15, "alarm")));
   svg.append(s("text", { x: -0.6, y: -0.45, class: "axis-note" }, "corridor side"),
              s("text", { x: -0.6, y: 4.95, class: "axis-note" }, "facade (windows)"));
   return svg;
@@ -122,7 +134,7 @@ export function planSvg(geo) {
 export function sectionSvg(geo) {
   const W = 0.06, Z = z => H - z;
   const ins = instruments(geo);
-  const svg = s("svg", { viewBox: `${VIEW_X[0]} -0.55 ${VIEW_X[1]} 3.45`, class: "plan fig section", role: "img",
+  const svg = s("svg", { viewBox: `${VIEW_X[0]} -0.55 ${VIEW_X[1]} 3.45`, class: "plan fig section", role: "group",
                          "aria-label": "Longitudinal section of the apartment with the instrument heights" });
   for (const [room, poly] of Object.entries(geo.rooms)) {
     const [ya, yb] = yRange(poly);
@@ -140,9 +152,9 @@ export function sectionSvg(geo) {
   for (const z of [0, 1, 2]) svg.append(s("text", { x: -0.12, y: Z(z) + 0.07, class: "axis-note", "text-anchor": "end" }, `${z} m`));
   // scale and fire
   const [, , ly0, ly1, lz0, lz1] = geo.load_cell_xb, [, , py0, py1, pz0, pz1] = geo.pan_xb;
-  svg.append(link(explorer("g=mass"), "Platform scale under the fire: fuel mass in the test explorer",
+  svg.append(link(explorer("g=mass"), "Platform scale under the fire: fuel mass in the test explorer", null,
                   s("rect", { x: ly0, y: Z(lz1), width: ly1 - ly0, height: lz1 - lz0, class: "scale" })));
-  svg.append(link("#/inputs", "Pool fire: heat release rate (Fig. 3)",
+  svg.append(link("#/inputs", fireLabel, null,
                   s("rect", { x: py0, y: Z(pz1), width: py1 - py0, height: pz1 - pz0, class: "fire" }),
                   s("path", { d: `M${py0 + 0.02},${Z(pz1)} Q${(py0 + py1) / 2},${Z(pz1 + 0.75)} ${py1 - 0.02},${Z(pz1)} Z`, class: "flame" })));
   // thermocouple trees: stem + one linked marker per height
@@ -150,22 +162,24 @@ export function sectionSvg(geo) {
     svg.append(s("line", { x1: t.y, y1: Z(0), x2: t.y, y2: Z(H), class: "stem" }));
     for (const tc of t.tcs)
       svg.append(link(explorer(`g=temp&ch=${tc.column}`), `Thermocouple, room ${room}, z = ${tc.z} m: temperature in the test explorer`,
-                      s("circle", { cx: t.y, cy: Z(tc.z), r: 0.065, class: "tree" })));
+                      hitC(t.y, Z(tc.z), 0.1), s("circle", { cx: t.y, cy: Z(tc.z), r: 0.065, class: "tree" })));
   }
   if (ins.ceil) svg.append(link(explorer("g=temp&ch=T_ceiling_F1_C"), "Ceiling thermocouple above the fire, room F1: temperature in the test explorer",
+                                hitC(ins.ceil.coords[1], Z(ins.ceil.coords[2]) + 0.05, 0.1),
                                 s("circle", { cx: ins.ceil.coords[1], cy: Z(ins.ceil.coords[2]) + 0.05, r: 0.05, class: "ceiling" })));
   // beams (perpendicular to the section): LEM diamond, SICK square, at the schematic pair positions
   for (const [room, b] of Object.entries(ins.beams)) {
     for (const z of b.lem)
-      svg.append(link(lemHref(room, z), `LEM beam, room ${room}, z = ${z} m: extinction`, diamond(b.y + PAIR, Z(z), 0.075, "lem-mark")));
+      svg.append(link(lemHref(room, z), `LEM beam, room ${room}, z = ${z} m: extinction`,
+                      hitC(b.y + PAIR, Z(z), 0.1), diamond(b.y + PAIR, Z(z), 0.075, "lem-mark")));
     if (b.sick) {
       const r = 0.06;
-      svg.append(link(sickHref(room), `SICK beam, room ${room}, z = 2.3 m: extinction`,
+      svg.append(link(sickHref(room), `SICK beam, room ${room}, z = 2.3 m: LEM vs SICK`, hitC(b.y - PAIR, Z(2.3), 0.1),
                       s("rect", { x: b.y - PAIR - r, y: Z(2.3) - r, width: 2 * r, height: 2 * r, class: "sick-mark" })));
     }
   }
   for (const a of ins.alarms)
-    svg.append(link(explorer(`g=alarm&ch=${a.column}`), alarmLabel(a), triangle(a.y, Z(a.z) + 0.04, 0.09, "alarm")));
+    svg.append(link(explorer(`g=alarm&ch=${a.column}`), alarmLabel(a), hitC(a.y, Z(a.z) + 0.04, 0.1), triangle(a.y, Z(a.z) + 0.04, 0.09, "alarm")));
   return svg;
 }
 
@@ -238,7 +252,7 @@ export const PLAN_CAPTION = `Top view, oriented as in ${REF.figApartment} (corri
   `the paper's floor plan and section: ${REF.figS_floorPlan}), and a ` +
   "longitudinal section seen from the facade, aligned with it; heights to scale. Instruments at the positions of the " +
   "FDS input files; the ceiling thermocouple is drawn centred over the fire and the corridor alarm on the corridor axis " +
-  "(offsets of 1–3 cm), and the LEM and SICK beams schematically as one pair per room; exact coordinates in " +
-  `${REF.tabS_positions} and the FDS input files. ` +
-  "Select any instrument to see its data: beams open the extinction, the other sensors the test explorer, the fire " +
-  "the heat release rate.";
+  "(offsets of 1–3 cm), the F2 alarm beside the thermocouple tree it is mounted next to, and the LEM and SICK beams " +
+  `schematically as one pair per room; exact coordinates in ${REF.tabS_positions} and the FDS input files. ` +
+  "Select any instrument to see its data: the LEM beams open the extinction, the SICK the LEM–SICK comparison, the " +
+  "other sensors the test explorer, the fire the heat release rate.";

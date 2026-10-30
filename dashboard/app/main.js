@@ -5,14 +5,14 @@ import { h } from "./util.js";
 // else stays in the Supplementary Material and the package (listed on the overview).
 // `refs` are keys of REF (paper_refs.js); `kind` is "paper" (shows paper figures and
 // tables) or "package" (package data without a paper figure). `module` is loaded on
-// first use; views without one are planned and listed greyed out.
+// first use; `blurb` may carry symbol markup (σ_{M}, see util.sym).
 export const VIEWS = [
   { id: "start", title: "Overview", module: "./views/start.js", kind: "paper", refs: ["tabExperiments", "tabAmbient", "figApartment"],
     blurb: "Key result, the apartment and its instruments, test series" },
   { id: "extinction", title: "Extinction", module: "./views/extinction.js", kind: "paper", refs: ["figExtMeasured", "figExtFds"],
     blurb: "Per room and height: single tests, series mean ± SD and the FDS beam" },
   { id: "validation", title: "Validation", module: "./views/validation.js", kind: "paper", refs: ["figScatter"],
-    blurb: "Measured vs predicted peaks, bias factor δ and model scatter σM, per sensor" },
+    blurb: "Measured vs predicted peaks, bias factor δ and model scatter σ_{M}, per sensor" },
   { id: "lemsick", title: "LEM vs SICK", module: "./views/lemsick.js", kind: "paper", refs: ["secWavelength", "secExpResults"],
     blurb: "The two co-located transmissometers, wavelength scaling, bias" },
   { id: "inputs", title: "Model inputs and sensitivity", module: "./views/inputs.js", kind: "paper", refs: ["figHrr", "tabCfdParams", "figTornado"],
@@ -58,9 +58,7 @@ function buildNav(current) {
   const nav = document.getElementById("nav");
   const list = h("ol");
   for (const v of VIEWS) {
-    list.append(h("li", {}, v.module
-      ? h("a", { href: `#/${v.id}`, "aria-current": v.id === current ? "page" : null }, v.title)
-      : h("span", { title: "planned" }, v.title, " ", h("small", {}, "(planned)"))));
+    list.append(h("li", {}, h("a", { href: `#/${v.id}`, "aria-current": v.id === current ? "page" : null }, v.title)));
   }
   nav.replaceChildren(list);
 }
@@ -78,6 +76,7 @@ async function route() {
   // release the charts of the previous view (resize listeners, data)
   main.querySelectorAll(".js-plotly-plot").forEach(el => window.Plotly && window.Plotly.purge(el));
   main.replaceChildren(h("p", { class: "loading" }, "Loading…"));
+  document.title = view.id === "start" ? "Hasenheide smoke extinction" : `${view.title} · Hasenheide smoke extinction`;
   try {
     const [mod, meta] = await Promise.all([import(view.module), load("meta.json")]);
     if (token !== renderToken) return;
@@ -87,11 +86,12 @@ async function route() {
     main.replaceChildren(frag);
     // e.g. charts that size to their container; true when the view scrolled to a target
     const placed = typeof mounted === "function" ? await mounted() : false;
-    document.title = view.id === "start" ? "Hasenheide smoke extinction" : `${view.title} · Hasenheide smoke extinction`;
     return placed === true;
   } catch (err) {
     console.error(err);
-    main.replaceChildren(h("h1", {}, "Could not load this view"), h("p", {}, String(err.message || err)));
+    if (token !== renderToken) return;
+    main.replaceChildren(h("h1", {}, "Could not load this view"), h("p", {}, String(err.message || err)),
+      h("p", {}, h("button", { type: "button", onclick: () => route() }, "Try again")));
   }
 }
 

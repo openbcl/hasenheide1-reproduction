@@ -17,7 +17,8 @@ export const REF = {
   secSick: "Section 2.3.2", secWavelength: "Section 2.3.4", secRst: "Section 2.4",
   secExpResults: "Section 2.5", secCfdMethod: "Section 3.1", secCfdParams: "Section 3.2",
   secCfdResults: "Section 3.3", secDiscExtinction: "Section 4.1", secDiscFuel: "Section 4.2",
-  secDiscTemperature: "Section 4.3", secDiscHeight: "Section 4.4", secDataAvailability: "Data Availability",
+  secDiscTemperature: "Section 4.3", secDiscHeight: "Section 4.4", secDiscKm: "Section 4.5",
+  secDataAvailability: "Data Availability",
   // Supplementary Material
   smFloorPlan: "SM S1", smAirtightness: "SM S2", smFuel: "SM S3", smSootYield: "SM S4",
   smHrr: "SM S5", smDevices: "SM S6", smFouling: "SM S7", smExtUncertainty: "SM S8",

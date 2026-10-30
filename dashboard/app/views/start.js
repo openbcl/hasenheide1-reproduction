@@ -1,7 +1,7 @@
 // View 1: overview -- the key result at a glance (after the graphical abstract) and the views; folded
 // below them: the key result in the paper's words, the study (plan and section, Tables 1 and 2), the
 // names, and what is only in the paper.
-import { h, table, sourceLine, exportSvgElement } from "../util.js";
+import { h, table, sourceLine, exportSvgElement, sym, fold } from "../util.js";
 import { PAPER, REF } from "../paper_refs.js";
 import { planSvg, sectionSvg, planLegend, exportFigure, PLAN_CAPTION } from "../plan.js";
 import { glanceBlock } from "../glance.js";
@@ -40,7 +40,7 @@ export async function render(root, { params, meta, views, load }) {
       h("p", {}, "Fourteen pool fires of a commercial ‘heptane’ (a C7 hydrocarbon mixture) in three series in a full-scale " +
         "three-room apartment, measured with line-of-sight transmissometers (LEM at 638 nm, SICK at 880 nm), " +
         "thermocouples and a platform scale, and compared with a-priori FDS simulations. The numbers are the " +
-        `paper's values, as printed (${REF.secSetup}, ${REF.secCfdResults}).`),
+        `paper's values, as printed (${REF.secSetup}, ${REF.secInstrumentation}).`),
       h("figure", { class: "figure" },
         h("div", { class: "plan-wrap", tabindex: "0", role: "region", "aria-label": "apartment plan and section" },
           h("div", { class: "plan-pair" }, top, side)), planLegend(), h("figcaption", { class: "caption" }, PLAN_CAPTION)),
@@ -75,7 +75,7 @@ export async function render(root, { params, meta, views, load }) {
     h("ul", { class: "note" },
       h("li", {}, `${REF.smFloorPlan}, ${REF.figPhotos}, ${REF.figS_photos}: floor plan and photographs (in the paper only)`),
       h("li", {}, `${REF.smAirtightness}: envelope airtightness (blower door)`),
-      h("li", {}, `${REF.smFuel}, ${REF.smSootYield}: fuel composition, calorimeter runs, n-heptane literature`),
+      h("li", {}, `${REF.smFuel}, ${REF.smSootYield}: fuel composition and calorimeter runs (in short under Model inputs), n-heptane literature`),
       h("li", {}, `${REF.smHrr}: heat release from the mass loss`),
       h("li", {}, `${REF.smDevices}, ${REF.smFouling}, ${REF.smExtUncertainty}: instrument validation, optics fouling, uncertainty budget`),
       h("li", {}, `${REF.smSmokeAlarms}: smoke alarms`),
@@ -94,17 +94,6 @@ export async function render(root, { params, meta, views, load }) {
   }
 }
 
-// A folded section: closed by default; whether a reader opened it is remembered for the
-// session (in this browser only), so coming back to the overview keeps it as it was.
-function fold(key, title, hint, ...body) {
-  const id = `fold:${key}`;
-  let open = false;
-  try { open = sessionStorage.getItem(id) === "1"; } catch { /* storage blocked: start closed */ }
-  const d = h("details", { class: "fold", id: `fold-${key}`, open },
-    h("summary", {}, h("h2", {}, title), hint ? h("span", { class: "fold-hint" }, hint) : null), ...body);
-  d.addEventListener("toggle", () => { try { sessionStorage.setItem(id, d.open ? "1" : "0"); } catch { /* ignore */ } });
-  return d;
-}
 
 // The views as cards, each with its paper references.
 function cards(views) {
@@ -113,12 +102,10 @@ function cards(views) {
   for (const x of views) {
     if (x.id === "start") continue;
     // on the cards only the exception is badged (package data); the view header shows all chips
-    const body = [h("b", {}, x.title), h("span", {}, x.blurb),
+    const body = [h("b", {}, x.title), h("span", {}, sym(x.blurb)),
       (x.refs || []).length ? h("small", { class: "refs" }, x.refs.map(k => REF[k]).join(" · ")) : null,
       x.kind === "package" ? h("small", { class: "chip kind-package" }, "package data") : null];
-    cur.append(x.module
-      ? h("a", { class: "card", href: `#/${x.id}` }, body)
-      : h("div", { class: "card planned", title: "planned" }, body, h("span", { class: "badge" }, "planned")));
+    cur.append(h("a", { class: "card", href: `#/${x.id}` }, body));
   }
   return out;
 }

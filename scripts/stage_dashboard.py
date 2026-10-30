@@ -55,6 +55,13 @@ def stage(out: Path, version: str, ref: str | None = None, preview: str | None =
                 f"the archived release is {cff_version()}.</p>")
         rules.append(("index.html", r"</header>\n", "</header>\n" + note.replace("\\", r"\\") + "\n", 1))
         rules.append(("index.html", r'(<meta name="referrer"[^>]*>\n)', r'\1<meta name="robots" content="noindex">\n', 1))
+    # the output folder is replaced: never the repository, the source, an ancestor of them, or a
+    # non-empty folder that is not an earlier staged site
+    out, src, repo = out.resolve(), ROOT.resolve(), ROOT.parent.resolve()
+    unsafe = out in (src, repo) or out in repo.parents or src in out.parents or (out / ".git").exists()
+    foreign = out.is_dir() and any(out.iterdir()) and not (out / "index.html").is_file()
+    if unsafe or foreign:
+        sys.exit(f"refusing to replace {out}: choose a new or an earlier staged folder")
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(ROOT, out, ignore=shutil.ignore_patterns("_*", "*.md"))   # no test pages, no notes
