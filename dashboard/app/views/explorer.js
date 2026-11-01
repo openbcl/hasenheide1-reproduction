@@ -1,7 +1,7 @@
 // Test explorer (package data, not a paper figure): every channel of one measured test,
 // grouped by quantity, with the logged events and, where fds_channels.csv maps one, the
 // FDS device at the same position. Values as committed; optionally zeroed at t = 0 (as
-// the paper's comparisons). Records end 1 s before the logged test_end.
+// the paper's comparisons; a transmission normalised to 100 %). Records end 1 s before the logged test_end.
 import { h, about, refChips, sourceLine, segmented, checks, loadPlotly, themeColors, rgba, baseLayout, latest, rebuild, drawChart, vis,
          EXTRA_THEME_PAIRS, testName, testId, LEGEND, isDark, onLeave } from "../util.js";
 import { REF } from "../paper_refs.js";
@@ -81,7 +81,7 @@ export async function render(root, { params, meta, load, setParams, views }) {
   const st = { run: testId(meta, params.run) || (most && order.find(id => recorded(id) === most)) || order[0],
                group: GROUPS.some(g => g.value === params.g) ? params.g : "ext",
                fds: params.fds !== "0", zero: params.zero !== "0", ch: picked.join(","),
-               tree: params.tree === "F2" ? "F2" : "F1", sick: params.sick === "1" };
+               tree: params.tree === "F2" ? "F2" : "F1", sick: params.sick === "1", ev: params.ev !== "0" };
   // a link with an unknown test or sensor is said, not silently replaced (no link wording is echoed)
   let notice = [params.run && !testId(meta, params.run) ? `Unknown test; showing ${testName(meta, st.run)}.` : "",
                 asked.length > picked.length ? "Unknown sensor in the link; showing all channels of this kind." : ""].join(" ").trim();
@@ -96,7 +96,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
     about("Every channel of one test as recorded (the temperatures one thermocouple tree at a time, the SICK on request), " +
       "with the events logged during the test and, where one exists, the FDS device at the same position in the baseline " +
       "run of its series. This view shows the package's time series; it is not a figure of the paper. Values are zeroed " +
-      "at t = 0 by default, as in the paper's comparisons; the FDS runs cover the pre-ventilation phase only."),
+      "at t = 0 by default, as in the paper's comparisons (a transmission is normalised to 100 % instead); the FDS runs " +
+      "cover the pre-ventilation phase only."),
     controls, chart, note, status, src);
 
   const select = h("select", { "aria-label": "Test", onchange: e => { st.run = e.target.value; notice = ""; update(); } },
@@ -108,11 +109,14 @@ export async function render(root, { params, meta, load, setParams, views }) {
     const g = GROUPS.find(x => x.value === st.group);
     const canFds = !["mass", "alarm", "tau"].includes(g.value);
     const optical = ["ext", "tau"].includes(g.value), temp = g.value === "temp", alarm = g.value === "alarm";
+    // zeroing: a transmission is normalised to 100 % at t = 0 (as the zeroed extinction k - k0),
+    // the other quantities lose their value at t = 0
+    const ratio = g.value === "tau";
     const hasSick = meta.channels.some(x => x.run === st.run && x.instrument === "SICK" && x.status !== "excluded");
     const run0 = () => meta.runs.find(r => r.run === st.run);
     // a selection from the plan overrides the tree and SICK choices
     const pick = st.ch ? st.ch.split(",") : null;
-    setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ch: st.ch || null,
+    setParams({ run: name, g: st.group === "ext" ? null : st.group, fds: st.fds ? null : "0", zero: st.zero ? null : "0", ev: st.ev ? null : "0", ch: st.ch || null,
                 tree: temp && !pick && st.tree === "F2" ? "F2" : null, sick: optical && !pick && st.sick ? "1" : null });
     rebuild(controls, () => [
       h("fieldset", { class: "seg" }, h("legend", {}, "Test"), select),
@@ -121,12 +125,13 @@ export async function render(root, { params, meta, load, setParams, views }) {
                                 st.tree, v => { st.tree = v; update(); }) : null,
       checks("Show", [
         // zeroing means nothing for an on/off alarm state
-        ...(alarm ? [] : [{ value: "zero", label: "Zeroed at t = 0", checked: st.zero }]),
+        ...(alarm ? [] : [{ value: "zero", label: ratio ? "Normalised to 100 % at t = 0" : "Zeroed at t = 0", checked: st.zero }]),
         ...(optical && !pick ? [{ value: "sick", label: "SICK", checked: st.sick && hasSick, disabled: !hasSick,
                                   title: hasSick ? "the SICK transmissometer (880 nm as measured and scaled to 638 nm)"
                                          : run0().pan_mm === 160 ? "no valid SICK record in this test" : "no SICK in the 220 mm tests" }] : []),
         { value: "fds", label: "FDS at the same position", checked: st.fds && canFds, disabled: !canFds,
           title: canFds ? "FDS baseline device mapped in fds_channels.csv" : "no FDS device of the same quantity" },
+        { value: "ev", label: "Events", checked: st.ev, title: "the events logged during the test: ignition, flame-out, ventilation, windows, fan, cleaning" },
       ], (k, on) => { st[k] = on; update(); })].filter(Boolean));
 
     const c = themeColors();
@@ -149,7 +154,8 @@ export async function render(root, { params, meta, load, setParams, views }) {
       : x.instrument === "LEM1" ? LEM1_C[dark ? "dark" : "light"]
       : vis(ROOM_C[x.room] || c.fg);
     const dash = x => x.instrument === "SICK" ? (x.wavelength_nm === 880 ? "dot" : "dash") : "solid";
-    const zero = (y, i0) => { const y0 = y[i0]; return st.zero && !alarm && y0 !== null ? y.map(v => v === null ? null : v - y0) : y; };
+    const zero = (y, i0) => { const y0 = y[i0]; return st.zero && !alarm && y0 !== null && !(ratio && y0 === 0)
+      ? y.map(v => v === null ? null : ratio ? 100 * v / y0 : v - y0) : y; };
 
     // the legend in two groups, measured and FDS, each entry hiding or showing its own line
     const MEAS = { legendgroup: "measured", legendgrouptitle: { text: "Measured" } };
@@ -169,10 +175,11 @@ export async function render(root, { params, meta, load, setParams, views }) {
     }
     traces.push(...fdsTraces);
     const evs = meta.events.filter(e => e.run === st.run && EVENT[e.event]);
-    const shapes = evs.map(e => ({ type: "line", xref: "x", yref: "paper", x0: e.t_s, x1: e.t_s, y0: 0, y1: 1,
+    const drawn = st.ev ? evs : [];
+    const shapes = drawn.map(e => ({ type: "line", xref: "x", yref: "paper", x0: e.t_s, x1: e.t_s, y0: 0, y1: 1,
                                    line: { color: c.muted, width: 1, dash: "dot" } }));
     // on a light panel, so a label stays readable where it crosses the curves
-    const annotations = eventLabels(evs).map(l => ({ x: l.t0, y: 1, xref: "x", yref: "paper", text: l.names.join(" · "), textangle: -90,
+    const annotations = eventLabels(drawn).map(l => ({ x: l.t0, y: 1, xref: "x", yref: "paper", text: l.names.join(" · "), textangle: -90,
       showarrow: false, xanchor: "right", yanchor: "top", font: { size: 10, color: c.muted }, bgcolor: rgba(c.panel, 0.85), borderpad: 1 }));
     // legend at the side on wide charts, below the chart on narrower ones (a side legend would
     // squeeze the plot); on wide screens the chart grows with a long legend instead of scrolling it
@@ -190,10 +197,10 @@ export async function render(root, { params, meta, load, setParams, views }) {
       legend: narrow ? { ...legend, x: 0, y: -65 / 280 } : { ...legend, x: 1.02, y: 1 },
       margin: { l: 60, r: 10, t: 10, b: 50 + legendH },
       xaxis: { title: { text: "t / s (t = 0: full minute of ignition)" } },
-      yaxis: { title: { text: (st.zero && !alarm ? "Δ" : "") + g.axis },
+      yaxis: { title: { text: (st.zero && !alarm && !ratio ? "Δ" : "") + g.axis },
                ...(alarm ? { tickvals: [0, 1], ticktext: ["off", "on"], range: [-0.15, 1.15] } : {}) } }),
       `${name}_${g.value}`, `${name}, ${g.label.toLowerCase()}${g.unit ? ` (${g.unit})` : ""}, ` +
-      `${st.zero && !alarm ? "zeroed at t = 0" : "as recorded"}; package data`);
+      `${st.zero && !alarm ? (ratio ? "normalised to 100 % at t = 0" : "zeroed at t = 0") : "as recorded"}; package data`);
 
     // remarks on channels: excluded ones, and a partial validity only where it cuts the record shown
     const window = x => (/valid for t_s = (-?[\d.]+) to (-?[\d.]+) s/.exec(x.note || "") || []).slice(1).map(Number);
