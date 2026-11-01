@@ -394,4 +394,5 @@ statement for the exact record that backs its figures.
 ## License
 
 CC BY 4.0 (see `LICENSE`). Third-party Python dependencies retain their own
-licenses; FDS is a NIST product in the public domain.
+licenses; FDS is a NIST product in the public domain. The institutional logos in
+`dashboard/logos/` are trademarks of their owners and not covered by CC BY 4.0.

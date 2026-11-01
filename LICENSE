@@ -30,4 +30,6 @@ Third-party components retain their own licenses. In particular, the Python
 dependencies listed in requirements.txt (numpy, pandas, matplotlib, scipy,
 fdsreader, ...) are distributed under their respective licenses, and FDS
 (Fire Dynamics Simulator) is a product of NIST in the public domain. This
-license applies to the original content of this repository only.
+license applies to the original content of this repository only. The institutional
+logos in dashboard/logos/ are trademarks of their owners and are not licensed
+under CC BY 4.0 (see dashboard/logos/README.md).

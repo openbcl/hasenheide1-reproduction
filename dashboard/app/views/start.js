@@ -84,6 +84,7 @@ export async function render(root, { params, meta, views, load }) {
       h("li", {}, "The text: introduction, discussion, conclusions.")),
     h("p", { class: "note" }, "The FDS runs cover the pre-ventilation phase only (900 s for Hep_160_075, 1200 s otherwise).")),
     ),
+    institutions(),
   );
 
   // #/start?open=<section> opens that section and scrolls to it once the page is in place
@@ -94,6 +95,38 @@ export async function render(root, { params, meta, views, load }) {
   }
 }
 
+
+// The authors' institutions (affiliations a-d of the paper) and the support named in its
+// acknowledgements. A logo only where its owner has cleared the use (dashboard/logos/README.md);
+// the others by name.
+const AUTHORS = [
+  { name: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL)", url: "https://www.bcl-leipzig.de/",
+    logo: "logos/bcl.svg", logoDark: "logos/bcl-on-dark.svg" },
+  { name: "Building Research Institute (ITB), Warsaw", url: "https://www.itb.pl/" },
+  { name: "Forschungszentrum Jülich (FZJ)", url: "https://www.fz-juelich.de/" },
+  { name: "University of Wuppertal (BUW)", url: "https://www.uni-wuppertal.de/" },
+];
+const SUPPORT = [
+  { name: "Verein zur Förderung von Ingenieurmethoden im Brandschutz e. V. (VIB)", url: "https://www.vib-brandschutz.de/",
+    logo: "logos/vib.svg", tall: true, role: "financial support of the experiments" },
+  { name: "Leipziger Wohnungs- und Baugesellschaft mbH (LWB)", url: "https://www.lwb.de/",
+    role: "the vacant residential building used as the experimental site" },
+];
+
+function institutions() {
+  const item = x => h("li", {},
+    h("a", { class: "inst", href: x.url, rel: "noopener", title: x.name },
+      x.logo ? [h("img", { src: x.logo, alt: x.name, class: [x.logoDark ? "on-light" : "", x.tall ? "tall" : ""].join(" ").trim() || null, height: 40 }),
+                x.logoDark ? h("img", { src: x.logoDark, alt: x.name, class: "on-dark", height: 40 }) : null]
+             : h("span", {}, x.name)),
+    x.role ? h("small", {}, x.role) : null);
+  return h("section", { class: "institutions", "aria-labelledby": "inst-h" },
+    h("h2", { id: "inst-h" }, "Institutions"),
+    h("h3", {}, "Authors' institutions"), h("ul", {}, AUTHORS.map(item)),
+    h("h3", {}, "Supported by"), h("ul", {}, SUPPORT.map(item)),
+    h("p", { class: "note" }, "As in the paper's affiliations and acknowledgements. Logos are trademarks of their owners and " +
+      "not covered by the licence of the package."));
+}
 
 // The views as cards, each with its paper references.
 function cards(views) {

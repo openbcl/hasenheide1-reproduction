@@ -795,14 +795,15 @@ def build() -> dict[str, bytes]:
                     for rel, b in ((rel, p.read_bytes().replace(b"\r\n", b"\n")) for rel, p in sorted(_sources.items()))],
         "outputs": [{"path": f"dashboard/{k}", "bytes": len(v), "sha256": hashlib.sha256(v).hexdigest()}
                     for k, v in sorted(out.items())],
-        # static files copied into the site (provenance in dashboard/vendor/README.md)
+        # static files copied into the site (provenance in dashboard/vendor/README.md, dashboard/logos/README.md)
         "assets": [{"path": p.relative_to(REPO).as_posix(), "bytes": p.stat().st_size,
                     "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in ASSETS],
     })
     return out
 
 
-ASSETS = [OUT / "vendor" / "plotly-cartesian-2.35.2.min.js"]
+ASSETS = [OUT / "vendor" / "plotly-cartesian-2.35.2.min.js",
+          *(OUT / "logos" / f for f in ("bcl.svg", "bcl-on-dark.svg", "vib.svg"))]
 for _a in ASSETS:
     assert _a.is_file(), f"missing static asset {_a.relative_to(REPO)}"
 
