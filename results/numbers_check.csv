@@ -84,7 +84,7 @@ valGridTempCoarseMaxDevPct,6,6,data,results/simulation/grid_convergence_summary.
 valGridTempMaxDevPct,5,5,data,results/simulation/grid_convergence_summary.csv,OK
 valGridTempMeanDevPct,4,4,data,results/simulation/grid_convergence_summary.csv,OK
 valHeptaneMetaCiHi,0.0169,0.0169,data,results/literature/heptane_meta.csv,OK
-valHeptaneMetaCiLo,0.0144,0.0144,data,results/literature/heptane_meta.csv,OK
+valHeptaneMetaCiLo,0.0143,0.0143,data,results/literature/heptane_meta.csv,OK
 valHeptaneMetaK,10,10,data,results/literature/heptane_meta.csv,OK
 valHeptaneMetaMu,0.0156,0.0156,data,results/literature/heptane_meta.csv,OK
 valHrrAvgLarge,46,46,data,results/measurement/hrr/hrr_summary.csv,OK
