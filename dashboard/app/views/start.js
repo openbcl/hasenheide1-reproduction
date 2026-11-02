@@ -112,19 +112,27 @@ const SUPPORT = [
   { name: "Leipziger Wohnungs- und Baugesellschaft mbH (LWB)", url: "https://www.lwb.de/",
     role: "the vacant residential building used as the experimental site" },
 ];
+// The paper's funding statement; no url, so named in text without a link.
+const FUNDING = [
+  { name: "Project NextVIS (OPUS-LAP)", wide: true,
+    role: "funded by the German Research Foundation (DFG, project number 465392452) and the " +
+          "National Science Centre, Poland (NCN, project number 2020/39/I/ST8/03159)" },
+];
 
 function institutions() {
-  const item = x => h("li", {},
-    h("a", { class: "inst", href: x.url, rel: "noopener", title: x.name },
-      x.logo ? [h("img", { src: x.logo, alt: x.name, class: [x.logoDark ? "on-light" : "", x.tall ? "tall" : ""].join(" ").trim() || null, height: 40 }),
-                x.logoDark ? h("img", { src: x.logoDark, alt: x.name, class: "on-dark", height: 40 }) : null]
-             : h("span", {}, x.name)),
+  const label = x => x.logo ? [h("img", { src: x.logo, alt: x.name, class: [x.logoDark ? "on-light" : "", x.tall ? "tall" : ""].join(" ").trim() || null, height: 40 }),
+                               x.logoDark ? h("img", { src: x.logoDark, alt: x.name, class: "on-dark", height: 40 }) : null]
+                            : h("span", {}, x.name);
+  const item = x => h("li", { class: x.wide ? "wide" : null },
+    x.url ? h("a", { class: "inst", href: x.url, rel: "noopener", title: x.name }, label(x))
+          : h("span", { class: "inst" }, label(x)),
     x.role ? h("small", {}, x.role) : null);
   return h("section", { class: "institutions", "aria-labelledby": "inst-h" },
     h("h2", { id: "inst-h" }, "Institutions"),
     h("h3", {}, "Authors' institutions"), h("ul", {}, AUTHORS.map(item)),
     h("h3", {}, "Supported by"), h("ul", {}, SUPPORT.map(item)),
-    h("p", { class: "note" }, "As in the paper's affiliations and acknowledgements. Logos are trademarks of their owners and " +
+    h("h3", {}, "Funding"), h("ul", {}, FUNDING.map(item)),
+    h("p", { class: "note" }, "As in the paper's affiliations, acknowledgements and funding statement. Logos are trademarks of their owners and " +
       "not covered by the licence of the package."));
 }
 
