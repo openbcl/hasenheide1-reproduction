@@ -258,7 +258,7 @@ campaign and enter this paper as parameters:
 - The ***n*-heptane literature pool** (§3.2, Table S3, `\valHeptaneMeta*`) is
   recomputed by `scripts/heptane_literature.py` from the ten literature values it
   tabulates (DerSimonian–Laird random effects; the tabulated ± read as 95 %
-  half-widths): 0.0156 g/g, 95 % CI 0.0144–0.0169. The NIST TN 2235 rows are records
+  half-widths): 0.0156 g/g, 95 % CI 0.0143–0.0169. The NIST TN 2235 rows are records
   of the NIST Fire Calorimetry Database for burns that TN 2235 documents (the report
   itself gives no soot yield).
 - The **size evolution of the binned soot** (Table S11 note d, SM S13, `\valBinned*`) comes from
@@ -347,8 +347,9 @@ branch.
 
 - **v0.3.0** (unreleased) — follows the paper's next revision. NIST TN 2133 in the
   *n*-heptane literature pool corrected to 0.0162 ± 0.0036 g/g (Fig. 7, read from the
-  vector graphics; v0.2.0 carried 0.0140 ± 0.0040, a misreading), which moves the
-  pooled yield from 0.0155 to 0.0156 g/g (95 % CI 0.0144–0.0169), and the TN 2235 rows
+  vector graphics; v0.2.0 carried 0.0140 ± 0.0040, a misreading) and the Osburg & Busse
+  cone arm re-derived from the 2011 run records, 0.0132 g/g (was 0.0134), which together
+  move the pooled yield from 0.0155 to 0.0156 g/g (95 % CI 0.0143–0.0169), and the TN 2235 rows
   labelled as NIST Fire Calorimetry Database records (Table S3); Table S2 recast as the
   C7 composition with a share of unassigned class, so the mass-weighted SFPE yield
   becomes a range, 0.045–0.054 g/g (`\valCoreFuelSeven*`, `\valSfpeYsCoreFuelSeven*`
