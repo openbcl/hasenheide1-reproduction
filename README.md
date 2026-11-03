@@ -333,7 +333,9 @@ literals rather than recomputed here, so a reproducer is not misled:
   (`scripts/example_timeseries.py`); the measurement reductions `reduce_matrices`,
   `reduce_fouling`, `reduce_fouling_at_peak`, `reduce_smoke_alarm` and
   `reduce_ambient` now run from them without the archive and reproduce the
-  committed CSVs exactly, `reduce_matrices` including its FDS overlay files.
+  committed CSVs exactly, `reduce_matrices` including its FDS overlay files. The README
+  names the funding and acknowledgements, the VIB's financial support of the
+  experiments included.
 - **v0.2.0** (2026-10-15) — first public release; accompanies the revised manuscript.
   Changes against the unreleased v0.1.0 that matched the original submission
   (2026-08-24): heat-of-combustion sensitivity case
@@ -359,6 +361,20 @@ record:
 
 A `CITATION.cff` accompanies the repository. See the paper's *Data Availability*
 statement for the exact record that backs its figures.
+
+## Funding and acknowledgements
+
+As in the paper's funding statement and acknowledgements: this work was partially
+funded by the German Research Foundation (Deutsche Forschungsgemeinschaft, DFG, project
+number 465392452) and the National Science Centre, Poland (Narodowe Centrum Nauki, NCN,
+project number 2020/39/I/ST8/03159) within the OPUS-LAP project NextVIS. We gratefully
+acknowledge the Verein zur Förderung von Ingenieurmethoden im Brandschutz e. V. (VIB), a
+non-profit fire-safety engineering association (https://www.vib-brandschutz.de), for
+financial support of the experiments. We also thank the Leipziger Wohnungs- und
+Baugesellschaft mbH (LWB) for providing the vacant residential building used as the
+experimental site, and the Institut für Technische Chemie at Leipzig University for the
+gas-chromatographic analysis of the fuel. M. Osburg is a member of the executive board
+of the VIB (the paper's Declaration of Competing Interest).
 
 ## License
 
