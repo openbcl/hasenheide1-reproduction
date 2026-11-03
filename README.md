@@ -396,13 +396,13 @@ statement for the exact record that backs its figures.
 
 ## Funding and acknowledgements
 
-As in the paper's funding statement and acknowledgements: this work was partially
-funded by the German Research Foundation (Deutsche Forschungsgemeinschaft, DFG, project
-number 465392452) and the National Science Centre, Poland (Narodowe Centrum Nauki, NCN,
-project number 2020/39/I/ST8/03159) within the OPUS-LAP project NextVIS. The experiments
-were financially supported by the Verein zur Förderung von Ingenieurmethoden im
-Brandschutz e. V. (VIB), a non-profit fire-safety engineering association
-(https://www.vib-brandschutz.de). We thank the Leipziger Wohnungs- und
+As in the paper's funding statement and acknowledgements: the experiments were
+financially supported by the Verein zur Förderung von Ingenieurmethoden im Brandschutz
+e. V. (VIB), a non-profit fire-safety engineering association
+(https://www.vib-brandschutz.de). This work was partially funded by the German Research
+Foundation (Deutsche Forschungsgemeinschaft, DFG, project number 465392452) and the
+National Science Centre, Poland (Narodowe Centrum Nauki, NCN, project number
+2020/39/I/ST8/03159) within the OPUS-LAP project NextVIS. We thank the Leipziger Wohnungs- und
 Baugesellschaft mbH (LWB) for providing the vacant residential building used as the
 experimental site, and the Institut für Technische Chemie at Leipzig University for the
 gas-chromatographic analysis of the fuel. M. Osburg is a member of the executive board
