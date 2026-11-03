@@ -107,13 +107,13 @@ const AUTHORS = [
   { name: "University of Wuppertal (BUW)", url: "https://www.uni-wuppertal.de/" },
 ];
 const SUPPORT = [
-  { name: "Verein zur Förderung von Ingenieurmethoden im Brandschutz e. V. (VIB)", url: "https://www.vib-brandschutz.de/",
-    logo: "logos/vib.svg", tall: true, role: "financial support of the experiments" },
   { name: "Leipziger Wohnungs- und Baugesellschaft mbH (LWB)", url: "https://www.lwb.de/",
     role: "the vacant residential building used as the experimental site" },
 ];
-// The paper's funding statement; no url, so named in text without a link.
+// The paper's funding statement, in its order; NextVIS has no url, so it is named in text without a link.
 const FUNDING = [
+  { name: "Verein zur Förderung von Ingenieurmethoden im Brandschutz e. V. (VIB)", url: "https://www.vib-brandschutz.de/",
+    logo: "logos/vib.svg", tall: true, role: "financial support of the experiments" },
   { name: "Project NextVIS (OPUS-LAP)", wide: true,
     role: "funded by the German Research Foundation (DFG, project number 465392452) and the " +
           "National Science Centre, Poland (NCN, project number 2020/39/I/ST8/03159)" },
