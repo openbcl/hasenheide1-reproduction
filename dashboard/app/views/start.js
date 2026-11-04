@@ -98,13 +98,17 @@ export async function render(root, { params, meta, views, load }) {
 
 // The authors' institutions (affiliations a-d of the paper) and the support named in its
 // acknowledgements. A logo only where its owner has cleared the use (dashboard/logos/README.md);
-// the others by name.
+// the others by name. Logo heights (px) set by eye on optical weight, not equal pixels: the inked
+// area of each file scaled ~ 1/sqrt(aspect ratio), damped by how dense its marks are (BUW's file
+// carries a 9 % margin above and below).
 const AUTHORS = [
   { name: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL)", url: "https://www.bcl-leipzig.de/",
-    logo: "logos/bcl.svg", logoDark: "logos/bcl-on-dark.svg" },
+    logo: "logos/bcl.svg", logoDark: "logos/bcl-on-dark.svg", px: 44 },
   { name: "Building Research Institute (ITB), Warsaw", url: "https://www.itb.pl/" },
-  { name: "Forschungszentrum Jülich (FZJ)", url: "https://www.fz-juelich.de/" },
-  { name: "University of Wuppertal (BUW)", url: "https://www.uni-wuppertal.de/" },
+  { name: "Forschungszentrum Jülich (FZJ)", url: "https://www.fz-juelich.de/",
+    logo: "logos/fzj.svg", logoDark: "logos/fzj-on-dark.svg", px: 38 },
+  { name: "University of Wuppertal (BUW)", url: "https://www.uni-wuppertal.de/",
+    logo: "logos/buw.svg", logoDark: "logos/buw-on-dark.svg", px: 54 },
 ];
 const SUPPORT = [
   { name: "Leipziger Wohnungs- und Baugesellschaft mbH (LWB)", url: "https://www.lwb.de/",
@@ -113,15 +117,15 @@ const SUPPORT = [
 // The paper's funding statement, in its order; NextVIS has no url, so it is named in text without a link.
 const FUNDING = [
   { name: "Verein zur Förderung von Ingenieurmethoden im Brandschutz e. V. (VIB)", url: "https://www.vib-brandschutz.de/",
-    logo: "logos/vib.svg", tall: true, role: "financial support of the experiments" },
+    logo: "logos/vib.svg", px: 46, role: "financial support of the experiments" },
   { name: "Project NextVIS (OPUS-LAP)", wide: true,
     role: "funded by the German Research Foundation (DFG, project number 465392452) and the " +
           "National Science Centre, Poland (NCN, project number 2020/39/I/ST8/03159)" },
 ];
 
 function institutions() {
-  const label = x => x.logo ? [h("img", { src: x.logo, alt: x.name, class: [x.logoDark ? "on-light" : "", x.tall ? "tall" : ""].join(" ").trim() || null, height: 40 }),
-                               x.logoDark ? h("img", { src: x.logoDark, alt: x.name, class: "on-dark", height: 40 }) : null]
+  const img = (src, cls, x) => h("img", { src, alt: x.name, class: cls, height: x.px, style: `height: ${x.px}px` });
+  const label = x => x.logo ? [img(x.logo, x.logoDark ? "on-light" : null, x), x.logoDark ? img(x.logoDark, "on-dark", x) : null]
                             : h("span", {}, x.name);
   const item = x => h("li", { class: x.wide ? "wide" : null },
     x.url ? h("a", { class: "inst", href: x.url, rel: "noopener", title: x.name }, label(x))
