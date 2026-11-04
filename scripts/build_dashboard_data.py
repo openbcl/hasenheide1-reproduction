@@ -803,7 +803,7 @@ def build() -> dict[str, bytes]:
 
 
 ASSETS = [OUT / "vendor" / "plotly-cartesian-2.35.2.min.js",
-          *(OUT / "logos" / f for f in ("bcl.svg", "bcl-on-dark.svg", "fzj.svg", "fzj-on-dark.svg", "buw.svg", "buw-on-dark.svg", "vib.svg"))]
+          *(OUT / "logos" / f for f in ("bcl.svg", "bcl-on-dark.svg", "itb.svg", "itb-on-dark.svg", "fzj.svg", "fzj-on-dark.svg", "buw.svg", "buw-on-dark.svg", "vib.svg"))]
 for _a in ASSETS:
     assert _a.is_file(), f"missing static asset {_a.relative_to(REPO)}"
 

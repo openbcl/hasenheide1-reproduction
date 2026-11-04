@@ -104,7 +104,8 @@ export async function render(root, { params, meta, views, load }) {
 const AUTHORS = [
   { name: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL)", url: "https://www.bcl-leipzig.de/",
     logo: "logos/bcl.svg", logoDark: "logos/bcl-on-dark.svg", px: 44 },
-  { name: "Building Research Institute (ITB), Warsaw", url: "https://www.itb.pl/" },
+  { name: "Building Research Institute (ITB), Warsaw", url: "https://www.itb.pl/",
+    logo: "logos/itb.svg", logoDark: "logos/itb-on-dark.svg", px: 32 },
   { name: "Forschungszentrum Jülich (FZJ)", url: "https://www.fz-juelich.de/",
     logo: "logos/fzj.svg", logoDark: "logos/fzj-on-dark.svg", px: 38 },
   { name: "University of Wuppertal (BUW)", url: "https://www.uni-wuppertal.de/",
