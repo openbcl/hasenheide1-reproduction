@@ -37,7 +37,7 @@ export async function render(root, { params, meta, views, load }) {
 
     fold("study", "The study: apartment, instruments and test series",
       `${REF.figApartment}, ${REF.tabExperiments}, ${REF.tabAmbient}`,
-      h("p", {}, "Fourteen pool fires of a commercial ‘heptane’ (a C7 hydrocarbon mixture) in three series in a full-scale " +
+      h("p", {}, "Fourteen pool fires of a C7 hydrocarbon mixture traded as ‘heptane’ in three series in a full-scale " +
         "three-room apartment, measured with line-of-sight transmissometers (LEM at 638 nm, SICK at 880 nm), " +
         "thermocouples and a platform scale, and compared with a-priori FDS simulations. The numbers are the " +
         `paper's values, as printed (${REF.secSetup}, ${REF.secInstrumentation}).`),
@@ -63,7 +63,7 @@ export async function render(root, { params, meta, views, load }) {
       h("dt", {}, "Hep_160_075"), h("dd", {}, "a series: fuel, square pan of side 160 mm, fuel mass 75 g"),
       h("dt", {}, "Hep_160_075_R4"), h("dd", {}, "a test: the fourth test of that series, in the order run (the package files keep the ids " +
         "of the test log, such as Hep_160_S3_R1; ", h("a", { href: "#/data" }, "Data and numbers"), " lists both)"),
-      h("dt", {}, "Hep"), h("dd", {}, "the commercial ‘heptane’, a C7 hydrocarbon mixture"),
+      h("dt", {}, "Hep"), h("dd", {}, "the C7 hydrocarbon mixture traded as ‘heptane’ (the C7-UVCB fuel)"),
       h("dt", {}, "F1, F2, FC, F3"), h("dd", {}, "fire room F1, room F2, corridor FC, room F3"),
       h("dt", {}, "LEM"), h("dd", {}, "custom-built laser extinction meter, 638 nm, optical path 0.81 m"),
       h("dt", {}, "SICK"), h("dd", {}, "commercial transmissometer (SICK FW 56-I), 880 nm, reflector 0.8 m away (double-pass path 1.6 m); " +

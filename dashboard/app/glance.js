@@ -113,7 +113,7 @@ export function glanceBlock(meta, geo) {
   return h("section", { class: "glance", "aria-label": "Key result at a glance" },
     h("p", { class: "glance-head" }, "A-priori FDS reproduces full-scale, multi-room smoke extinction to about 10 %"),
     h("p", { class: "glance-sub" }, "… provided the soot yield is measured on the burned fuel"),
-    h("p", { class: "glance-context" }, "3-room apartment “Hasenheide” · commercial C7 heptane mixture, " +
+    h("p", { class: "glance-context" }, "3-room apartment “Hasenheide” · C7-UVCB heptane mixture, " +
       `${kn.valHrrPeakSmall}–${kn.valHrrPeakLarge} kW pool fires · no tuning to these data`),
     h("div", { class: "glance-grid" },
       h("a", { href: "#/validation", class: "glance-cell", title: `Validation (${REF.figScatter})` }, parity(g, delta)),
