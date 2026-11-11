@@ -335,7 +335,7 @@ servers (Plotly is vendored in `dashboard/vendor/`, MIT licence); it does not wo
 (GitHub Pages sets no custom headers), so it cannot forbid framing; the site changes nothing on a click, so this is
 accepted. The vendored library is loaded with a subresource-integrity hash (`dashboard/vendor/README.md`).
 
-Publishing: `.github/workflows/pages.yml` (on a push to the preview branch `dashboard`, or started by hand)
+Publishing: `.github/workflows/pages.yml` (on a push to `main`, or started by hand)
 checks the committed data with `--check`, stages `dashboard/` with `scripts/stage_dashboard.py` and publishes only
 that copy on GitHub Pages. Staging adds the commit as a version to every module, stylesheet and data reference, so
 browsers do not mix cached files of two releases, and points the repository links at that commit; a site built
