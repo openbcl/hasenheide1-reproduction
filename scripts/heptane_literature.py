@@ -4,7 +4,15 @@ Table S3 (figures stage, committed; no external data).
 The ten study arms are open-pool/pan (and cone) fires of pure or near-pure
 n-heptane under well-ventilated conditions, with the values and summary
 uncertainties as reported in the cited sources (Table S3 of the Supplementary
-Material). The tabulated +/- are treated as 95 % CI half-widths, so the input
+Material). NIST TN 2133 is read from the vector graphics of its Fig. 7 (0.0162 +/-
+0.0036, combined expanded uncertainty, k = 2; was 0.0140 +/- 0.0040 in v0.2.0, a
+misreading). The Osburg & Busse cone arm is 0.0132 (+0.0009/-0.0015, the range of
+the 10-25 % sampling-line deposition correction), re-derived by the authors from the
+2011 run records (filter mass x partial-flow ratio 200 / load-cell mass at ignition,
+/ (1 - 0.20)); it was 0.0134 in v0.2.0, on a burned fraction the records do not
+reproduce. The two TN 2235 arms are NIST Fire Calorimetry Database records of
+burns documented in TN 2235, which itself reports no soot yield.
+The tabulated +/- are treated as 95 % CI half-widths, so the input
 standard error is SE_i = unc / 1.96 (the one asymmetric interval is symmetrised
 to its half-width first).
 
@@ -30,10 +38,10 @@ TABLES_DIR = P.REPO_ROOT / "tables"
 # (95 % CI half-width); SE_i = unc / 1.96.
 CI_TO_SE = 1.0 / 1.96
 ARMS = [
-    ("Osburg & Busse",        0.0134, 0.0012),   # +0.0009/-0.0015 -> half-width
+    ("Osburg & Busse",        0.0132, 0.0012),   # +0.0009/-0.0015 -> half-width
     ("Mulholland (60/85 mm)", 0.0120, 0.0032),
     ("Mulholland (310/500)",  0.0105, 0.0021),
-    ("NIST TN 2133",          0.0140, 0.0040),
+    ("NIST TN 2133",          0.0162, 0.0036),   # Fig. 7, vector graphics; k = 2
     ("NIST TN 2162r1 (Sung)", 0.0169, 0.0005),
     ("NIST TN 2235 (pan)",    0.0233, 0.0022),
     ("NIST TN 2235 (pool)",   0.0147, 0.0020),
@@ -48,7 +56,7 @@ ARMS = [
 TABLE_ROWS = {
     "Osburg & Busse":        (r"Osburg and Busse\textsuperscript{b}~\cite{Osburg2013}",
                               r"cone, $D = {}$\SI{70}{\milli\metre}", "G",
-                              r"$0.0134\,^{+0.0009}_{-0.0015}$"),
+                              r"$0.0132\,^{+0.0009}_{-0.0015}$"),
     "Mulholland (60/85 mm)": (r"Mulholland \textit{et al.}~\cite{mulholland_effect_scale_smoke}",
                               r"cone, $D = 60$, \SI{85}{\milli\metre}", "G", None),
     "Mulholland (310/500)":  (r"Mulholland \textit{et al.}~\cite{mulholland_effect_scale_smoke}",
@@ -57,9 +65,11 @@ TABLE_ROWS = {
                               r"pan, \SI{9.7}{\centi\metre}", "P", None),
     "NIST TN 2162r1 (Sung)": (r"NIST TN~2162r1~\cite{sung2024}",
                               r"burner, \SI{30.1}{\centi\metre}", "P", None),
-    "NIST TN 2235 (pan)":    (r"NIST TN~2235~\cite{nist_heptane_pan1,nist_heptane_pan2,nist_heptane_pan3,maranghides_structure_separation_2022}",
+    # TN 2235 documents the burns but reports no soot yield; the yields are records
+    # of the NIST Fire Calorimetry Database (FCD), Table S3 note c
+    "NIST TN 2235 (pan)":    (r"NIST FCD\textsuperscript{c}~\cite{nist_heptane_pan1,nist_heptane_pan2,nist_heptane_pan3}",
                               r"baking pan", "P", None),
-    "NIST TN 2235 (pool)":   (r"NIST TN~2235~\cite{nist_heptane_pool_confirmation,maranghides_structure_separation_2022}",
+    "NIST TN 2235 (pool)":   (r"NIST FCD\textsuperscript{c}~\cite{nist_heptane_pool_confirmation}",
                               r"six open pans", "P", None),
     "Stage (160 mm)":        (r"Stage \textit{et al.}~\cite{stage_soot_2023}",
                               r"pool, $D = {}$\SI{160}{\milli\metre}", "P", None),

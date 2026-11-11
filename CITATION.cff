@@ -27,9 +27,14 @@ authors:
     affiliation: "Institute for Advanced Simulation, Forschungszentrum Jülich, Jülich, Germany; Chair of Computational Civil Engineering, University of Wuppertal, Wuppertal, Germany"
 license: CC-BY-4.0
 repository-code: "https://github.com/openbcl/hasenheide1-reproduction"
-version: v0.2.0
-date-released: "2026-10-15"
-doi: 10.5281/zenodo.23097800
+version: v1.0.0
+date-released: "2026-11-11"
+doi: 10.5281/zenodo.24054120
+#
+# Funding (CFF 1.2 has no funder field; see README, "Funding and acknowledgements"):
+# project NextVIS (DFG 465392452, NCN 2020/39/I/ST8/03159); the experiments were
+# financially supported by the Verein zur Foerderung von Ingenieurmethoden im
+# Brandschutz e. V. (VIB), a funder, not an author.
 #
 # Once the article is published, add a preferred-citation block so the paper is
 # the primary citation and this record the software/data companion:

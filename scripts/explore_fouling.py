@@ -216,7 +216,7 @@ import paths as _PATHS  # noqa: E402
 _PATHS.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 pd.DataFrame(summary, columns=["run", "device", "baseline", "fouling_resid_1pm",
                                "post_wipe_1pm", "cleaned"]).to_csv(
-    _PATHS.RESULTS_DIR / "measurement" / "fouling_residuals.csv", index=False)
+    _PATHS.RESULTS_DIR / "measurement" / "fouling_residuals.csv", index=False, lineterminator="\n")
 print(f"-> {_PATHS.RESULTS_DIR / 'measurement' / 'fouling_residuals.csv'}")
 
 
@@ -260,8 +260,8 @@ def dump_paper_figure_data():
     mdf = pd.DataFrame(mrows)
     d = _P.RESULTS_DIR / "measurement" / "fouling"
     d.mkdir(parents=True, exist_ok=True)
-    cdf.to_csv(d / "fig_curves.csv", index=False)
-    mdf.to_csv(d / "fig_meta.csv", index=False)
+    cdf.to_csv(d / "fig_curves.csv", index=False, lineterminator="\n")
+    mdf.to_csv(d / "fig_meta.csv", index=False, lineterminator="\n")
     rb = pd.read_csv(d / "fig_curves.csv", float_precision="round_trip")
     assert np.array_equal(cdf["t_s"].to_numpy(float), rb["t_s"].to_numpy(float), equal_nan=True)
     assert np.array_equal(cdf["k"].to_numpy(float), rb["k"].to_numpy(float), equal_nan=True)

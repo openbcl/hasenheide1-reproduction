@@ -1,0 +1,105 @@
+// LEM vs SICK: the co-located transmissometers (Sections 2.3.4, 2.5). Per test the LEM at
+// 638 nm, the SICK at 880 nm as measured and the SICK scaled to 638 nm (Widmann), zeroed at
+// t = 0 as in the paper; the cross-check table and the exponent test as committed. The
+// key numbers are the numbers.tex macros checked at build time.
+import { h, about, refChips, sourceLine, table, loadPlotly, themeColors, baseLayout, latest, rebuild, drawChart, testName, testId,
+         minus, onLeave } from "../util.js";
+import { REF } from "../paper_refs.js";
+
+export async function render(root, { params, meta, load, setParams, views }) {
+  const view = views.find(v => v.id === "lemsick");
+  const [ls] = await Promise.all([load("lemsick.json"), loadPlotly()]);
+  const repo = meta.citation.repository;
+  const k = ls.keys;
+  // tests in the order used everywhere else: by series (as Table 1), then in the order run
+  const order = meta.series.flatMap(s => s.runs);
+  const rows = [...ls.crosscheck].sort((a, b) => order.indexOf(a.run) - order.indexOf(b.run));
+  const runs = rows.map(r => r.run);
+  // ?run= a test (name or package id); ?room= the first test with the SICK in that room (plan links)
+  const asked = testId(meta, params.run);
+  const byRoom = params.room && rows.find(r => r.room === params.room)?.run;
+  const st = { run: runs.includes(asked) ? asked : byRoom || runs[0] };
+  const notice = params.run && !runs.includes(asked)
+    ? (asked ? `${testName(meta, asked)}: ${meta.runs.find(r => r.run === asked).setup_text.split(", ").slice(1).join(", ")}; ` +
+               `showing ${testName(meta, st.run)}.`
+             : `Unknown test in the link; showing ${testName(meta, st.run)}.`) : "";
+
+  const controls = h("div", { class: "controls" });
+  const chart = h("div", { class: "chart", role: "img", "aria-label": "LEM and SICK extinction over time" });
+  const note = h("p", { class: "chart-note" });
+  const status = h("p", { class: "sr-only", "aria-live": "polite" });
+  const src = h("div");
+  const w = ls.widmann.find(r => r.test === "lem_sick");
+  let showNotice = !!notice;                        // only until the reader picks a test
+  const select = h("select", { "aria-label": "Test", onchange: e => { st.run = e.target.value; showNotice = false; update(); } },
+    meta.series.filter(s => s.runs.some(r => runs.includes(r))).map(s => h("optgroup", { label: `${s.key} (${s.label})` },
+      rows.filter(r => s.runs.includes(r.run)).map(r =>
+        h("option", { value: r.run, selected: r.run === st.run }, `${testName(meta, r.run)} · SICK in ${r.room}`)))));
+
+  root.append(
+    h("h1", {}, view.title), refChips(view, REF),
+    about("The LEM (638 nm, 0.81 m path) and the SICK (880 nm, 1.6 m double pass) measured the same smoke side by side " +
+      "near the ceiling. The SICK extinction is rescaled to 638 nm with the Widmann correlation (factor " +
+      `${ls.widmann_factor.toFixed(2)}); the co-located records also test that correlation (${REF.secWavelength}, ${REF.secExpResults}).`),
+    h("div", { class: "tiles" },
+      tile(`${minus(k.mean_bias.text)} %`, "mean SICK–LEM bias", `over the ${k.n_runs.text} tests with valid SICK data`,
+           `numbers.tex: \\${k.mean_bias.macro}`),
+      tile(`${k.med_dev_lo.text}–${k.med_dev_hi.text} %`, "median deviation per test", "interquartile range across the tests",
+           `numbers.tex: \\${k.med_dev_lo.macro}, \\${k.med_dev_hi.macro}`),
+      tile(k.widmann_n.text, h("span", {}, "effective exponent β (K", h("sub", {}, "m"), " ∝ λ", h("sup", {}, "−β"), ")"),
+           `${k.widmann_lo.text}–${k.widmann_hi.text} interquartile range across the tests; Widmann: 1.0088`,
+           `numbers.tex: \\${k.widmann_n.macro}`),
+      tile(`≈ ${k.factor_dev.text} %`, "constraint on the 638 nm normalisation", `from the exponent test (${REF.secWavelength})`,
+           `${REF.secWavelength}: “about one percent”`)),
+    h("h2", {}, "Per test"),
+    controls, chart, note, status, src,
+    h("h2", {}, "Cross-check per test"),
+    table({ caption: "SICK (scaled to 638 nm) against the co-located LEM, per test (as committed)",
+            header: ["Test", "Room", "Bias (%)", "Median |deviation| (%)", "RMS deviation (%)", "Samples (1 Hz)"], numeric: [2, 3, 4, 5],
+            rows: rows.map(r => [testName(meta, r.run), r.room, fmt(r.bias_pct, 1), fmt(r.median_abs_pct, 1), fmt(r.rms_pct, 1), String(r.n)]) }),
+    w ? h("p", { class: "note" }, `Exponent test over ${w.n} tests: median ${fmt(w.n_median, 3)}, interquartile range ` +
+      `${fmt(w.lo, 3)}–${fmt(w.hi, 3)}, range ${fmt(w.n_min, 3)}–${fmt(w.n_max, 3)}.`) : null,
+    sourceLine(repo, ls.source));
+
+  const update = latest(async stale => {
+    const name = testName(meta, st.run);
+    setParams({ run: st.run === runs[0] ? null : name, room: null });
+    rebuild(controls, () => h("fieldset", { class: "seg" }, h("legend", {}, "Test"), select));
+    const c = themeColors();
+    const row = rows.find(r => r.run === st.run);
+    const d = await load(`ts/${st.run}.json`);
+    if (stale()) return;
+    const lemCol = Object.keys(d.columns).find(n => new RegExp(`^k_LEM\\d_${row.room}_z2\\.3_638nm`).test(n));
+    const zeroed = col => { const y = d.columns[col], y0 = y[d.zero_index]; return y.map(v => v === null ? null : v - y0); };
+    const tr = (col, label, color, dash, width, rank) => ({ x: d.t, y: zeroed(col), type: "scatter", mode: "lines", name: label,
+      legendrank: rank, line: { color, dash, width }, hovertemplate: `${label}<br>t = %{x} s<br>k = %{y:.3f} 1/m<extra></extra>` });
+    // drawn with the LEM on top, listed with the reference first
+    const traces = [
+      tr(`k_SICK_${row.room}_z2.3_880nm_per_m`, "SICK at 880 nm (as measured)", c.sick, "dot", 1.2, 3),
+      tr(`k_SICK_${row.room}_z2.3_638nm_per_m`, "SICK scaled to 638 nm", c.sick, "solid", 1.5, 2),
+      tr(lemCol, "LEM at 638 nm", c.lem, "solid", 1.5, 1),
+    ];
+    await drawChart(chart, traces, baseLayout(c, {
+      xaxis: { title: { text: "t / s" } }, yaxis: { title: { text: "k / m⁻¹" }, rangemode: "tozero" } }),
+      `lem_sick_${name}`, `${name}, room ${row.room}, LEM and SICK extinction in 1/m, zeroed at t = 0`);
+    note.textContent = (showNotice ? notice + " " : "") +
+      `${name}, room ${row.room}, z = 2.3 m, zeroed at t = 0; records up to 1 s before the logged end of the test.`;
+    status.textContent = `Showing ${name}, SICK in ${row.room}.`;
+    src.replaceChildren(sourceLine(repo, [d.source]));
+  }, err => { note.textContent = `Could not draw the chart: ${err.message}`; });
+
+  return async () => {
+    await update();
+    const onTheme = () => update();
+    window.addEventListener("themechange", onTheme);
+    onLeave(chart, () => window.removeEventListener("themechange", onTheme));
+  };
+}
+
+function fmt(v, n) { return v === null || v === undefined ? "–" : minus(Number(v).toFixed(n)); }
+
+// a key number; its source (the numbers.tex macro or the paper's wording) as a tooltip
+function tile(value, label, sub, source) {
+  return h("div", { class: "tile", title: source }, h("div", { class: "v" }, value), h("div", { class: "k" }, label),
+    h("div", { class: "k" }, sub));
+}

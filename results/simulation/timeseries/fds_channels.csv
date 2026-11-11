@@ -1,0 +1,190 @@
+case,series,column,quantity,unit,room,z_m,position,measured
+hep_160_075_ysmatched,Hep_160_075,t_s,time,s,,,,
+hep_160_075_ysmatched,Hep_160_075,TC_Ceiling_F1,THERMOCOUPLE (below the ceiling),C,F1,,"XYZ=2.0625,2.1375,2.54",T_ceiling_F1_C
+hep_160_075_ysmatched,Hep_160_075,TC_Ceiling_F3,THERMOCOUPLE (below the ceiling),C,F3,,"XYZ=2.275,12.925,2.54",
+hep_160_075_ysmatched,Hep_160_075,TC_F1_0_6,THERMOCOUPLE,C,F1,0.6,"XYZ=3.65,0.5,0.6",T_F1_z0.6_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_1_2,THERMOCOUPLE,C,F1,1.2,"XYZ=3.65,0.5,1.2",T_F1_z1.2_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_1_6,THERMOCOUPLE,C,F1,1.6,"XYZ=3.65,0.5,1.6",T_F1_z1.6_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_1_8,THERMOCOUPLE,C,F1,1.8,"XYZ=3.65,0.5,1.8",T_F1_z1.8_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_2_0,THERMOCOUPLE,C,F1,2.0,"XYZ=3.65,0.5,2.0",T_F1_z2.0_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_2_2,THERMOCOUPLE,C,F1,2.2,"XYZ=3.65,0.5,2.2",T_F1_z2.2_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_2_4,THERMOCOUPLE,C,F1,2.4,"XYZ=3.65,0.5,2.4",T_F1_z2.4_C
+hep_160_075_ysmatched,Hep_160_075,TC_F1_2_5,THERMOCOUPLE,C,F1,2.5,"XYZ=3.65,0.5,2.5",T_F1_z2.5_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_0_6,THERMOCOUPLE,C,F2,0.6,"XYZ=2.225,5.9,0.6",T_F2_z0.6_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_1_2,THERMOCOUPLE,C,F2,1.2,"XYZ=2.225,5.9,1.2",T_F2_z1.2_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_1_6,THERMOCOUPLE,C,F2,1.6,"XYZ=2.225,5.9,1.6",T_F2_z1.6_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_1_8,THERMOCOUPLE,C,F2,1.8,"XYZ=2.225,5.9,1.8",T_F2_z1.8_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_2_0,THERMOCOUPLE,C,F2,2.0,"XYZ=2.225,5.9,2.0",T_F2_z2.0_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_2_2,THERMOCOUPLE,C,F2,2.2,"XYZ=2.225,5.9,2.2",T_F2_z2.2_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_2_4,THERMOCOUPLE,C,F2,2.4,"XYZ=2.225,5.9,2.4",T_F2_z2.4_C
+hep_160_075_ysmatched,Hep_160_075,TC_F2_2_5,THERMOCOUPLE,C,F2,2.5,"XYZ=2.225,5.9,2.5",T_F2_z2.5_C
+hep_160_075_ysmatched,Hep_160_075,TC_F3_0_6,THERMOCOUPLE,C,F3,0.6,"XYZ=2.275,12.925,0.6",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_1_2,THERMOCOUPLE,C,F3,1.2,"XYZ=2.275,12.925,1.2",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_1_6,THERMOCOUPLE,C,F3,1.6,"XYZ=2.275,12.925,1.6",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_1_8,THERMOCOUPLE,C,F3,1.8,"XYZ=2.275,12.925,1.8",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_2_0,THERMOCOUPLE,C,F3,2.0,"XYZ=2.275,12.925,2.0",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_2_2,THERMOCOUPLE,C,F3,2.2,"XYZ=2.275,12.925,2.2",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_2_4,THERMOCOUPLE,C,F3,2.4,"XYZ=2.275,12.925,2.4",
+hep_160_075_ysmatched,Hep_160_075,TC_F3_2_5,THERMOCOUPLE,C,F3,2.5,"XYZ=2.275,12.925,2.5",
+hep_160_075_ysmatched,Hep_160_075,EXT_DEVC_F1_2_3,EXTINCTION COEFFICIENT (point),1/m,F1,2.3,"XYZ=3.15,3.725,2.3",
+hep_160_075_ysmatched,Hep_160_075,EXT_DEVC_F2_1_5,EXTINCTION COEFFICIENT (point),1/m,F2,1.5,"XYZ=2.275,6.275,1.5",
+hep_160_075_ysmatched,Hep_160_075,EXT_DEVC_F2_1_9,EXTINCTION COEFFICIENT (point),1/m,F2,1.9,"XYZ=2.275,6.275,1.9",
+hep_160_075_ysmatched,Hep_160_075,EXT_DEVC_F2_2_1,EXTINCTION COEFFICIENT (point),1/m,F2,2.1,"XYZ=2.275,6.275,2.1",
+hep_160_075_ysmatched,Hep_160_075,EXT_DEVC_F2_2_3,EXTINCTION COEFFICIENT (point),1/m,F2,2.3,"XYZ=2.275,6.325,2.3",
+hep_160_075_ysmatched,Hep_160_075,EXT_DEVC_F3_2_3,EXTINCTION COEFFICIENT (point),1/m,F3,2.3,"XYZ=2.275,12.775,2.3",
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F1_2_3,PATH OBSCURATION,%,F1,2.3,"XB=2.745,3.555,3.725,3.725,2.3,2.3",
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_1_5,PATH OBSCURATION,%,F2,1.5,"XB=1.870,2.680,6.275,6.275,1.5,1.5",
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_1_9,PATH OBSCURATION,%,F2,1.9,"XB=1.870,2.680,6.275,6.275,1.9,1.9",
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_2_1,PATH OBSCURATION,%,F2,2.1,"XB=1.870,2.680,6.275,6.275,2.1,2.1",
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_2_3,PATH OBSCURATION,%,F2,2.3,"XB=1.870,2.680,6.325,6.325,2.3,2.3",
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F3_2_3,PATH OBSCURATION,%,F3,2.3,"XB=1.870,2.680,12.775,12.775,2.3,2.3",
+hep_160_075_ysmatched,Hep_160_075,SICK_LOS_F1,PATH OBSCURATION,%,F1,2.285,"XB=2.780,3.580,3.525,3.525,2.285,2.285",
+hep_160_075_ysmatched,Hep_160_075,SICK_LOS_F2,PATH OBSCURATION,%,F2,2.315,"XB=1.875,2.675,5.340,5.340,2.315,2.315",
+hep_160_075_ysmatched,Hep_160_075,SICK_LOS_F3,PATH OBSCURATION,%,F3,2.255,"XB=1.860,2.660,13.095,13.095,2.255,2.255",
+hep_160_075_ysmatched,Hep_160_075,SD_F2_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_075_ysmatched,Hep_160_075,SD_F2_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_075_ysmatched,Hep_160_075,SD_F2_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_075_ysmatched,Hep_160_075,SD_F2_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_075_ysmatched,Hep_160_075,SD_FC_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_075_ysmatched,Hep_160_075,SD_FC_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_075_ysmatched,Hep_160_075,SD_FC_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_075_ysmatched,Hep_160_075,SD_FC_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_075_ysmatched,Hep_160_075,SD_F3_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_075_ysmatched,Hep_160_075,SD_F3_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_075_ysmatched,Hep_160_075,SD_F3_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_075_ysmatched,Hep_160_075,SD_F3_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F1_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F1,2.3,"XB=2.745,3.555,3.725,3.725,2.3,2.3",k_LEM4_F1_z2.3_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_1_5_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,1.5,"XB=1.870,2.680,6.275,6.275,1.5,1.5",k_LEM1_F2_z1.5_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_1_9_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,1.9,"XB=1.870,2.680,6.275,6.275,1.9,1.9",k_LEM1_F2_z1.9_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_2_1_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,2.1,"XB=1.870,2.680,6.275,6.275,2.1,2.1",k_LEM1_F2_z2.1_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F2_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,2.3,"XB=1.870,2.680,6.325,6.325,2.3,2.3",k_LEM3_F2_z2.3_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,LEM_LOS_F3_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F3,2.3,"XB=1.870,2.680,12.775,12.775,2.3,2.3",k_LEM2_F3_z2.3_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,SICK_LOS_F1_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F1,2.285,"XB=2.780,3.580,3.525,3.525,2.285,2.285",k_SICK_F1_z2.3_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,SICK_LOS_F2_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F2,2.315,"XB=1.875,2.675,5.340,5.340,2.315,2.315",k_SICK_F2_z2.3_638nm_per_m
+hep_160_075_ysmatched,Hep_160_075,SICK_LOS_F3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F3,2.255,"XB=1.860,2.660,13.095,13.095,2.255,2.255",k_SICK_F3_z2.3_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,t_s,time,s,,,,
+hep_160_150_ysmatched,Hep_160_150,TC_Ceiling_F1,THERMOCOUPLE (below the ceiling),C,F1,,"XYZ=2.0625,2.1375,2.54",T_ceiling_F1_C
+hep_160_150_ysmatched,Hep_160_150,TC_Ceiling_F3,THERMOCOUPLE (below the ceiling),C,F3,,"XYZ=2.275,12.925,2.54",
+hep_160_150_ysmatched,Hep_160_150,TC_F1_0_6,THERMOCOUPLE,C,F1,0.6,"XYZ=3.65,0.5,0.6",T_F1_z0.6_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_1_2,THERMOCOUPLE,C,F1,1.2,"XYZ=3.65,0.5,1.2",T_F1_z1.2_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_1_6,THERMOCOUPLE,C,F1,1.6,"XYZ=3.65,0.5,1.6",T_F1_z1.6_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_1_8,THERMOCOUPLE,C,F1,1.8,"XYZ=3.65,0.5,1.8",T_F1_z1.8_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_2_0,THERMOCOUPLE,C,F1,2.0,"XYZ=3.65,0.5,2.0",T_F1_z2.0_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_2_2,THERMOCOUPLE,C,F1,2.2,"XYZ=3.65,0.5,2.2",T_F1_z2.2_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_2_4,THERMOCOUPLE,C,F1,2.4,"XYZ=3.65,0.5,2.4",T_F1_z2.4_C
+hep_160_150_ysmatched,Hep_160_150,TC_F1_2_5,THERMOCOUPLE,C,F1,2.5,"XYZ=3.65,0.5,2.5",T_F1_z2.5_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_0_6,THERMOCOUPLE,C,F2,0.6,"XYZ=2.225,5.9,0.6",T_F2_z0.6_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_1_2,THERMOCOUPLE,C,F2,1.2,"XYZ=2.225,5.9,1.2",T_F2_z1.2_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_1_6,THERMOCOUPLE,C,F2,1.6,"XYZ=2.225,5.9,1.6",T_F2_z1.6_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_1_8,THERMOCOUPLE,C,F2,1.8,"XYZ=2.225,5.9,1.8",T_F2_z1.8_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_2_0,THERMOCOUPLE,C,F2,2.0,"XYZ=2.225,5.9,2.0",T_F2_z2.0_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_2_2,THERMOCOUPLE,C,F2,2.2,"XYZ=2.225,5.9,2.2",T_F2_z2.2_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_2_4,THERMOCOUPLE,C,F2,2.4,"XYZ=2.225,5.9,2.4",T_F2_z2.4_C
+hep_160_150_ysmatched,Hep_160_150,TC_F2_2_5,THERMOCOUPLE,C,F2,2.5,"XYZ=2.225,5.9,2.5",T_F2_z2.5_C
+hep_160_150_ysmatched,Hep_160_150,TC_F3_0_6,THERMOCOUPLE,C,F3,0.6,"XYZ=2.275,12.925,0.6",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_1_2,THERMOCOUPLE,C,F3,1.2,"XYZ=2.275,12.925,1.2",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_1_6,THERMOCOUPLE,C,F3,1.6,"XYZ=2.275,12.925,1.6",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_1_8,THERMOCOUPLE,C,F3,1.8,"XYZ=2.275,12.925,1.8",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_2_0,THERMOCOUPLE,C,F3,2.0,"XYZ=2.275,12.925,2.0",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_2_2,THERMOCOUPLE,C,F3,2.2,"XYZ=2.275,12.925,2.2",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_2_4,THERMOCOUPLE,C,F3,2.4,"XYZ=2.275,12.925,2.4",
+hep_160_150_ysmatched,Hep_160_150,TC_F3_2_5,THERMOCOUPLE,C,F3,2.5,"XYZ=2.275,12.925,2.5",
+hep_160_150_ysmatched,Hep_160_150,EXT_DEVC_F1_2_3,EXTINCTION COEFFICIENT (point),1/m,F1,2.3,"XYZ=3.15,3.725,2.3",
+hep_160_150_ysmatched,Hep_160_150,EXT_DEVC_F2_1_5,EXTINCTION COEFFICIENT (point),1/m,F2,1.5,"XYZ=2.275,6.275,1.5",
+hep_160_150_ysmatched,Hep_160_150,EXT_DEVC_F2_1_9,EXTINCTION COEFFICIENT (point),1/m,F2,1.9,"XYZ=2.275,6.275,1.9",
+hep_160_150_ysmatched,Hep_160_150,EXT_DEVC_F2_2_1,EXTINCTION COEFFICIENT (point),1/m,F2,2.1,"XYZ=2.275,6.275,2.1",
+hep_160_150_ysmatched,Hep_160_150,EXT_DEVC_F2_2_3,EXTINCTION COEFFICIENT (point),1/m,F2,2.3,"XYZ=2.275,6.325,2.3",
+hep_160_150_ysmatched,Hep_160_150,EXT_DEVC_F3_2_3,EXTINCTION COEFFICIENT (point),1/m,F3,2.3,"XYZ=2.275,12.775,2.3",
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F1_2_3,PATH OBSCURATION,%,F1,2.3,"XB=2.745,3.555,3.725,3.725,2.3,2.3",
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_1_5,PATH OBSCURATION,%,F2,1.5,"XB=1.870,2.680,6.275,6.275,1.5,1.5",
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_1_9,PATH OBSCURATION,%,F2,1.9,"XB=1.870,2.680,6.275,6.275,1.9,1.9",
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_2_1,PATH OBSCURATION,%,F2,2.1,"XB=1.870,2.680,6.275,6.275,2.1,2.1",
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_2_3,PATH OBSCURATION,%,F2,2.3,"XB=1.870,2.680,6.325,6.325,2.3,2.3",
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F3_2_3,PATH OBSCURATION,%,F3,2.3,"XB=1.870,2.680,12.775,12.775,2.3,2.3",
+hep_160_150_ysmatched,Hep_160_150,SICK_LOS_F1,PATH OBSCURATION,%,F1,2.285,"XB=2.780,3.580,3.525,3.525,2.285,2.285",
+hep_160_150_ysmatched,Hep_160_150,SICK_LOS_F2,PATH OBSCURATION,%,F2,2.315,"XB=1.875,2.675,5.340,5.340,2.315,2.315",
+hep_160_150_ysmatched,Hep_160_150,SICK_LOS_F3,PATH OBSCURATION,%,F3,2.255,"XB=1.860,2.660,13.095,13.095,2.255,2.255",
+hep_160_150_ysmatched,Hep_160_150,SD_F2_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_150_ysmatched,Hep_160_150,SD_F2_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_150_ysmatched,Hep_160_150,SD_F2_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_150_ysmatched,Hep_160_150,SD_F2_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_160_150_ysmatched,Hep_160_150,SD_FC_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_150_ysmatched,Hep_160_150,SD_FC_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_150_ysmatched,Hep_160_150,SD_FC_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_150_ysmatched,Hep_160_150,SD_FC_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_160_150_ysmatched,Hep_160_150,SD_F3_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_150_ysmatched,Hep_160_150,SD_F3_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_150_ysmatched,Hep_160_150,SD_F3_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_150_ysmatched,Hep_160_150,SD_F3_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F1_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F1,2.3,"XB=2.745,3.555,3.725,3.725,2.3,2.3",k_LEM4_F1_z2.3_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_1_5_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,1.5,"XB=1.870,2.680,6.275,6.275,1.5,1.5",k_LEM1_F2_z1.5_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_1_9_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,1.9,"XB=1.870,2.680,6.275,6.275,1.9,1.9",k_LEM1_F2_z1.9_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_2_1_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,2.1,"XB=1.870,2.680,6.275,6.275,2.1,2.1",k_LEM1_F2_z2.1_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F2_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,2.3,"XB=1.870,2.680,6.325,6.325,2.3,2.3",k_LEM3_F2_z2.3_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,LEM_LOS_F3_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F3,2.3,"XB=1.870,2.680,12.775,12.775,2.3,2.3",k_LEM2_F3_z2.3_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,SICK_LOS_F1_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F1,2.285,"XB=2.780,3.580,3.525,3.525,2.285,2.285",k_SICK_F1_z2.3_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,SICK_LOS_F2_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F2,2.315,"XB=1.875,2.675,5.340,5.340,2.315,2.315",k_SICK_F2_z2.3_638nm_per_m
+hep_160_150_ysmatched,Hep_160_150,SICK_LOS_F3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F3,2.255,"XB=1.860,2.660,13.095,13.095,2.255,2.255",k_SICK_F3_z2.3_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,t_s,time,s,,,,
+hep_220_300_ysmatched,Hep_220_300,TC_Ceiling_F1,THERMOCOUPLE (below the ceiling),C,F1,,"XYZ=2.0625,2.1375,2.54",T_ceiling_F1_C
+hep_220_300_ysmatched,Hep_220_300,TC_Ceiling_F3,THERMOCOUPLE (below the ceiling),C,F3,,"XYZ=2.275,12.925,2.54",
+hep_220_300_ysmatched,Hep_220_300,TC_F1_0_6,THERMOCOUPLE,C,F1,0.6,"XYZ=3.65,0.5,0.6",T_F1_z0.6_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_1_2,THERMOCOUPLE,C,F1,1.2,"XYZ=3.65,0.5,1.2",T_F1_z1.2_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_1_6,THERMOCOUPLE,C,F1,1.6,"XYZ=3.65,0.5,1.6",T_F1_z1.6_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_1_8,THERMOCOUPLE,C,F1,1.8,"XYZ=3.65,0.5,1.8",T_F1_z1.8_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_2_0,THERMOCOUPLE,C,F1,2.0,"XYZ=3.65,0.5,2.0",T_F1_z2.0_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_2_2,THERMOCOUPLE,C,F1,2.2,"XYZ=3.65,0.5,2.2",T_F1_z2.2_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_2_4,THERMOCOUPLE,C,F1,2.4,"XYZ=3.65,0.5,2.4",T_F1_z2.4_C
+hep_220_300_ysmatched,Hep_220_300,TC_F1_2_5,THERMOCOUPLE,C,F1,2.5,"XYZ=3.65,0.5,2.5",T_F1_z2.5_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_0_6,THERMOCOUPLE,C,F2,0.6,"XYZ=2.225,5.9,0.6",T_F2_z0.6_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_1_2,THERMOCOUPLE,C,F2,1.2,"XYZ=2.225,5.9,1.2",T_F2_z1.2_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_1_6,THERMOCOUPLE,C,F2,1.6,"XYZ=2.225,5.9,1.6",T_F2_z1.6_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_1_8,THERMOCOUPLE,C,F2,1.8,"XYZ=2.225,5.9,1.8",T_F2_z1.8_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_2_0,THERMOCOUPLE,C,F2,2.0,"XYZ=2.225,5.9,2.0",T_F2_z2.0_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_2_2,THERMOCOUPLE,C,F2,2.2,"XYZ=2.225,5.9,2.2",T_F2_z2.2_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_2_4,THERMOCOUPLE,C,F2,2.4,"XYZ=2.225,5.9,2.4",T_F2_z2.4_C
+hep_220_300_ysmatched,Hep_220_300,TC_F2_2_5,THERMOCOUPLE,C,F2,2.5,"XYZ=2.225,5.9,2.5",T_F2_z2.5_C
+hep_220_300_ysmatched,Hep_220_300,TC_F3_0_6,THERMOCOUPLE,C,F3,0.6,"XYZ=2.275,12.925,0.6",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_1_2,THERMOCOUPLE,C,F3,1.2,"XYZ=2.275,12.925,1.2",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_1_6,THERMOCOUPLE,C,F3,1.6,"XYZ=2.275,12.925,1.6",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_1_8,THERMOCOUPLE,C,F3,1.8,"XYZ=2.275,12.925,1.8",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_2_0,THERMOCOUPLE,C,F3,2.0,"XYZ=2.275,12.925,2.0",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_2_2,THERMOCOUPLE,C,F3,2.2,"XYZ=2.275,12.925,2.2",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_2_4,THERMOCOUPLE,C,F3,2.4,"XYZ=2.275,12.925,2.4",
+hep_220_300_ysmatched,Hep_220_300,TC_F3_2_5,THERMOCOUPLE,C,F3,2.5,"XYZ=2.275,12.925,2.5",
+hep_220_300_ysmatched,Hep_220_300,EXT_DEVC_F1_2_3,EXTINCTION COEFFICIENT (point),1/m,F1,2.3,"XYZ=3.15,3.725,2.3",
+hep_220_300_ysmatched,Hep_220_300,EXT_DEVC_F2_1_5,EXTINCTION COEFFICIENT (point),1/m,F2,1.5,"XYZ=2.275,6.275,1.5",
+hep_220_300_ysmatched,Hep_220_300,EXT_DEVC_F2_1_9,EXTINCTION COEFFICIENT (point),1/m,F2,1.9,"XYZ=2.275,6.275,1.9",
+hep_220_300_ysmatched,Hep_220_300,EXT_DEVC_F2_2_1,EXTINCTION COEFFICIENT (point),1/m,F2,2.1,"XYZ=2.275,6.275,2.1",
+hep_220_300_ysmatched,Hep_220_300,EXT_DEVC_F2_2_3,EXTINCTION COEFFICIENT (point),1/m,F2,2.3,"XYZ=2.275,6.325,2.3",
+hep_220_300_ysmatched,Hep_220_300,EXT_DEVC_F3_2_3,EXTINCTION COEFFICIENT (point),1/m,F3,2.3,"XYZ=2.275,12.775,2.3",
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F1_2_3,PATH OBSCURATION,%,F1,2.3,"XB=2.745,3.555,3.725,3.725,2.3,2.3",
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_1_5,PATH OBSCURATION,%,F2,1.5,"XB=1.870,2.680,6.275,6.275,1.5,1.5",
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_1_9,PATH OBSCURATION,%,F2,1.9,"XB=1.870,2.680,6.275,6.275,1.9,1.9",
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_2_1,PATH OBSCURATION,%,F2,2.1,"XB=1.870,2.680,6.275,6.275,2.1,2.1",
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_2_3,PATH OBSCURATION,%,F2,2.3,"XB=1.870,2.680,6.325,6.325,2.3,2.3",
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F3_2_3,PATH OBSCURATION,%,F3,2.3,"XB=1.870,2.680,12.775,12.775,2.3,2.3",
+hep_220_300_ysmatched,Hep_220_300,SICK_LOS_F1,PATH OBSCURATION,%,F1,2.285,"XB=2.780,3.580,3.525,3.525,2.285,2.285",
+hep_220_300_ysmatched,Hep_220_300,SICK_LOS_F2,PATH OBSCURATION,%,F2,2.315,"XB=1.875,2.675,5.340,5.340,2.315,2.315",
+hep_220_300_ysmatched,Hep_220_300,SICK_LOS_F3,PATH OBSCURATION,%,F3,2.255,"XB=1.860,2.660,13.095,13.095,2.255,2.255",
+hep_220_300_ysmatched,Hep_220_300,SD_F2_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_220_300_ysmatched,Hep_220_300,SD_F2_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_220_300_ysmatched,Hep_220_300,SD_F2_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_220_300_ysmatched,Hep_220_300,SD_F2_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,F2,,"XYZ=2.125,6.0,2.51",alarm_SD1_F2
+hep_220_300_ysmatched,Hep_220_300,SD_FC_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_220_300_ysmatched,Hep_220_300,SD_FC_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_220_300_ysmatched,Hep_220_300,SD_FC_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_220_300_ysmatched,Hep_220_300,SD_FC_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,FC,,"XYZ=0.55,9.45,2.51",alarm_SD2_FC
+hep_220_300_ysmatched,Hep_220_300,SD_F3_EXT,EXTINCTION COEFFICIENT at the alarm,1/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_220_300_ysmatched,Hep_220_300,SD_F3_Hes,"CHAMBER OBSCURATION, PROP 'Heskestad Ionization' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_220_300_ysmatched,Hep_220_300,SD_F3_P1,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P1' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_220_300_ysmatched,Hep_220_300,SD_F3_P2,"CHAMBER OBSCURATION, PROP 'Optical Smoke Detector P2' in the deck",%/m,F3,,"XYZ=2.275,12.925,2.51",alarm_SD3_F3
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F1_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F1,2.3,"XB=2.745,3.555,3.725,3.725,2.3,2.3",k_LEM4_F1_z2.3_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_1_5_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,1.5,"XB=1.870,2.680,6.275,6.275,1.5,1.5",k_LEM1_F2_z1.5_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_1_9_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,1.9,"XB=1.870,2.680,6.275,6.275,1.9,1.9",k_LEM1_F2_z1.9_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_2_1_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,2.1,"XB=1.870,2.680,6.275,6.275,2.1,2.1",k_LEM1_F2_z2.1_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F2_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F2,2.3,"XB=1.870,2.680,6.325,6.325,2.3,2.3",k_LEM3_F2_z2.3_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,LEM_LOS_F3_2_3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.81 m",1/m,F3,2.3,"XB=1.870,2.680,12.775,12.775,2.3,2.3",k_LEM2_F3_z2.3_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,SICK_LOS_F1_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F1,2.285,"XB=2.780,3.580,3.525,3.525,2.285,2.285",k_SICK_F1_z2.3_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,SICK_LOS_F2_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F2,2.315,"XB=1.875,2.675,5.340,5.340,2.315,2.315",k_SICK_F2_z2.3_638nm_per_m
+hep_220_300_ysmatched,Hep_220_300,SICK_LOS_F3_k,"path-mean extinction coefficient from PATH OBSCURATION, L = 0.80 m (single pass)",1/m,F3,2.255,"XB=1.860,2.660,13.095,13.095,2.255,2.255",k_SICK_F3_z2.3_638nm_per_m
