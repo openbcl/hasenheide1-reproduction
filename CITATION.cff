@@ -12,6 +12,7 @@ authors:
     affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
   - given-names: Anna
     family-names: Troff
+    orcid: "https://orcid.org/0009-0001-6625-6143"
     affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
   - given-names: Wojciech
     family-names: Węgrzyński
@@ -50,6 +51,7 @@ preferred-citation:
       affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
     - given-names: Anna
       family-names: Troff
+      orcid: "https://orcid.org/0009-0001-6625-6143"
       affiliation: "Brandschutz Consult Ingenieurgesellschaft mbH Leipzig (BCL), Leipzig, Germany"
     - given-names: Wojciech
       family-names: Węgrzyński
