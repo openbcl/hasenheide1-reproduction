@@ -389,7 +389,9 @@ branch.
 If you use this code or data, please cite both the paper and this software/data
 record:
 
-- Paper: *(DOI added on publication)*
+- Paper: M. Osburg, J. Schelhorn, A. Troff, W. Węgrzyński, A. Belt, L. Arnold, *Measuring and Modelling Smoke Light Extinction in Well-Ventilated, Multi-Room Compartment Fires: Co-located Transmissometry and A-priori FDS Validation*,
+  Fire Safety Journal (2026) 104997,
+  [doi:10.1016/j.firesaf.2026.104997](https://doi.org/10.1016/j.firesaf.2026.104997)
 - Software/data: Zenodo, [doi:10.5281/zenodo.24054120](https://doi.org/10.5281/zenodo.24054120)
   (this version, v1.0.0; v0.2.0 accompanied the revised manuscript,
   [doi:10.5281/zenodo.23097800](https://doi.org/10.5281/zenodo.23097800))

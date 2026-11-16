@@ -1,11 +1,13 @@
 // The ONLY place for the paper's figure, table and section numbers: they may change in
 // the proof. Read from main.aux / Supplementary.aux of the revised manuscript
-// (build of 2026-10-26); check them again against the published version.
+// (build of 2026-10-26); checked 2026-11-16 against the final, proof-corrected sources
+// (all section, figure and table numbers unchanged).
 export const PAPER = {
   title: "Measuring and Modelling Smoke Light Extinction in Well-Ventilated, Multi-Room " +
          "Compartment Fires: Co-located Transmissometry and A-priori FDS Validation",
   authors: "Osburg et al.",
-  doi: null,          // added on publication
+  journal: "Fire Safety Journal",
+  doi: "10.1016/j.firesaf.2026.104997",   // published 2026-11 as article 104997
 };
 
 export const REF = {
