@@ -117,7 +117,7 @@ const AUTHORS = [
 ];
 const SUPPORT = [
   { name: "Leipziger Wohnungs- und Baugesellschaft mbH (LWB)", url: "https://www.lwb.de/",
-    role: "the vacant residential building used as the experimental site" },
+    logo: "logos/lwb.svg", px: 40, clear: true, role: "the vacant residential building used as the experimental site" },
 ];
 // The paper's funding statement, in its order; NextVIS has no url, so it is named in text without a link.
 const FUNDING = [
@@ -129,7 +129,10 @@ const FUNDING = [
 ];
 
 function institutions() {
-  const img = (src, cls, x) => h("img", { src, alt: x.name, class: cls, height: x.px, style: `height: ${x.px}px` });
+  // clear: the owner's clear zone, a third of the circle diameter (= the file's height) kept free above,
+  // right and below; the logo's circle stands on the outer, left side
+  const img = (src, cls, x) => h("img", { src, alt: x.name, class: cls, height: x.px,
+    style: `height: ${x.px}px` + (x.clear ? `; margin: ${Math.ceil(x.px / 3)}px ${Math.ceil(x.px / 3)}px ${Math.ceil(x.px / 3)}px 0` : "") });
   const label = x => x.logo ? [img(x.logo, x.logoDark ? "on-light" : null, x), x.logoDark ? img(x.logoDark, "on-dark", x) : null]
                             : h("span", {}, x.name);
   const item = x => h("li", { class: x.wide ? "wide" : null },
