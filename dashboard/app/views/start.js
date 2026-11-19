@@ -20,7 +20,9 @@ export async function render(root, { params, meta, views, load }) {
       h("figcaption", {}, "Fire room F1 during test Hep_220_300_R1, seen through a core-drilled hole in the wall. Photo: M. Osburg, CC BY 4.0")),
     h("h1", {}, PAPER.title),
     h("p", { class: "lead" },
-      `Interactive companion to the paper (${PAPER.authors}, ${PAPER.journal}, doi:${PAPER.doi}) and its reproduction package. ` +
+      `Interactive companion to the paper (${PAPER.authors}, ${PAPER.journal}, `,
+      h("a", { href: `https://doi.org/${PAPER.doi}`, rel: "noopener" }, `doi:${PAPER.doi}`),
+      ") and its reproduction package. " +
       "It shows what the paper and the package contain: the measured and simulated curves, the validation " +
       "statistics and the data behind every number. Each view names the paper figures and tables it shows and links its data files."),
     glanceBlock(meta, geo),
